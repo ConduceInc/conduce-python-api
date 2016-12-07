@@ -1,11 +1,10 @@
 import json
 import copy
 from add_entities import add_entities_dict
-from csv_to_json import csv_to_json
+from util import csv_to_json
 
 import base64
 from dateutil import parser
-
 
 def set_generic_data(host, api_key, dataset_id, data):
     timestamp = 0
