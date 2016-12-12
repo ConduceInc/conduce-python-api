@@ -17,6 +17,8 @@ def get_session(host, email):
         pass
 
     if cookies is None or not validate_session(host, cookies):
+        print
+        print "user: %s" % email
         cookies = login(host, email, getpass.getpass())
         with open(cookie_file_path, 'w') as cookie_file:
             pickle.dump(requests.utils.dict_from_cookiejar(cookies), cookie_file)
