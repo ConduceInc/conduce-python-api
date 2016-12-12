@@ -18,6 +18,7 @@ def get_session(host, email):
 
     if cookies is None or not validate_session(host, cookies):
         print
+        print "host: %s" % host
         print "user: %s" % email
         cookies = login(host, email, getpass.getpass())
         with open(cookie_file_path, 'w') as cookie_file:
