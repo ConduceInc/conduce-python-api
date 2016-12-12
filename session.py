@@ -26,7 +26,11 @@ def get_session(host, email):
 
 def validate_session(host, cookies):
     response = requests.get("https://%s/api/validate-session" % host, cookies=cookies)
-    response.raise_for_status()
+    if response.status_code == 401:
+        print "Session expired"
+        cookies = None
+    elif response.status_code != requests.codes.ok:
+        response.raise_for_status()
     return cookies
 
 
