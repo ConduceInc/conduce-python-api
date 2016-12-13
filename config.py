@@ -33,6 +33,39 @@ def get_full_config():
             config = {}
         return config
 
+def get_env_from_host(host):
+    if 'stg' in host:
+        return 'stg-app'
+    elif 'dev' in host:
+        return 'dev-app'
+    elif 'prd' in host:
+        return 'prd-app'
+
+    return host.split('.')[0]
+
+def set_api_key(args):
+    config = get_full_config()
+
+    if not args.user:
+        args.user = config['user']
+    if not args.host:
+        raise Exception('No host specified for API key')
+    if not args.key:
+        raise Exception('No API key specified')
+
+    if not args.user in config:
+        config[args.user] = {'api-keys':{'dev-app':"", 'stg-app':"", 'prd-app':""}}
+    config[args.user]['api-keys'][get_env_from_host(args.host)] = args.key
+
+    with open(config_file_path, 'w') as config_file:
+        yaml.dump(config, config_file, default_flow_style=False)
+
+def get_api_key(email, host):
+    config = get_full_config()
+    if email in config:
+        if get_env_from_host(host) in config[email]['api-keys']:
+            return config[email]['api-keys'][get_env_from_host(host)]
+
 def get_config(args):
     with open(config_file_path, 'r') as config_file:
         config = yaml.load(config_file)
