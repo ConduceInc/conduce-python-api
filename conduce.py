@@ -2,116 +2,30 @@ import requests
 import session
 import config
 import json
+import api
 
 
 def list_orchestrations(args):
-    return list_saved('orchestrations', args)
+    return api.list_saved('orchestrations', **vars(args))
 
 
 def list_substrates(args):
-    return list_saved('substrates', args)
+    return api.list_saved('substrates', **vars(args))
 
 
 def list_from_args(args):
     if args.object_to_list == 'datasets':
-        return list_datasets(args)
+        return api.list_datasets(**vars(args))
 
-    return list_saved(args.object_to_list, args)
+    return api.list_saved(args.object_to_list, **vars(args))
 
 
 def list_datasets(args):
-    return make_get_request("conduce/api/datasets/listv2", args)
-
-
-def list_saved(thing_to_list, args):
-    return make_get_request("conduce/api/%s/saved" % thing_to_list, args)
-
-
-def wait_for_job(job_id, args):
-    finished = False
-
-    while not finished:
-        time.sleep(0.5)
-        response = make_get_request('conduce/api/%s' % job_id)
-        if int(response.status_code / 100) != 2:
-            print "Error code %s: %s" % (response.status_code, response.text)
-            return False;
-
-        if response.ok:
-            msg = response.json()
-            if 'response' in msg:
-                print "Job completed successfully."
-                finished = True
-        else:
-            print resp, resp.content
-            break
-
-
-def make_get_request(uri, args):
-    if args.host:
-        host = args.host
-    else:
-        host = config['default-host']
-    if args.user:
-        user = args.user
-    else:
-        user = config['default-user']
-
-    if args.api_key:
-        auth = session.api_key_header(args.api_key)
-    else:
-        auth = session.get_session(host, user)
-
-    url = 'https://%s/%s' % (host, uri)
-    if 'Authorization' in auth:
-        response = requests.get(url, headers=auth)
-    else:
-        response = requests.get(url, cookies=auth)
-    response.raise_for_status()
-    return response
-
-
-def ingest_data(dataset_id, data, args):
-    response = make_post_request(data, 'conduce/api/datasets/add_datav2/%s' % dataset_id, args)
-    if 'location' in response.headers:
-        job = response.headers['location']
-        response = wait_for_job(job_id, args)
-    return response
+    return api.list_datasets(**vars(args))
 
 
 def create_dataset(args):
-    response = make_post_request({'name':args.name}, 'conduce/api/datasets/createv2', args)
-
-    if args.json:
-        response_dict = json.loads(response)
-        ingest_data(response_dict['dataset'], args.json, args)
-    elif args.csv:
-        print "TODO: Allow users to import directly from CSV"
-    return response
-
-
-def make_post_request(payload, uri, args):
-    if args.host:
-        host = args.host
-    else:
-        host = config['default-host']
-    if args.user:
-        user = args.user
-    else:
-        user = config['default-user']
-
-    if args.api_key:
-        auth = session.api_key_header(args.api_key)
-    else:
-        auth = session.get_session(host, user)
-
-    url = 'https://%s/%s' % (host, uri)
-    if 'Authorization' in auth:
-        response = requests.post(url, json=payload, headers=auth)
-    else:
-        response = requests.post(url, json=payload, cookies=auth)
-    response.raise_for_status()
-    return response
+    return api.create_dataset(**vars(args))
 
 
 if __name__ == '__main__':
