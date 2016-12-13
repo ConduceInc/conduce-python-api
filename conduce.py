@@ -28,6 +28,29 @@ def create_dataset(args):
     return api.create_dataset(**vars(args))
 
 
+def set_generic_data(args):
+    if args.csv:
+        import util
+        data = util.csv_to_json(args.csv)
+    elif args.json:
+        data = args.json
+
+    dataset_id = args.dataset_id
+    key = args.key
+    del vars(args)['dataset_id']
+    del vars(args)['key']
+
+    return api.set_generic_data(dataset_id, key, json.dumps(data), **vars(args))
+
+
+def get_generic_data(args):
+    dataset_id = args.dataset_id
+    key = args.key
+    del vars(args)['dataset_id']
+    del vars(args)['key']
+    return api.get_generic_data(dataset_id, key, **vars(args))
+
+
 if __name__ == '__main__':
     import argparse, jsbeautifier
 
@@ -88,6 +111,24 @@ if __name__ == '__main__':
     parser_create_dataset.add_argument('--json', help='Optional: A well formatted Conduce entities JSON file')
     parser_create_dataset.add_argument('--csv', help='Optional: A CSV file that can be parsed as Conduce data')
     parser_create_dataset.set_defaults(func=create_dataset)
+
+    parser_set_generic_data = subparsers.add_parser('set-generic-data', help='Add generic data to Conduce dataset')
+    parser_set_generic_data.add_argument('--json', help='The data to be consumed')
+    parser_set_generic_data.add_argument('--csv', help='The data to be consumed')
+    parser_set_generic_data.add_argument('--user', help='The user who owns the data')
+    parser_set_generic_data.add_argument('--host', help='The server to receive the data')
+    parser_set_generic_data.add_argument('--api-key', help='The API key used to authenticate to the server')
+    parser_set_generic_data.add_argument('--dataset-id', help='The ID of the dataset to send data to')
+    parser_set_generic_data.add_argument('--key', help='Unique name with which to lookup data')
+    parser_set_generic_data.set_defaults(func=set_generic_data)
+
+    parser_get_generic_data = subparsers.add_parser('get-generic-data', help='Retrieve generic data from Conduce dataget')
+    parser_get_generic_data.add_argument('--user', help='The user who owns the data')
+    parser_get_generic_data.add_argument('--host', help='The server on which the data resides')
+    parser_get_generic_data.add_argument('--api-key', help='The API key used to authenticate to the server')
+    parser_get_generic_data.add_argument('--dataset-id', help='The ID of the dataset to get the data from')
+    parser_get_generic_data.add_argument('--key', help='Unique ID of entity to retrieve data from')
+    parser_get_generic_data.set_defaults(func=get_generic_data)
 
     args = arg_parser.parse_args()
 
