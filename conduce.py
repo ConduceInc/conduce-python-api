@@ -48,7 +48,7 @@ def get_generic_data(args):
     key = args.key
     del vars(args)['dataset_id']
     del vars(args)['key']
-    return api.get_generic_data(dataset_id, key, **vars(args))
+    return json.dumps(api.get_generic_data(dataset_id, key, **vars(args)))
 
 
 if __name__ == '__main__':

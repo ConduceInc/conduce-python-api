@@ -17,7 +17,7 @@ def wait_for_job(job_id):
 
     while not finished:
         time.sleep(0.5)
-        response = make_get_request('conduce/api/%s' % job_id, host=None, user=None, api_key=None)
+        response = make_get_request('conduce/api/%s' % job_id)
         if int(response.status_code / 100) != 2:
             print "Error code %s: %s" % (response.status_code, response.text)
             return False;
@@ -34,7 +34,7 @@ def wait_for_job(job_id):
 
 def get_generic_data(dataset_id, entity_id, **kwargs):
     entity = get_entity(dataset_id, entity_id, **kwargs)
-    return json.dumps(json.loads(json.loads(entity.content)[0]['attrs'][0]['str_value']))
+    return json.loads(json.loads(entity.content)[0]['attrs'][0]['str_value'])
 
 
 def get_entity(dataset_id, entity_id, **kwargs):
@@ -44,18 +44,17 @@ def get_entity(dataset_id, entity_id, **kwargs):
 def make_get_request(uri, **kwargs):
     cfg = config.get_full_config()
 
-    if kwargs['host']:
+    if 'host' in kwargs and kwargs['host']:
         host = kwargs['host']
     else:
         host = cfg['default-host']
 
-    if kwargs['user']:
+    if 'user' in kwargs and kwargs['user']:
         user = kwargs['user']
     else:
         user = cfg['default-user']
 
-    if kwargs['api_key']:
-        print 'trying api key'
+    if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
     else:
         auth = session.get_session(host, user)
@@ -126,17 +125,17 @@ def ingest_entities(dataset_id, data, **kwargs):
 def make_post_request(payload, uri, **kwargs):
     cfg = config.get_full_config()
 
-    if kwargs['host']:
+    if 'host' in kwargs and kwargs['host']:
         host = kwargs['host']
     else:
         host = cfg['default-host']
 
-    if kwargs['user']:
+    if 'user' in kwargs and kwargs['user']:
         user = kwargs['user']
     else:
         user = cfg['default-user']
 
-    if kwargs['api_key']:
+    if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
     else:
         auth = session.get_session(host, user)
