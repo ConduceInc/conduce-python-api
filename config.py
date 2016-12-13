@@ -16,11 +16,11 @@ def set_config(args):
             config = {}
 
         if args.default_user:
-            config['user'] = args.default_user
-            print config['user']
+            config['default-user'] = args.default_user
+            print config['default-user']
         if args.default_host:
-            config['host'] = args.default_host
-            print config['host']
+            config['default-host'] = args.default_host
+            print config['default-host']
 
     with open(config_file_path, 'w') as config_file:
         yaml.dump(config, config_file, default_flow_style=False)
@@ -47,7 +47,7 @@ def set_api_key(args):
     config = get_full_config()
 
     if not args.user:
-        args.user = config['user']
+        args.user = config['default-user']
     if not args.host:
         raise Exception('No host specified for API key')
     if not args.key:
@@ -73,9 +73,9 @@ def get_config(args):
             return "No configuration found"
 
         if args.default_user:
-            value = config['user']
+            value = config['default-user']
         elif args.default_host:
-            value = config['host']
+            value = config['default-host']
         if not value:
             value = "not set"
 

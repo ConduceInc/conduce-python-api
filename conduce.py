@@ -32,11 +32,11 @@ def make_get_request(uri, args):
     if args.host:
         host = args.host
     else:
-        host = config['host']
+        host = config['default-host']
     if args.user:
         user = args.user
     else:
-        user = config['user']
+        user = config['default-user']
 
     if args.api_key:
         auth = session.api_key_header(args.api_key)
