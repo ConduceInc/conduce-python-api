@@ -7,7 +7,7 @@ def set_config(args):
     if not os.path.isfile(config_file_path):
         with open(config_file_path, 'w') as config_file:
             print 'creating new configuration'
-            new_config = {'host':'dev-app.conduce.com'}
+            new_config = {'default-host':'dev-app.conduce.com'}
             yaml.dump(new_config, config_file, default_flow_style=False)
 
     with open(config_file_path, 'r') as config_file:
@@ -60,11 +60,22 @@ def set_api_key(args):
     with open(config_file_path, 'w') as config_file:
         yaml.dump(config, config_file, default_flow_style=False)
 
-def get_api_key(email, host):
+def get_api_key_config(args):
     config = get_full_config()
-    if email in config:
-        if get_env_from_host(host) in config[email]['api-keys']:
-            return config[email]['api-keys'][get_env_from_host(host)]
+    if not args.user:
+        args.user = config['default-user']
+    if not args.host:
+        args.host = config['default-host']
+
+    if get_env_from_host(args.host) in config[args.user]['api-keys']:
+        key = config[args.user]['api-keys'][get_env_from_host(args.host)]
+        return 'user: %s\nhost: %s\nkey:  %s' % (args.user, args.host, key)
+
+
+def get_api_key(user, host):
+    config = get_full_config()
+    if get_env_from_host(host) in config[user]['api-keys']:
+        return config[user]['api-keys'][get_env_from_host(host)]
 
 def get_config(args):
     with open(config_file_path, 'r') as config_file:
