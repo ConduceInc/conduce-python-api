@@ -71,11 +71,12 @@ def make_get_request(uri, **kwargs):
 def create_dataset(**kwargs):
     response = make_post_request({'name':kwargs['name']}, 'conduce/api/datasets/createv2', **kwargs)
 
+    response_dict = json.loads(response)
     if kwargs['json']:
-        response_dict = json.loads(response)
-        ingest_entities(response_dict['dataset'], kwargs['json'], **kwargs)
+        ingest_entities(response_dict['dataset'], json.load(open(kwargs['json'])), **kwargs)
     elif kwargs['csv']:
-        print "TODO: Allow users to import directly from CSV"
+        ingest_entities(response_dict['dataset'], util.csv_to_entities(kwargs['csv']), **kwargs)
+
     return response
 
 
@@ -115,6 +116,9 @@ def set_generic_data(dataset_id, key, data_string, **kwargs):
 
 
 def ingest_entities(dataset_id, data, **kwargs):
+    if isinstance(data, list):
+        data = {'entities': data}
+
     response = make_post_request(data, 'conduce/api/datasets/add_datav2/%s' % dataset_id, **kwargs)
     if 'location' in response.headers:
         job_id = response.headers['location']

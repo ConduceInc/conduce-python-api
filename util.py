@@ -251,7 +251,7 @@ def dict_to_entities(raw_entities):
                 }
         entities.append(entity)
 
-    return entities
+    return {'entities':entities}
 
 
 if __name__ == '__main__':
