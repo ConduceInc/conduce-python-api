@@ -98,6 +98,7 @@ def set_generic_data(dataset_id, key, data_string, **kwargs):
         "identity": key,
         "kind": 'raw_data',
         "timestamp_ms": timestamp,
+        "endtime_ms": timestamp,
         "path": [location],
         "removed": True,
     }
@@ -108,6 +109,7 @@ def set_generic_data(dataset_id, key, data_string, **kwargs):
         "identity": key,
         "kind": 'raw_data',
         "timestamp_ms": timestamp,
+        "endtime_ms": timestamp,
         "path": [location],
         "attrs": attributes,
     }
