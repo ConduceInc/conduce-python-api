@@ -204,10 +204,9 @@ def get_attributes(attribute_keys, raw_entity):
 
 
 def csv_to_entities(infile, outfile=None, toStdout=False):
-    raw_entities = csv_to_json(infile)
-    return json_to_entities(raw_entities)
+    return dict_to_entities(csv_to_json(infile))
 
-def json_to_entities(raw_entities):
+def dict_to_entities(raw_entities):
     keys = raw_entities[0].keys()
     attribute_keys = copy.deepcopy(keys)
     fields = ['identity','kind','x','y','z','timestamp_ms','endtime_ms']
@@ -253,7 +252,6 @@ def json_to_entities(raw_entities):
         entities.append(entity)
 
     return entities
-
 
 
 if __name__ == '__main__':
