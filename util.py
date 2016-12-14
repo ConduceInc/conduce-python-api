@@ -206,10 +206,8 @@ def get_attributes(attribute_keys, raw_entity):
 def csv_to_entities(infile, outfile=None, toStdout=False):
     return dict_to_entities(csv_to_json(infile))
 
-def dict_to_entities(raw_entities):
-    keys = raw_entities[0].keys()
-    attribute_keys = copy.deepcopy(keys)
-    fields = ['identity','kind','x','y','z','timestamp_ms','endtime_ms']
+
+def score_fields(raw_entities, keys):
     key_scores = {}
     for key in keys:
         key_scores[key] = {}
@@ -220,7 +218,10 @@ def dict_to_entities(raw_entities):
         key_scores[key]['x_score'] = get_x_score(key, raw_entities[0][key])
         key_scores[key]['y_score'] = get_y_score(key, raw_entities[0][key])
         key_scores[key]['z_score'] = get_z_score(key, raw_entities[0][key])
+    return key_scores
 
+
+def map_keys(key_scores, keys, attribute_keys):
     key_map = {}
     for score in key_scores[keys[0]].keys():
         max_score = 0
@@ -234,22 +235,37 @@ def dict_to_entities(raw_entities):
         if max_key in attribute_keys:
             attribute_keys.remove(max_key)
 
+    #TODO: Filter to single key match with highest score
 
+    return key_map
+
+def generate_entities(raw_entities, key_map, attribute_keys):
     entities = []
     for raw_entity in raw_entities:
         entity = {
-                'identity': get_field_value(raw_entity, key_map, 'identity'),
-                'kind': get_field_value(raw_entity, key_map, 'kind'),
-                'timestamp_ms': get_field_value(raw_entity, key_map, 'timestamp_ms'),
-                'endtime_ms': get_field_value(raw_entity, key_map, 'endtime_ms'),
-                'path': [{
-                    'x': get_field_value(raw_entity, key_map, 'x'),
-                    'y': get_field_value(raw_entity, key_map, 'y'),
-                    'z': get_field_value(raw_entity, key_map, 'z'),
-                    }],
-                'attrs': get_attributes(attribute_keys, raw_entity)
-                }
+            'identity': get_field_value(raw_entity, key_map, 'identity'),
+            'kind': get_field_value(raw_entity, key_map, 'kind'),
+            'timestamp_ms': get_field_value(raw_entity, key_map, 'timestamp_ms'),
+            'endtime_ms': get_field_value(raw_entity, key_map, 'endtime_ms'),
+            'path': [{
+                'x': get_field_value(raw_entity, key_map, 'x'),
+                'y': get_field_value(raw_entity, key_map, 'y'),
+                'z': get_field_value(raw_entity, key_map, 'z'),
+                }],
+            'attrs': get_attributes(attribute_keys, raw_entity),
+        }
         entities.append(entity)
+
+    return entities
+
+def dict_to_entities(raw_entities):
+    keys = raw_entities[0].keys()
+    attribute_keys = copy.deepcopy(keys)
+    fields = ['identity','kind','x','y','z','timestamp_ms','endtime_ms']
+
+    key_scores = score_fields(raw_entities, keys)
+    key_map = map_keys(key_scores, keys, attribute_keys)
+    entities = generate_entities(raw_entities, key_map, attribute_keys)
 
     return {'entities':entities}
 
