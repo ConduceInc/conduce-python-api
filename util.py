@@ -160,7 +160,7 @@ def get_z_score(key, value):
 
 def get_default(field):
     if field == 'identity':
-        return uuid.UUID()
+        return uuid.uuid4()
     elif field == 'timestamp_ms':
         return string_to_timestamp_ms('2000-01-01T00:00:00')
     elif field == 'endtime_ms':
@@ -208,6 +208,7 @@ def csv_to_entities(infile, outfile=None, toStdout=False):
 
 
 def score_fields(raw_entities, keys):
+    #TODO: Use up to 100 values to score fields
     key_scores = {}
     for key in keys:
         key_scores[key] = {}
