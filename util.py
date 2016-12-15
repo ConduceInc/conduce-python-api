@@ -14,9 +14,13 @@ def string_to_timestamp_ms(datetime_string, ignoretz=True):
 
 
 def csv_to_json(infile, outfile=None, toStdout=False):
-    with open(infile, "r") as f:
-        reader = csv.DictReader(f)
+    if hasattr(infile, 'read'):
+        reader = csv.DictReader(infile)
         out = json.dumps( [ row for row in reader ] )
+    else:
+        with open(infile, "r") as f:
+            reader = csv.DictReader(f)
+            out = json.dumps( [ row for row in reader ] )
     if out is None:
         raise "No JSON output. Try again."
     else:
