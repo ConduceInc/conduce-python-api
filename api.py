@@ -3,6 +3,9 @@ import session
 import config
 import json
 import time
+import re
+
+
 
 def list_saved(object_to_list, **kwargs):
     return make_get_request("conduce/api/%s/saved" % object_to_list, **kwargs)
@@ -128,10 +131,39 @@ def ingest_entities(dataset_id, data, **kwargs):
     return response
 
 
-def remove_dataset(dataset_id, **kwargs):
+def _remove_dataset(dataset_id, **kwargs):
     response = make_post_request(None, 'conduce/api/datasets/removev2/' + dataset_id, **kwargs)
     response.raise_for_status()
     return True
+
+
+def remove_dataset(**kwargs):
+    return_message = None
+    if kwargs['id']:
+        _remove_dataset(kwargs['id'], **kwargs)
+        return_message = 'Removed 1 dataset'
+    elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
+        datasets = json.loads(list_datasets(**kwargs).content)
+        to_remove = []
+        for dataset in datasets:
+            if dataset['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], dataset['name'])):
+                to_remove.append(dataset)
+        if len(to_remove) == 1:
+            _remove_dataset(to_remove[0]['id'], **kwargs)
+            return_message = 'Removed 1 dataset'
+        elif kwargs['all']:
+            for dataset in to_remove:
+                _remove_dataset(dataset['id'], **kwargs)
+            print "Removed %s datasets" % len(to_remove)
+        elif len(to_remove) > 1:
+            return_message = "Matching datasets:\n"
+            return_message += json.dumps(to_remove)
+            return_message += "\n\nName or regular expression matched multiple datasets.  Pass --all to remove all matching datasets."
+        else:
+            return_message = "No matching datasets found."
+
+    return return_message
+
 
 
 def make_post_request(payload, uri, **kwargs):

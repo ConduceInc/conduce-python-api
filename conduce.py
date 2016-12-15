@@ -3,7 +3,6 @@ import session
 import config
 import json
 import api
-import re
 
 
 def list_orchestrations(args):
@@ -53,31 +52,7 @@ def get_generic_data(args):
 
 
 def remove_dataset(args):
-    if args.id:
-        api.remove_dataset(args.id, **vars(args))
-        print 'Removed 1 dataset'
-    elif args.name or args.regex or args.name == "":
-        datasets = json.loads(api.list_datasets(**vars(args)).content)
-        to_remove = []
-        for dataset in datasets:
-            #if dataset['name'] == args.name:
-            if dataset['name'] == args.name or (args.regex and re.match(args.regex, dataset['name'])):
-                to_remove.append(dataset)
-        if len(to_remove) == 1:
-            api.remove_dataset(to_remove[0]['id'], **vars(args))
-            print 'Removed 1 dataset'
-        elif args.all:
-            for dataset in to_remove:
-                api.remove_dataset(dataset['id'], **vars(args))
-            print "Removed %s datasets" % len(to_remove)
-        elif len(to_remove) > 1:
-            import jsbeautifier
-            print "Matching datasets:"
-            print jsbeautifier.beautify(json.dumps(to_remove))
-            print
-            print "Name or regular expression matched multiple datasets.  Pass --all to remove all matching datasets."
-        else:
-            print "No matching datasets found."
+    return api.remove_dataset(**vars(args))
 
 
 if __name__ == '__main__':
