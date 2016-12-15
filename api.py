@@ -68,8 +68,8 @@ def make_get_request(uri, **kwargs):
     return response
 
 
-def create_dataset(**kwargs):
-    response = make_post_request({'name':kwargs['name']}, 'conduce/api/datasets/createv2', **kwargs)
+def create_dataset(dataset_name, **kwargs):
+    response = make_post_request({'name':dataset_name}, 'conduce/api/datasets/createv2', **kwargs)
 
     response_dict = json.loads(response)
     if kwargs['json']:

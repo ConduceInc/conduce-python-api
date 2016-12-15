@@ -25,7 +25,7 @@ def list_datasets(args):
 
 
 def create_dataset(args):
-    return api.create_dataset(**vars(args))
+    return api.create_dataset(args.name, **vars(args))
 
 
 def set_generic_data(args):
