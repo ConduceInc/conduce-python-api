@@ -3,6 +3,7 @@ import session
 import config
 import json
 import api
+import re
 
 
 def list_orchestrations(args):
@@ -49,6 +50,34 @@ def get_generic_data(args):
     del vars(args)['dataset_id']
     del vars(args)['key']
     return json.dumps(api.get_generic_data(dataset_id, key, **vars(args)))
+
+
+def remove_dataset(args):
+    if args.id:
+        api.remove_dataset(args.id, **vars(args))
+        print 'Removed 1 dataset'
+    elif args.name or args.regex or args.name == "":
+        datasets = json.loads(api.list_datasets(**vars(args)).content)
+        to_remove = []
+        for dataset in datasets:
+            #if dataset['name'] == args.name:
+            if dataset['name'] == args.name or (args.regex and re.match(args.regex, dataset['name'])):
+                to_remove.append(dataset)
+        if len(to_remove) == 1:
+            api.remove_dataset(to_remove[0]['id'], **vars(args))
+            print 'Removed 1 dataset'
+        elif args.all:
+            for dataset in to_remove:
+                api.remove_dataset(dataset['id'], **vars(args))
+            print "Removed %s datasets" % len(to_remove)
+        elif len(to_remove) > 1:
+            import jsbeautifier
+            print "Matching datasets:"
+            print jsbeautifier.beautify(json.dumps(to_remove))
+            print
+            print "Name or regular expression matched multiple datasets.  Pass --all to remove all matching datasets."
+        else:
+            print "No matching datasets found."
 
 
 if __name__ == '__main__':
@@ -122,13 +151,23 @@ if __name__ == '__main__':
     parser_set_generic_data.add_argument('--key', help='Unique name with which to lookup data')
     parser_set_generic_data.set_defaults(func=set_generic_data)
 
-    parser_get_generic_data = subparsers.add_parser('get-generic-data', help='Retrieve generic data from Conduce dataget')
+    parser_get_generic_data = subparsers.add_parser('get-generic-data', help='Retrieve generic data from Conduce dataset')
     parser_get_generic_data.add_argument('--user', help='The user who owns the data')
     parser_get_generic_data.add_argument('--host', help='The server on which the data resides')
     parser_get_generic_data.add_argument('--api-key', help='The API key used to authenticate to the server')
     parser_get_generic_data.add_argument('--dataset-id', help='The ID of the dataset to get the data from')
     parser_get_generic_data.add_argument('--key', help='Unique ID of entity to retrieve data from')
     parser_get_generic_data.set_defaults(func=get_generic_data)
+
+    parser_get_generic_data = subparsers.add_parser('remove-dataset', help='Remove a dataset from Conduce')
+    parser_get_generic_data.add_argument('--user', help='The user who owns the data')
+    parser_get_generic_data.add_argument('--host', help='The server on which the data resides')
+    parser_get_generic_data.add_argument('--api-key', help='The API key used to authenticate to the server')
+    parser_get_generic_data.add_argument('--id', help='The ID of the dataset to be removed')
+    parser_get_generic_data.add_argument('--name', help='The name of the dataset to be removed')
+    parser_get_generic_data.add_argument('--regex', help='Remove datasets that match the regular expression')
+    parser_get_generic_data.add_argument('--all', help='Remove all matching datasets', action='store_true')
+    parser_get_generic_data.set_defaults(func=remove_dataset)
 
     args = arg_parser.parse_args()
 

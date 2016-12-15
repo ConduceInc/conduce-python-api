@@ -70,11 +70,11 @@ def make_get_request(uri, **kwargs):
 
 def create_dataset(dataset_name, **kwargs):
     response = make_post_request({'name':dataset_name}, 'conduce/api/datasets/createv2', **kwargs)
-
-    response_dict = json.loads(response)
-    if kwargs['json']:
+    response_dict = json.loads(response.content)
+    print kwargs
+    if 'json' in kwargs and kwargs['json']:
         ingest_entities(response_dict['dataset'], json.load(open(kwargs['json'])), **kwargs)
-    elif kwargs['csv']:
+    elif 'csv' in kwargs and kwargs['csv']:
         ingest_entities(response_dict['dataset'], util.csv_to_entities(kwargs['csv']), **kwargs)
 
     return response
@@ -128,6 +128,12 @@ def ingest_entities(dataset_id, data, **kwargs):
     return response
 
 
+def remove_dataset(dataset_id, **kwargs):
+    response = make_post_request(None, 'conduce/api/datasets/removev2/' + dataset_id, **kwargs)
+    response.raise_for_status()
+    return True
+
+
 def make_post_request(payload, uri, **kwargs):
     cfg = config.get_full_config()
 
@@ -153,4 +159,3 @@ def make_post_request(payload, uri, **kwargs):
         response = requests.post(url, json=payload, cookies=auth)
     response.raise_for_status()
     return response
-
