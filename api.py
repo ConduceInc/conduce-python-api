@@ -21,6 +21,9 @@ def wait_for_job(job_id):
     while not finished:
         time.sleep(0.5)
         response = make_get_request('conduce/api/%s' % job_id)
+        response.raise_for_status()
+
+        #TODO: This is probably dead code
         if int(response.status_code / 100) != 2:
             print "Error code %s: %s" % (response.status_code, response.text)
             return False;
@@ -28,7 +31,6 @@ def wait_for_job(job_id):
         if response.ok:
             msg = response.json()
             if 'response' in msg:
-                print "Job completed successfully."
                 finished = True
         else:
             print resp, resp.content
@@ -74,7 +76,6 @@ def make_get_request(uri, **kwargs):
 def create_dataset(dataset_name, **kwargs):
     response = make_post_request({'name':dataset_name}, 'conduce/api/datasets/createv2', **kwargs)
     response_dict = json.loads(response.content)
-    print kwargs
     if 'json' in kwargs and kwargs['json']:
         ingest_entities(response_dict['dataset'], json.load(open(kwargs['json'])), **kwargs)
     elif 'csv' in kwargs and kwargs['csv']:
@@ -139,6 +140,13 @@ def _remove_dataset(dataset_id, **kwargs):
 
 def remove_dataset(**kwargs):
     return_message = None
+    if not 'id' in kwargs:
+        kwargs['id'] = None
+    if not 'regex' in kwargs:
+        kwargs['regex'] = None
+    if not 'name' in kwargs:
+        kwargs['name'] = None
+
     if kwargs['id']:
         _remove_dataset(kwargs['id'], **kwargs)
         return_message = 'Removed 1 dataset'
@@ -154,7 +162,7 @@ def remove_dataset(**kwargs):
         elif kwargs['all']:
             for dataset in to_remove:
                 _remove_dataset(dataset['id'], **kwargs)
-            print "Removed %s datasets" % len(to_remove)
+            return_message = "Removed %s datasets" % len(to_remove)
         elif len(to_remove) > 1:
             return_message = "Matching datasets:\n"
             return_message += json.dumps(to_remove)
@@ -189,5 +197,7 @@ def make_post_request(payload, uri, **kwargs):
         response = requests.post(url, json=payload, headers=auth)
     else:
         response = requests.post(url, json=payload, cookies=auth)
+    if response.status_code == 400:
+        print response.text
     response.raise_for_status()
     return response
