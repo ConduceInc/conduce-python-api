@@ -5,6 +5,7 @@ import uuid
 import re
 from dateutil import parser
 import copy
+import api
 
 
 def string_to_timestamp_ms(datetime_string, ignoretz=True):
@@ -274,6 +275,13 @@ def dict_to_entities(raw_entities):
 
     return {'entities':entities}
 
+def get_dataset_id(dataset_name, **kwargs):
+    datasets = json.loads(api.list_datasets(**kwargs).content)
+    for dataset in datasets:
+        if dataset['name'] == dataset_name:
+            return dataset['id']
+
+    return None
 
 if __name__ == '__main__':
     import argparse
