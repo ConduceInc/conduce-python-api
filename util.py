@@ -253,9 +253,9 @@ def generate_entities(raw_entities, key_map, attribute_keys):
             'timestamp_ms': get_field_value(raw_entity, key_map, 'timestamp_ms'),
             'endtime_ms': get_field_value(raw_entity, key_map, 'endtime_ms'),
             'path': [{
-                'x': get_field_value(raw_entity, key_map, 'x'),
-                'y': get_field_value(raw_entity, key_map, 'y'),
-                'z': get_field_value(raw_entity, key_map, 'z'),
+                'x': float(get_field_value(raw_entity, key_map, 'x')),
+                'y': float(get_field_value(raw_entity, key_map, 'y')),
+                'z': float(get_field_value(raw_entity, key_map, 'z')),
                 }],
             'attrs': get_attributes(attribute_keys, raw_entity),
         }
