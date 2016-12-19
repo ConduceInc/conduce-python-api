@@ -8,19 +8,26 @@ import copy
 import api
 
 
+def format_mac_address(mac_address):
+    return re.sub('[:-]', '', mac_address).upper().strip()
+
+
 def string_to_timestamp_ms(datetime_string, ignoretz=True):
     EPOCH = parser.parse("1970-01-01T00:00:00.000+0000", ignoretz=ignoretz)
     timestamp = parser.parse(datetime_string, ignoretz=ignoretz)
     return int((timestamp - EPOCH).total_seconds() * 1000)
 
 
-def csv_to_json(infile, outfile=None, toStdout=False):
+def csv_to_json(infile, outfile=None, toStdout=False, **kwargs):
+    delimiter = ','
+    if 'delimiter' in kwargs:
+        delimiter = kwargs['delimiter']
     if hasattr(infile, 'read'):
-        reader = csv.DictReader(infile)
+        reader = csv.DictReader(infile, delimiter=delimiter)
         out = json.dumps( [ row for row in reader ] )
     else:
         with open(infile, "r") as f:
-            reader = csv.DictReader(f)
+            reader = csv.DictReader(f, delimiter=delimiter)
             out = json.dumps( [ row for row in reader ] )
     if out is None:
         raise "No JSON output. Try again."
