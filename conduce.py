@@ -65,10 +65,6 @@ if __name__ == '__main__':
     parser_config_subparsers = parser_config.add_subparsers(help='config subcommands')
 
     parser_config_set = parser_config_subparsers.add_parser('set', help='Set Conduce configuration setting')
-    parser_config_set.add_argument('--default-user', help='Set the default user for executing commands')
-    parser_config_set.add_argument('--default-host', help='Set the default server to send commands to')
-    parser_config_set.add_argument('--api-key', help='Set the default API key')
-    parser_config_set.set_defaults(func=config.set_config)
     parser_config_set_subparsers = parser_config_set.add_subparsers(help='set subcommands')
 
     parser_config_set_api_key = parser_config_set_subparsers.add_parser('api-key', help='Set a Conduce API key')
@@ -78,10 +74,13 @@ if __name__ == '__main__':
     parser_config_set_api_key.set_defaults(func=config.set_api_key)
 
     parser_config_get = parser_config_subparsers.add_parser('get', help='Get Conduce configuration setting')
-    parser_config_get.add_argument('--default-user', help='Get the default user for executing commands', action='store_true')
-    parser_config_get.add_argument('--default-host', help='Get the default server to send commands to', action='store_true')
-    parser_config_get.set_defaults(func=config.get_config)
     parser_config_get_subparsers = parser_config_get.add_subparsers(help='get subcommands')
+
+    parser_config_get_default_user = parser_config_get_subparsers.add_parser('default-user', help='get the default user for executing commands')
+    parser_config_get_default_user.set_defaults(func=config.get_default_user)
+
+    parser_config_get_default_host = parser_config_get_subparsers.add_parser('default-host', help='get the default server to send commands to')
+    parser_config_get_default_host.set_defaults(func=config.get_default_host)
 
     parser_config_get_api_key = parser_config_get_subparsers.add_parser('api-key', help='Get a Conduce API key')
     parser_config_get_api_key.add_argument('--user', help='The user to which the API key belongs')
