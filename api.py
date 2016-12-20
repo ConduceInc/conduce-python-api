@@ -5,14 +5,34 @@ import json
 import time
 import re
 
+def deprecated(func):
+    '''This is a decorator which can be used to mark functions
+    as deprecated. It will result in a warning being emitted
+    when the function is used.'''
+    def new_func(*args, **kwargs):
+        warnings.warn("Call to deprecated function {}.".format(func.__name__),
+                      category=DeprecationWarning)
+        return func(*args, **kwargs)
+    new_func.__name__ = func.__name__
+    new_func.__doc__ = func.__doc__
+    new_func.__dict__.update(func.__dict__)
+    return new_func
 
-
+@deprecated
 def list_saved(object_to_list, **kwargs):
-    return make_get_request("conduce/api/%s/saved" % object_to_list, **kwargs)
+    return list_object(object_to_list, **kwargs)
+
+
+def list_object(object_to_list, **kwargs):
+    return make_get_request("conduce/api/v1/%s/list" % object_to_list, **kwargs)
 
 
 def list_datasets(**kwargs):
-    return make_get_request("conduce/api/datasets/listv2", **kwargs)
+    return list_object('datasets', **kwargs)
+
+
+def list_substrates(**kwargs):
+    return list_object('substrates', **kwargs)
 
 
 def wait_for_job(job_id):
@@ -37,13 +57,43 @@ def wait_for_job(job_id):
             break
 
 
+"""
+from saveSubstrate
+        var cfg = {
+            background: {
+                asset_id: this.image,
+                bottom_left: bounds.bottom_left,
+                top_right: bounds.top_right,
+                //pixel_width: res.pixel_width,
+                //pixel_height: res.pixel_height,
+            },
+        };
+{
+    "substrate": {
+        "id": "9428b576-05eb-4d9c-b6b5-2c87034455ff",
+        "name": "DHL_Beringe_Kyocera",
+        "background": {
+            "asset_id": "13784280-405d-4ac2-aed3-5913e56464b4",
+            "bottom_left": {
+                "x": -102938,
+                "y": 161021
+            },
+            "top_right": {
+                "x": 187243,
+                "y": -967
+            }
+        }
+    }
+}
+"""
+
 def get_generic_data(dataset_id, entity_id, **kwargs):
     entity = get_entity(dataset_id, entity_id, **kwargs)
     return json.loads(json.loads(entity.content)[0]['attrs'][0]['str_value'])
 
 
 def get_entity(dataset_id, entity_id, **kwargs):
-    return make_get_request('conduce/api/datasets/entity/%s/%s' % (dataset_id, entity_id), **kwargs)
+    return make_get_request('conduce/api/v1/datasets/entity/%s/%s' % (dataset_id, entity_id), **kwargs)
 
 
 def make_get_request(uri, **kwargs):
@@ -74,7 +124,7 @@ def make_get_request(uri, **kwargs):
 
 
 def create_dataset(dataset_name, **kwargs):
-    response = make_post_request({'name':dataset_name}, 'conduce/api/datasets/createv2', **kwargs)
+    response = make_post_request({'name':dataset_name}, 'conduce/api/v1/datasets/create', **kwargs)
     response_dict = json.loads(response.content)
     if 'json' in kwargs and kwargs['json']:
         ingest_entities(response_dict['dataset'], json.load(open(kwargs['json'])), **kwargs)
@@ -125,7 +175,7 @@ def ingest_entities(dataset_id, data, **kwargs):
     if isinstance(data, list):
         data = {'entities': data}
 
-    response = make_post_request(data, 'conduce/api/datasets/add_datav2/%s' % dataset_id, **kwargs)
+    response = make_post_request(data, 'conduce/api/v1/datasets/add-data/%s' % dataset_id, **kwargs)
     if 'location' in response.headers:
         job_id = response.headers['location']
         response = wait_for_job(job_id)
@@ -133,7 +183,7 @@ def ingest_entities(dataset_id, data, **kwargs):
 
 
 def _remove_dataset(dataset_id, **kwargs):
-    response = make_post_request(None, 'conduce/api/datasets/removev2/' + dataset_id, **kwargs)
+    response = make_post_request(None, 'conduce/api/v1/datasets/delete/' + dataset_id, **kwargs)
     response.raise_for_status()
     return True
 
@@ -197,7 +247,5 @@ def make_post_request(payload, uri, **kwargs):
         response = requests.post(url, json=payload, headers=auth)
     else:
         response = requests.post(url, json=payload, cookies=auth)
-    if response.status_code == 400:
-        print response.text
     response.raise_for_status()
     return response

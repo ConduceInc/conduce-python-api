@@ -5,19 +5,11 @@ import json
 import api
 
 
-def list_orchestrations(args):
-    return api.list_saved('orchestrations', **vars(args))
-
-
-def list_substrates(args):
-    return api.list_saved('substrates', **vars(args))
-
-
 def list_from_args(args):
-    if args.object_to_list == 'datasets':
-        return api.list_datasets(**vars(args))
+    object_to_list = args.object_to_list
+    del vars(args)['object_to_list']
 
-    return api.list_saved(args.object_to_list, **vars(args))
+    return api.list_object(object_to_list, **vars(args))
 
 
 def list_datasets(args):
@@ -55,6 +47,14 @@ def remove_dataset(args):
     return api.remove_dataset(**vars(args))
 
 
+def send_get_request(args):
+    return api.make_get_request(args.uri)
+
+
+def send_post_request(args):
+    return api.make_post_request(json.loads(args.data), args.uri)
+
+
 if __name__ == '__main__':
     import argparse, jsbeautifier
 
@@ -86,18 +86,6 @@ if __name__ == '__main__':
     parser_config_get_api_key.add_argument('--user', help='The user to which the API key belongs')
     parser_config_get_api_key.add_argument('--host', help='The server on which the API key is valid')
     parser_config_get_api_key.set_defaults(func=config.get_api_key_config)
-
-    parser_list_orchestrations = subparsers.add_parser('list-orchestrations', help='List orchestrations owned by user')
-    parser_list_orchestrations.add_argument('--user', help='The user whose orchestrations will be listed')
-    parser_list_orchestrations.add_argument('--host', help='The server from which orchestrations will be listed')
-    parser_list_orchestrations.add_argument('--api-key', help='The API key used to authenticate')
-    parser_list_orchestrations.set_defaults(func=list_orchestrations)
-
-    parser_list_substrates = subparsers.add_parser('list-substrates', help='List substrates owned by user')
-    parser_list_substrates.add_argument('--user', help='The user whose substrates will be listed')
-    parser_list_substrates.add_argument('--host', help='The server from which substrates will be listed')
-    parser_list_substrates.add_argument('--api-key', help='The API key used to authenticate')
-    parser_list_substrates.set_defaults(func=list_orchestrations)
 
     parser_config_list = subparsers.add_parser('list', help='List "objects" owned by user')
     parser_config_list.add_argument('object_to_list', help='Conduce object to list')
@@ -143,13 +131,26 @@ if __name__ == '__main__':
     parser_get_generic_data.add_argument('--all', help='Remove all matching datasets', action='store_true')
     parser_get_generic_data.set_defaults(func=remove_dataset)
 
+    parser_get = subparsers.add_parser('get', help='Make an arbitrary get request')
+    parser_get.add_argument('uri', help='The URI of the resource being requested')
+    parser_get.set_defaults(func=send_get_request)
+
+    parser_post = subparsers.add_parser('post', help='Make an arbitrary post request')
+    parser_post.add_argument('uri', help='The URI of the resource being requested')
+    parser_post.add_argument('data', help='The data being posted')
+    parser_post.set_defaults(func=send_post_request)
+
     args = arg_parser.parse_args()
 
     config = config.get_full_config()
 
-    result = args.func(args)
-    if result:
-        if hasattr(result, 'content'):
-            print jsbeautifier.beautify(result.content)
-        else:
-            print jsbeautifier.beautify(result)
+    try:
+        result = args.func(args)
+        if result:
+            if hasattr(result, 'content'):
+                print jsbeautifier.beautify(result.content)
+            else:
+                print jsbeautifier.beautify(result)
+    except requests.exceptions.HTTPError as e:
+        print e
+        print e.response.text
