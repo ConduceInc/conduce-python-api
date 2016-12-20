@@ -4,6 +4,7 @@ import config
 import json
 import time
 import re
+import urlparse
 
 def deprecated(func):
     '''This is a decorator which can be used to mark functions
@@ -40,7 +41,7 @@ def wait_for_job(job_id):
 
     while not finished:
         time.sleep(0.5)
-        response = make_get_request('conduce/api/%s' % job_id)
+        response = make_get_request(job_id)
         response.raise_for_status()
 
         #TODO: This is probably dead code
@@ -87,16 +88,27 @@ from saveSubstrate
 }
 """
 
+def compose_uri(fragment):
+    prefix = 'conduce/api/v1'
+    fragment = fragment.lstrip('/')
+    uri = '/%s' % fragment
+    if not prefix in fragment:
+        uri = '/%s/%s' % (prefix, fragment)
+
+    return uri
+
 def get_generic_data(dataset_id, entity_id, **kwargs):
     entity = get_entity(dataset_id, entity_id, **kwargs)
     return json.loads(json.loads(entity.content)[0]['attrs'][0]['str_value'])
 
 
 def get_entity(dataset_id, entity_id, **kwargs):
-    return make_get_request('conduce/api/v1/datasets/entity/%s/%s' % (dataset_id, entity_id), **kwargs)
+    return make_get_request('datasets/entity/%s/%s' % (dataset_id, entity_id), **kwargs)
 
+def make_get_request(fragment, **kwargs):
+    return _make_get_request(compose_uri(fragment), **kwargs)
 
-def make_get_request(uri, **kwargs):
+def _make_get_request(uri, **kwargs):
     cfg = config.get_full_config()
 
     if 'host' in kwargs and kwargs['host']:
@@ -124,7 +136,7 @@ def make_get_request(uri, **kwargs):
 
 
 def create_dataset(dataset_name, **kwargs):
-    response = make_post_request({'name':dataset_name}, 'conduce/api/v1/datasets/create', **kwargs)
+    response = make_post_request({'name':dataset_name}, 'datasets/create', **kwargs)
     response_dict = json.loads(response.content)
     if 'json' in kwargs and kwargs['json']:
         ingest_entities(response_dict['dataset'], json.load(open(kwargs['json'])), **kwargs)
@@ -175,7 +187,7 @@ def ingest_entities(dataset_id, data, **kwargs):
     if isinstance(data, list):
         data = {'entities': data}
 
-    response = make_post_request(data, 'conduce/api/v1/datasets/add-data/%s' % dataset_id, **kwargs)
+    response = make_post_request(data, 'datasets/add-data/%s' % dataset_id, **kwargs)
     if 'location' in response.headers:
         job_id = response.headers['location']
         response = wait_for_job(job_id)
@@ -183,7 +195,7 @@ def ingest_entities(dataset_id, data, **kwargs):
 
 
 def _remove_dataset(dataset_id, **kwargs):
-    response = make_post_request(None, 'conduce/api/v1/datasets/delete/' + dataset_id, **kwargs)
+    response = make_post_request(None, 'datasets/delete/' + dataset_id, **kwargs)
     response.raise_for_status()
     return True
 
@@ -224,7 +236,10 @@ def remove_dataset(**kwargs):
 
 
 
-def make_post_request(payload, uri, **kwargs):
+def make_post_request(payload, fragment, **kwargs):
+    return _make_post_request(payload, compose_uri(fragment), **kwargs)
+
+def _make_post_request(payload, uri, **kwargs):
     cfg = config.get_full_config()
 
     if 'host' in kwargs and kwargs['host']:
