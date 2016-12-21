@@ -208,6 +208,8 @@ def remove_dataset(**kwargs):
         kwargs['regex'] = None
     if not 'name' in kwargs:
         kwargs['name'] = None
+    if not 'all' in kwargs:
+        kwargs['all'] = None
 
     if kwargs['id']:
         _remove_dataset(kwargs['id'], **kwargs)
@@ -234,7 +236,51 @@ def remove_dataset(**kwargs):
 
     return return_message
 
+def _remove_substrate(substrate_id, **kwargs):
+    response = make_post_request(None, 'substrates/delete/' + substrate_id, **kwargs)
+    response.raise_for_status()
+    return True
 
+
+def remove_substrate(**kwargs):
+    return_message = None
+    if not 'id' in kwargs:
+        kwargs['id'] = None
+    if not 'regex' in kwargs:
+        kwargs['regex'] = None
+    if not 'name' in kwargs:
+        kwargs['name'] = None
+    if not 'all' in kwargs:
+        kwargs['all'] = None
+
+    if kwargs['id']:
+        _remove_substrate(kwargs['id'], **kwargs)
+        return_message = 'Removed 1 substrate'
+    elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
+        substrates = json.loads(list_substrates(**kwargs).content)['substrate_list']['files']
+        to_remove = []
+        print substrates
+        for substrate in substrates:
+            if substrate['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], substrate['name'])):
+                to_remove.append(substrate)
+        if len(to_remove) == 1:
+            _remove_substrate(to_remove[0]['id'], **kwargs)
+            return_message = 'Removed 1 substrate'
+        elif kwargs['all']:
+            for substrate in to_remove:
+                _remove_substrate(substrate['id'], **kwargs)
+            return_message = "Removed %s substrates" % len(to_remove)
+        elif len(to_remove) > 1:
+            return_message = "Matching substrates:\n"
+            return_message += json.dumps(to_remove)
+            return_message += "\n\nName or regular expression matched multiple substrates.  Pass --all to remove all matching substrates."
+        else:
+            return_message = "No matching substrates found."
+
+    return return_message
+
+def create_substrate(name, substrate_def, **kwargs):
+    return make_post_request(substrate_def, 'substrates/create/%s' % name, **kwargs)
 
 def make_post_request(payload, fragment, **kwargs):
     return _make_post_request(payload, compose_uri(fragment), **kwargs)
@@ -259,8 +305,77 @@ def _make_post_request(payload, uri, **kwargs):
 
     url = 'https://%s/%s' % (host, uri)
     if 'Authorization' in auth:
-        response = requests.post(url, json=payload, headers=auth)
+        if 'headers' in kwargs and kwars['headers']:
+            headers = kwargs['headers']
+            headers.update(auth)
+        else:
+            headers = auth
+
+        response = requests.post(url, json=payload, headers=headers)
     else:
-        response = requests.post(url, json=payload, cookies=auth)
+        response = requests.post(url, json=payload, cookies=auth, headers=headers)
     response.raise_for_status()
     return response
+
+def create_asset(name, content, mime_type, **kwargs):
+    content_type = {'Content-Type': mime_type}
+    if 'headers' in kwargs and kwars['headers']:
+        headers = kwargs['headers']
+        headers.update(content_type)
+    else:
+        headers = content_type
+
+    return file_post_request(content, 'userassets/create/%s' % name, headers=headers, **kwargs)
+
+
+def file_post_request(payload, fragment, **kwargs):
+    return _file_post_request(payload, compose_uri(fragment), **kwargs)
+
+def _file_post_request(payload, uri, **kwargs):
+    cfg = config.get_full_config()
+
+    if 'host' in kwargs and kwargs['host']:
+        host = kwargs['host']
+    else:
+        host = cfg['default-host']
+
+    if 'user' in kwargs and kwargs['user']:
+        user = kwargs['user']
+    else:
+        user = cfg['default-user']
+
+    if 'api_key' in kwargs and kwargs['api_key']:
+        auth = session.api_key_header(kwargs['api_key'])
+    else:
+        auth = session.get_session(host, user)
+
+    url = 'https://%s/%s' % (host, uri)
+    if 'Authorization' in auth:
+        if 'headers' in kwargs and kwargs['headers']:
+            headers = kwargs['headers']
+            headers.update(auth)
+        else:
+            headers = auth
+
+        response = requests.post(url, data=payload, headers=headers)
+    else:
+        response = requests.post(url, data=payload, cookies=auth, headers=headers)
+    response.raise_for_status()
+    return response
+
+
+def remove_asset(name, **kwargs):
+    results = json.loads(make_post_request({'query':name}, 'userassets/search', **kwargs).content)
+    if 'asset_list' in results and 'files' in results['asset_list']:
+        results = results['asset_list']['files']
+    else:
+        return None
+
+    if len(results) > 0:
+        asset_id = results[0]['id']
+        return _remove_asset(asset_id, **kwargs)
+
+    return None
+
+def _remove_asset(asset_id, **kwargs):
+    return make_post_request({}, 'userassets/delete/' + asset_id, **kwargs)
