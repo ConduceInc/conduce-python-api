@@ -67,6 +67,14 @@ if __name__ == '__main__':
     parser_config_set = parser_config_subparsers.add_parser('set', help='Set Conduce configuration setting')
     parser_config_set_subparsers = parser_config_set.add_subparsers(help='set subcommands')
 
+    parser_config_set_default_user = parser_config_set_subparsers.add_parser('default-user', help='get the default user for executing commands')
+    parser_config_set_default_user.add_argument('default_user', help='user name')
+    parser_config_set_default_user.set_defaults(func=config.set_default_user)
+
+    parser_config_set_default_host = parser_config_set_subparsers.add_parser('default-host', help='get the default server to send commands to')
+    parser_config_set_default_host.add_argument('default_host', help='host')
+    parser_config_set_default_host.set_defaults(func=config.set_default_host)
+
     parser_config_set_api_key = parser_config_set_subparsers.add_parser('api-key', help='Set a Conduce API key')
     parser_config_set_api_key.add_argument('--user', help='The user to which the API key belongs')
     parser_config_set_api_key.add_argument('--host', help='The server on which the API key is valid')
