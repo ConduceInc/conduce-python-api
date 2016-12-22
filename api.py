@@ -259,7 +259,6 @@ def remove_substrate(**kwargs):
     elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
         substrates = json.loads(list_substrates(**kwargs).content)['substrate_list']['files']
         to_remove = []
-        print substrates
         for substrate in substrates:
             if substrate['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], substrate['name'])):
                 to_remove.append(substrate)
