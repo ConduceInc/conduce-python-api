@@ -433,7 +433,6 @@ def remove_asset(**kwargs):
         return_message = 'Removed 1 substrate'
     elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
         results = json.loads(make_post_request({'query':kwargs['name']}, 'userassets/search', **kwargs).content)
-        print results
         if 'asset_list' in results and 'files' in results['asset_list']:
             assets = results['asset_list']['files']
             to_remove = []
