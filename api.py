@@ -19,6 +19,7 @@ def deprecated(func):
     new_func.__dict__.update(func.__dict__)
     return new_func
 
+
 @deprecated
 def list_saved(object_to_list, **kwargs):
     return list_object(object_to_list, **kwargs)
@@ -58,36 +59,6 @@ def wait_for_job(job_id):
             break
 
 
-"""
-from saveSubstrate
-        var cfg = {
-            background: {
-                asset_id: this.image,
-                bottom_left: bounds.bottom_left,
-                top_right: bounds.top_right,
-                //pixel_width: res.pixel_width,
-                //pixel_height: res.pixel_height,
-            },
-        };
-{
-    "substrate": {
-        "id": "9428b576-05eb-4d9c-b6b5-2c87034455ff",
-        "name": "DHL_Beringe_Kyocera",
-        "background": {
-            "asset_id": "13784280-405d-4ac2-aed3-5913e56464b4",
-            "bottom_left": {
-                "x": -102938,
-                "y": 161021
-            },
-            "top_right": {
-                "x": 187243,
-                "y": -967
-            }
-        }
-    }
-}
-"""
-
 def compose_uri(fragment):
     prefix = 'conduce/api/v1'
     fragment = fragment.lstrip('/')
@@ -96,6 +67,7 @@ def compose_uri(fragment):
         uri = '/%s/%s' % (prefix, fragment)
 
     return uri
+
 
 def get_generic_data(dataset_id, entity_id, **kwargs):
     entity = get_entity(dataset_id, entity_id, **kwargs)
@@ -243,8 +215,31 @@ def _remove_substrate(substrate_id, **kwargs):
     return True
 
 
-def remove_substrate(**kwargs):
+def _remove_thing_by_id(uri_thing, thing_id, **kwargs):
+    response = make_post_request(None, ('%s/delete/%s' % (uri_thing, thing_id)), **kwargs)
+    response.raise_for_status()
+    return True
+
+
+def _remove_thing(thing, **kwargs):
     return_message = None
+
+    if not 'things' in kwargs:
+        things = '%ss' % thing
+    else:
+        things = kwargs['things']
+    if not 'thing_list' in kwargs:
+        thing_list = '%s_list' % thing
+    else:
+        thing_list = kwargs['thing_list']
+    if not 'uri_thing' in kwargs:
+        uri_thing = things
+    else:
+        uri_thing = kwargs['uri_thing']
+        del kwargs['uri_thing']
+
+    search_uri = '%s/search' % uri_thing
+
     if not 'id' in kwargs:
         kwargs['id'] = None
     if not 'regex' in kwargs:
@@ -254,35 +249,37 @@ def remove_substrate(**kwargs):
     if not 'all' in kwargs:
         kwargs['all'] = None
 
-
     if kwargs['id']:
-        _remove_substrate(kwargs['id'], **kwargs)
-        return_message = 'Removed 1 substrate'
+        _remove_thing_by_id(uri_thing, kwargs['id'], **kwargs)
     elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
-        results = json.loads(make_post_request({'query':kwargs['name']}, 'substrates/search', **kwargs).content)
-        if 'substrate_list' in results and 'files' in results['substrate_list']:
-            substrates = results['substrate_list']['files']
+        results = json.loads(make_post_request({'query':kwargs['name']}, search_uri, **kwargs).content)
+        if thing_list in results and 'files' in results[thing_list]:
+            thing_obj_list = results[thing_list]['files']
             to_remove = []
-            for substrate in substrates:
-                if substrate['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], substrate['name'])):
-                    to_remove.append(substrate)
+            for thing_obj in thing_obj_list:
+                if thing_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], thing_obj['name'])):
+                    to_remove.append(thing_obj)
             if len(to_remove) == 1:
-                _remove_substrate(to_remove[0]['id'], **kwargs)
-                return_message = 'Removed 1 substrate'
+                _remove_thing_by_id(uri_thing, to_remove[0]['id'], **kwargs)
+                return_message = 'Removed 1 %s' % thing
             elif kwargs['all']:
-                for substrate in to_remove:
-                    _remove_substrate(substrate['id'], **kwargs)
-                return_message = "Removed %s substrates" % len(to_remove)
+                for thing_obj in to_remove:
+                    _remove_thing_by_id(uri_thing, thing_obj['id'], **kwargs)
+                return_message = "Removed %s %s" % (len(to_remove), things)
             elif len(to_remove) > 1:
-                return_message = "Matching substrates:\n"
+                return_message = "Matching %s:\n" % things
                 return_message += json.dumps(to_remove)
-                return_message += "\n\nName or regular expression matched multiple substrates.  Pass --all to remove all matching substrates."
+                return_message += "\n\nName or regular expression matched multiple %s.  Pass --all to remove all matching %s." % (things, things)
             else:
-                return_message = "No matching substrates found."
+                return_message = "No matching %s found." % things
         else:
-            return_message = "The query did not match any substrates."
+            return_message = "The query did not match any %s." % things
 
     return return_message
+
+
+def remove_substrate(**kwargs):
+    return _remove_thing('substrate', **kwargs)
 
 
 def create_substrate(name, substrate_def, **kwargs):
@@ -296,44 +293,7 @@ def _remove_template(template_id, **kwargs):
 
 
 def remove_template(**kwargs):
-    return_message = None
-    if not 'id' in kwargs:
-        kwargs['id'] = None
-    if not 'regex' in kwargs:
-        kwargs['regex'] = None
-    if not 'name' in kwargs:
-        kwargs['name'] = None
-    if not 'all' in kwargs:
-        kwargs['all'] = None
-
-    if kwargs['id']:
-        _remove_substrate(kwargs['id'], **kwargs)
-        return_message = 'Removed 1 substrate'
-    elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
-        results = json.loads(make_post_request({'query':kwargs['name']}, 'templates/search', **kwargs).content)
-        if 'template_list' in results and 'files' in results['template_list']:
-            templates = results['template_list']['files']
-            to_remove = []
-            for template in templates:
-                if template['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], template['name'])):
-                    to_remove.append(template)
-            if len(to_remove) == 1:
-                _remove_template(to_remove[0]['id'], **kwargs)
-                return_message = 'Removed 1 template'
-            elif kwargs['all']:
-                for template in to_remove:
-                    _remove_template(template['id'], **kwargs)
-                return_message = "Removed %s templates" % len(to_remove)
-            elif len(to_remove) > 1:
-                return_message = "Matching templates:\n"
-                return_message += json.dumps(to_remove)
-                return_message += "\n\nName or regular expression matched multiple templates.  Pass --all to remove all matching templates."
-            else:
-                return_message = "No matching templates found."
-        else:
-            return_message = "The query did not match any templates."
-
-    return return_message
+    _remove_thing('template', **kwargs)
 
 
 def create_template(name, template_def, **kwargs):
@@ -376,6 +336,7 @@ def _make_post_request(payload, uri, **kwargs):
     response.raise_for_status()
     return response
 
+
 def create_asset(name, content, mime_type, **kwargs):
     content_type = {'Content-Type': mime_type}
     if 'headers' in kwargs and kwars['headers']:
@@ -386,8 +347,10 @@ def create_asset(name, content, mime_type, **kwargs):
 
     return file_post_request(content, 'userassets/create/%s' % name, headers=headers, **kwargs)
 
+
 def file_post_request(payload, fragment, **kwargs):
     return _file_post_request(payload, compose_uri(fragment), **kwargs)
+
 
 def _file_post_request(payload, uri, **kwargs):
     cfg = config.get_full_config()
@@ -423,44 +386,8 @@ def _file_post_request(payload, uri, **kwargs):
 
 
 def remove_asset(**kwargs):
-    return_message = None
-    if not 'id' in kwargs:
-        kwargs['id'] = None
-    if not 'regex' in kwargs:
-        kwargs['regex'] = None
-    if not 'name' in kwargs:
-        kwargs['name'] = None
-    if not 'all' in kwargs:
-        kwargs['all'] = None
+    _remove_thing('asset', uri_thing='userassets', **kwargs)
 
-    if kwargs['id']:
-        _remove_substrate(kwargs['id'], **kwargs)
-        return_message = 'Removed 1 substrate'
-    elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
-        results = json.loads(make_post_request({'query':kwargs['name']}, 'userassets/search', **kwargs).content)
-        if 'asset_list' in results and 'files' in results['asset_list']:
-            assets = results['asset_list']['files']
-            to_remove = []
-            for asset in assets:
-                if asset['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], asset['name'])):
-                    to_remove.append(asset)
-            if len(to_remove) == 1:
-                _remove_asset(to_remove[0]['id'], **kwargs)
-                return_message = 'Removed 1 asset'
-            elif kwargs['all']:
-                for asset in to_remove:
-                    _remove_asset(asset['id'], **kwargs)
-                return_message = "Removed %s assets" % len(to_remove)
-            elif len(to_remove) > 1:
-                return_message = "Matching assets:\n"
-                return_message += json.dumps(to_remove)
-                return_message += "\n\nName or regular expression matched multiple assets.  Pass --all to remove all matching assets."
-            else:
-                return_message = "No matching assets found."
-        else:
-            return_message = "The query did not match any assets."
-
-    return return_message
 
 def _remove_asset(asset_id, **kwargs):
     return make_post_request({}, 'userassets/delete/' + asset_id, **kwargs)
