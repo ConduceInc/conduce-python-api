@@ -254,28 +254,33 @@ def remove_substrate(**kwargs):
     if not 'all' in kwargs:
         kwargs['all'] = None
 
+
     if kwargs['id']:
         _remove_substrate(kwargs['id'], **kwargs)
         return_message = 'Removed 1 substrate'
     elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
-        substrates = json.loads(list_substrates(**kwargs).content)['substrate_list']['files']
-        to_remove = []
-        for substrate in substrates:
-            if substrate['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], substrate['name'])):
-                to_remove.append(substrate)
-        if len(to_remove) == 1:
-            _remove_substrate(to_remove[0]['id'], **kwargs)
-            return_message = 'Removed 1 substrate'
-        elif kwargs['all']:
-            for substrate in to_remove:
-                _remove_substrate(substrate['id'], **kwargs)
-            return_message = "Removed %s substrates" % len(to_remove)
-        elif len(to_remove) > 1:
-            return_message = "Matching substrates:\n"
-            return_message += json.dumps(to_remove)
-            return_message += "\n\nName or regular expression matched multiple substrates.  Pass --all to remove all matching substrates."
+        results = json.loads(make_post_request({'query':kwargs['name']}, 'substrates/search', **kwargs).content)
+        if 'substrate_list' in results and 'files' in results['substrate_list']:
+            substrates = results['substrate_list']['files']
+            to_remove = []
+            for substrate in substrates:
+                if substrate['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], substrate['name'])):
+                    to_remove.append(substrate)
+            if len(to_remove) == 1:
+                _remove_substrate(to_remove[0]['id'], **kwargs)
+                return_message = 'Removed 1 substrate'
+            elif kwargs['all']:
+                for substrate in to_remove:
+                    _remove_substrate(substrate['id'], **kwargs)
+                return_message = "Removed %s substrates" % len(to_remove)
+            elif len(to_remove) > 1:
+                return_message = "Matching substrates:\n"
+                return_message += json.dumps(to_remove)
+                return_message += "\n\nName or regular expression matched multiple substrates.  Pass --all to remove all matching substrates."
+            else:
+                return_message = "No matching substrates found."
         else:
-            return_message = "No matching substrates found."
+            return_message = "The query did not match any substrates."
 
     return return_message
 
