@@ -37,6 +37,10 @@ def list_substrates(**kwargs):
     return list_object('substrates', **kwargs)
 
 
+def list_templates(**kwargs):
+    return list_object('templates', **kwargs)
+
+
 def wait_for_job(job_id):
     finished = False
 
@@ -62,9 +66,9 @@ def wait_for_job(job_id):
 def compose_uri(fragment):
     prefix = 'conduce/api/v1'
     fragment = fragment.lstrip('/')
-    uri = '/%s' % fragment
+    uri = '%s' % fragment
     if not prefix in fragment:
-        uri = '/%s/%s' % (prefix, fragment)
+        uri = '%s/%s' % (prefix, fragment)
 
     return uri
 
@@ -286,6 +290,19 @@ def create_substrate(name, substrate_def, **kwargs):
     return make_post_request(substrate_def, 'substrates/create/%s' % name, **kwargs)
 
 
+# NOTE No 'remove lens' method because they are supposedly dropped when the orchestration is removed.
+
+def set_lens_order(lens_id_list, orchestration_id, **kwargs):
+    # NOTE Provide the lenses ordered top-to-bottom, but this API wants them the other way around!
+    ids = list(reversed(lens_id_list))
+    param = { "lens_ids": ids }
+    return make_post_request(param, '/conduce/api/v1/orchestration/%s/reorder-lenses' % orchestration_id, **kwargs)
+
+
+def create_lens(name, lens_def, orchestration_id, **kwargs):
+    return make_post_request(lens_def, 'orchestration/%s/create-lens' % orchestration_id, **kwargs)
+
+
 def _remove_template(template_id, **kwargs):
     response = make_post_request(None, 'templates/delete/' + template_id, **kwargs)
     response.raise_for_status()
@@ -293,11 +310,27 @@ def _remove_template(template_id, **kwargs):
 
 
 def remove_template(**kwargs):
-    _remove_thing('template', **kwargs)
+    return _remove_thing('template', **kwargs)
 
 
 def create_template(name, template_def, **kwargs):
-    return make_post_request(template_def, 'templates/create/%s' % name, **kwargs)
+    return make_post_request(template_def, 'templates/create/' + name, **kwargs)
+
+
+#def _remove_orchestration(orchestration_id, **kwargs):
+#    response = make_post_request(None, 'orchestrations/close/' + orchestration_id, **kwargs)
+#    response.raise_for_status()
+#    response = make_post_request(None, 'orchestrations/delete/' + orchestration_id, **kwargs)
+#    response.raise_for_status()
+#    return True
+
+
+def remove_orchestration(**kwargs):
+    return _remove_thing('orchestration', **kwargs)
+
+
+def create_orchestration(orchestration_def, **kwargs):
+    return make_post_request(orchestration_def, 'orchestrations/create', **kwargs)
 
 
 def make_post_request(payload, fragment, **kwargs):
@@ -330,8 +363,12 @@ def _make_post_request(payload, uri, **kwargs):
         else:
             headers = auth
 
+        if 'orchestrations/delete' in uri:
+            headers['Origin'] = "https://%s" % host
         response = requests.post(url, json=payload, headers=headers)
     else:
+        if 'orchestrations/delete' in uri:
+            headers['Origin'] = "https://%s" % host
         response = requests.post(url, json=payload, cookies=auth, headers=headers)
     response.raise_for_status()
     return response
@@ -345,7 +382,7 @@ def create_asset(name, content, mime_type, **kwargs):
     else:
         headers = content_type
 
-    return file_post_request(content, 'userassets/create/%s' % name, headers=headers, **kwargs)
+    return file_post_request(content, 'userassets/create/' + name, headers=headers, **kwargs)
 
 
 def file_post_request(payload, fragment, **kwargs):
@@ -386,7 +423,7 @@ def _file_post_request(payload, uri, **kwargs):
 
 
 def remove_asset(**kwargs):
-    _remove_thing('asset', uri_thing='userassets', **kwargs)
+    return _remove_thing('asset', uri_thing='userassets', **kwargs)
 
 
 def _remove_asset(asset_id, **kwargs):
