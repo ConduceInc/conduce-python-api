@@ -312,7 +312,6 @@ def _remove_template(template_id, **kwargs):
 def remove_template(**kwargs):
     return _remove_thing('template', **kwargs)
 
-
 def create_template(name, template_def, **kwargs):
     return make_post_request(template_def, 'templates/create/%s' % name, **kwargs)
 
@@ -416,7 +415,6 @@ def _file_post_request(payload, uri, **kwargs):
 
 def remove_asset(**kwargs):
     return _remove_thing('asset', uri_thing='userassets', **kwargs)
-
 
 def _remove_asset(asset_id, **kwargs):
     return make_post_request({}, 'userassets/delete/%s' % asset_id, **kwargs)
