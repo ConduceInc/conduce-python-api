@@ -171,7 +171,7 @@ def ingest_entities(dataset_id, data, **kwargs):
 
 
 def _remove_dataset(dataset_id, **kwargs):
-    response = make_post_request(None, 'datasets/delete/' + dataset_id, **kwargs)
+    response = make_post_request(None, 'datasets/delete/%s' % dataset_id, **kwargs)
     response.raise_for_status()
     return True
 
@@ -214,7 +214,7 @@ def remove_dataset(**kwargs):
 
 
 def _remove_substrate(substrate_id, **kwargs):
-    response = make_post_request(None, 'substrates/delete/' + substrate_id, **kwargs)
+    response = make_post_request(None, 'substrates/delete/%s' % substrate_id, **kwargs)
     response.raise_for_status()
     return True
 
@@ -304,7 +304,7 @@ def create_lens(name, lens_def, orchestration_id, **kwargs):
 
 
 def _remove_template(template_id, **kwargs):
-    response = make_post_request(None, 'templates/delete/' + template_id, **kwargs)
+    response = make_post_request(None, 'templates/delete/%s' % template_id, **kwargs)
     response.raise_for_status()
     return True
 
@@ -314,15 +314,7 @@ def remove_template(**kwargs):
 
 
 def create_template(name, template_def, **kwargs):
-    return make_post_request(template_def, 'templates/create/' + name, **kwargs)
-
-
-#def _remove_orchestration(orchestration_id, **kwargs):
-#    response = make_post_request(None, 'orchestrations/close/' + orchestration_id, **kwargs)
-#    response.raise_for_status()
-#    response = make_post_request(None, 'orchestrations/delete/' + orchestration_id, **kwargs)
-#    response.raise_for_status()
-#    return True
+    return make_post_request(template_def, 'templates/create/%s' % name, **kwargs)
 
 
 def remove_orchestration(**kwargs):
@@ -382,7 +374,7 @@ def create_asset(name, content, mime_type, **kwargs):
     else:
         headers = content_type
 
-    return file_post_request(content, 'userassets/create/' + name, headers=headers, **kwargs)
+    return file_post_request(content, 'userassets/create/%s' % name, headers=headers, **kwargs)
 
 
 def file_post_request(payload, fragment, **kwargs):
@@ -427,4 +419,4 @@ def remove_asset(**kwargs):
 
 
 def _remove_asset(asset_id, **kwargs):
-    return make_post_request({}, 'userassets/delete/' + asset_id, **kwargs)
+    return make_post_request({}, 'userassets/delete/%s' % asset_id, **kwargs)
