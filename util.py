@@ -8,6 +8,20 @@ import copy
 import api
 
 
+def walk_up_find(search_path, start_dir=os.getcwd()):
+    cwd = start_dir
+    while True:
+        fullpath = os.path.join(cwd, search_path)
+        if os.path.exists(fullpath):
+            return fullpath
+        if cwd == '/' or cwd == '' or cwd == ' ':
+            break
+        cwd = os.path.dirname(cwd)
+    
+    print search_path, "not found"
+    return None
+
+
 def format_mac_address(mac_address):
     return re.sub('[:-]', '', mac_address).upper().strip()
 
