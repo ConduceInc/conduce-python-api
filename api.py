@@ -41,12 +41,12 @@ def list_templates(**kwargs):
     return list_object('templates', **kwargs)
 
 
-def wait_for_job(job_id):
+def wait_for_job(job_id, **kwargs):
     finished = False
 
     while not finished:
         time.sleep(0.5)
-        response = make_get_request(job_id)
+        response = make_get_request(job_id, **kwargs)
         response.raise_for_status()
 
         #TODO: This is probably dead code
@@ -166,7 +166,7 @@ def ingest_entities(dataset_id, data, **kwargs):
     response = make_post_request(data, 'datasets/add-data/%s' % dataset_id, **kwargs)
     if 'location' in response.headers:
         job_id = response.headers['location']
-        response = wait_for_job(job_id)
+        response = wait_for_job(job_id, **kwargs)
     return response
 
 
@@ -348,7 +348,7 @@ def _make_post_request(payload, uri, **kwargs):
 
     url = 'https://%s/%s' % (host, uri)
     if 'Authorization' in auth:
-        if 'headers' in kwargs and kwars['headers']:
+        if 'headers' in kwargs and kwargs['headers']:
             headers = kwargs['headers']
             headers.update(auth)
         else:
@@ -367,7 +367,7 @@ def _make_post_request(payload, uri, **kwargs):
 
 def create_asset(name, content, mime_type, **kwargs):
     content_type = {'Content-Type': mime_type}
-    if 'headers' in kwargs and kwars['headers']:
+    if 'headers' in kwargs and kwargs['headers']:
         headers = kwargs['headers']
         headers.update(content_type)
     else:
@@ -405,7 +405,6 @@ def _file_post_request(payload, uri, **kwargs):
             headers.update(auth)
         else:
             headers = auth
-
         response = requests.post(url, data=payload, headers=headers)
     else:
         response = requests.post(url, data=payload, cookies=auth, headers=headers)

@@ -48,17 +48,26 @@ def remove_dataset(args):
 
 
 def send_get_request(args):
-    return api.make_get_request(args.uri)
+    uri = args.uri
+    del vars(args)['uri']
+
+    return api.make_get_request(uri, **vars(args))
 
 
 def send_post_request(args):
-    return api.make_post_request(json.loads(args.data), args.uri)
+    uri = args.uri
+    del vars(args)['uri']
+
+    return api.make_post_request(json.loads(args.data), uri, **vars(args))
 
 
 if __name__ == '__main__':
     import argparse, jsbeautifier
 
     arg_parser = argparse.ArgumentParser(description='Conduce command line utility')
+    #TODO: figure out how to propagate these arguments to subcommands
+    #arg_parser.add_argument('--user', help='The user whose objects will be listed')
+    #arg_parser.add_argument('--host', help='The server from which objects will be listed')
     subparsers = arg_parser.add_subparsers(help='help for subcommands')
 
     parser_config = subparsers.add_parser('config', help='Conduce configuration settings')
@@ -104,8 +113,6 @@ if __name__ == '__main__':
 
     parser_create_dataset = subparsers.add_parser('create-dataset', help='Create a Conduce dataset')
     parser_create_dataset.add_argument('name', help='The name to be given to the new dataset')
-    parser_create_dataset.add_argument('--user', help='The user who owns the new dataset')
-    parser_create_dataset.add_argument('--host', help='The server on which the dataset will be created')
     parser_create_dataset.add_argument('--api-key', help='The API key used to authenticate')
     parser_create_dataset.add_argument('--json', help='Optional: A well formatted Conduce entities JSON file')
     parser_create_dataset.add_argument('--csv', help='Optional: A CSV file that can be parsed as Conduce data')
@@ -141,11 +148,15 @@ if __name__ == '__main__':
 
     parser_get = subparsers.add_parser('get', help='Make an arbitrary get request')
     parser_get.add_argument('uri', help='The URI of the resource being requested')
+    parser_get.add_argument('--user', help='The user to which the API key belongs')
+    parser_get.add_argument('--host', help='The server on which the API key is valid')
     parser_get.set_defaults(func=send_get_request)
 
     parser_post = subparsers.add_parser('post', help='Make an arbitrary post request')
     parser_post.add_argument('uri', help='The URI of the resource being requested')
     parser_post.add_argument('data', help='The data being posted')
+    parser_post.add_argument('--user', help='The user to which the API key belongs')
+    parser_post.add_argument('--host', help='The server on which the API key is valid')
     parser_post.set_defaults(func=send_post_request)
 
     args = arg_parser.parse_args()
