@@ -316,6 +316,14 @@ def create_template(name, template_def, **kwargs):
     return make_post_request(template_def, 'templates/create/%s' % name, **kwargs)
 
 
+def set_time(orchestration_id, start_timestamp, end_timestamp, **kwargs):
+    bounds = {
+        "start":{"bound_value":start_timestamp, "type":"FIXED"},
+        "end":{"bound_value":end_timestamp, "type":"FIXED"}
+    }
+    return make_post_request(bounds, 'orchestration/%s/set-time' % orchestration_id, **kwargs)
+
+
 def move_camera(orchestration_id, config, **kwargs):
     camera = {
         "position":config['position'],
