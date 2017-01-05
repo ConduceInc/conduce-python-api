@@ -316,6 +316,16 @@ def create_template(name, template_def, **kwargs):
     return make_post_request(template_def, 'templates/create/%s' % name, **kwargs)
 
 
+def move_camera(orchestration_id, config, **kwargs):
+    camera = {
+        "position":config['position'],
+        "normal":{"x":0, "y":0, "z":1},
+        "over":{"x":1, "y":0, "z":0},
+        "aperture":config['aperture']
+    }
+    return make_post_request(camera, 'orchestration/%s/move-camera' % orchestration_id, **kwargs)
+
+
 def remove_orchestration(**kwargs):
     return _remove_thing('orchestration', **kwargs)
 
