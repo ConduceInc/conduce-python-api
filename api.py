@@ -316,20 +316,19 @@ def create_template(name, template_def, **kwargs):
     return make_post_request(template_def, 'templates/create/%s' % name, **kwargs)
 
 
-def set_time_config(orchestration_id, time_def, **kwargs):
+def set_time(orchestration_id, time_def, **kwargs):
     return make_post_request(time_def, 'orchestration/%s/set-time' % orchestration_id, **kwargs)
 
-
-def set_time(orchestration_id, time_params, **kwargs):
+def set_time_fixed(orchestration_id, **kwargs):
     time_config = {}
 
     start_ms = None
-    if 'start' in time_params and int(time_params['start']):
-        start_ms = time_params['start']
+    if 'start' in kwargs and int(kwargs['start']):
+        start_ms = kwargs['start']
         time_config["start"] = {"bound_value":start_ms, "type":"FIXED"}
     end_ms = None
-    if 'end' in time_params and int(time_params['end']):
-        end_ms = time_params['end']
+    if 'end' in kwargs and int(kwargs['end']):
+        end_ms = kwargs['end']
         time_config["end"] = {"bound_value":end_ms, "type":"FIXED"}
     if start_ms and end_ms and (end_ms < start_ms):
         # Swap the values
@@ -337,16 +336,18 @@ def set_time(orchestration_id, time_params, **kwargs):
         time_config["end"] = {"bound_value":start_ms, "type":"FIXED"}
 
     ctrl_params = {}
-    if 'initial' in time_params and int(time_params['initial']):
-        ctrl_params["timestamp_ms"] = time_params['initial']
-    if 'playrate' in time_params and int(time_params['playrate']):
-        ctrl_params["playrate"] = time_params['playrate']
-    if 'paused' in time_params:
-        ctrl_params["paused"] = time_params['paused']
+    if 'initial' in kwargs and int(kwargs['initial']):
+        ctrl_params["timestamp_ms"] = kwargs['initial']
+    if 'playrate' in kwargs and int(kwargs['playrate']):
+        ctrl_params["playrate"] = kwargs['playrate']
+    if 'paused' in kwargs:
+        ctrl_params["paused"] = kwargs['paused']
     if len(ctrl_params) > 0:
         time_config["time"] = ctrl_params
 
-    return set_time_config(orchestration_id, time_config, **kwargs)
+    if len(time_config):
+        return set_time(orchestration_id, time_config, **kwargs)
+    return False
 
 
 def move_camera(orchestration_id, config, **kwargs):
