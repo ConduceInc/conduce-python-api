@@ -316,17 +316,37 @@ def create_template(name, template_def, **kwargs):
     return make_post_request(template_def, 'templates/create/%s' % name, **kwargs)
 
 
-def set_time(orchestration_id, time_config, **kwargs):
-    time_params = {
-        "start":{"bound_value":time_config['start'], "type":"FIXED"},
-        "end":{"bound_value":time_config['end'], "type":"FIXED"},
-        "time":{
-            "timestamp_ms":time_config['initial'],
-            "playrate":time_config['playrate'],
-            "paused":time_config['paused']
-        }
-    }
-    return make_post_request(time_params, 'orchestration/%s/set-time' % orchestration_id, **kwargs)
+def set_time_config(orchestration_id, time_def, **kwargs):
+    return make_post_request(time_def, 'orchestration/%s/set-time' % orchestration_id, **kwargs)
+
+
+def set_time(orchestration_id, time_params, **kwargs):
+    time_config = {}
+
+    start_ms = None
+    if 'start' in time_params and int(time_params['start']):
+        start_ms = time_params['start']
+        time_config["start"] = {"bound_value":start_ms, "type":"FIXED"}
+    end_ms = None
+    if 'end' in time_params and int(time_params['end']):
+        end_ms = time_params['end']
+        time_config["end"] = {"bound_value":end_ms, "type":"FIXED"}
+    if start_ms and end_ms and (end_ms < start_ms):
+        # Swap the values
+        time_config["start"] = {"bound_value":end_ms, "type":"FIXED"}
+        time_config["end"] = {"bound_value":start_ms, "type":"FIXED"}
+
+    ctrl_params = {}
+    if 'initial' in time_params and int(time_params['initial']):
+        ctrl_params["timestamp_ms"] = time_params['initial']
+    if 'playrate' in time_params and int(time_params['playrate']):
+        ctrl_params["playrate"] = time_params['playrate']
+    if 'paused' in time_params:
+        ctrl_params["paused"] = time_params['paused']
+    if len(ctrl_params) > 0:
+        time_config["time"] = ctrl_params
+
+    return set_time_config(orchestration_id, time_config, **kwargs)
 
 
 def move_camera(orchestration_id, config, **kwargs):
