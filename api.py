@@ -298,8 +298,8 @@ def set_lens_order(lens_id_list, orchestration_id, **kwargs):
     param = { "lens_ids": ids }
     return make_post_request(param, '/conduce/api/v1/orchestration/%s/reorder-lenses' % orchestration_id, **kwargs)
 
-def change_lens_opacity(orchestration_id, lens_id, val, **kwargs):
-    param = { "lens_id":lens_id, "opacity":val }
+def change_lens_opacity(orchestration_id, lens_id, opacity, **kwargs):
+    param = { "lens_id":lens_id, "opacity":opacity }
     return make_post_request(param, '/conduce/api/v1/orchestration/%s/change-lens-opacity' % orchestration_id, **kwargs)
 
 def create_lens(name, lens_def, orchestration_id, **kwargs):
