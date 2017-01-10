@@ -32,16 +32,31 @@ def string_to_timestamp_ms(datetime_string, ignoretz=True):
     return int((timestamp - EPOCH).total_seconds() * 1000)
 
 
+def get_csv_reader(infile, delimiter):
+    if len(delimiter) > 1:
+        try:
+            dialect = csv.Sniffer().sniff(infile.readline(), delimiters=delimiter)
+            infile.seek(0)
+            return csv.DictReader(infile, dialect=dialect)
+        except Exception as e:
+            print '%s (using default)' % str(e)
+            infile.seek(0)
+            return csv.DictReader(infile)
+    else:
+        return csv.DictReader(infile, delimiter=delimiter)
+
+
 def csv_to_json(infile, outfile=None, toStdout=False, **kwargs):
-    delimiter = ','
+    delimiter = ';,'
     if 'delimiter' in kwargs:
         delimiter = kwargs['delimiter']
+
     if hasattr(infile, 'read'):
-        reader = csv.DictReader(infile, delimiter=delimiter)
+        reader = get_csv_reader(infile, delimiter)
         out = json.dumps( [ row for row in reader ] )
     else:
         with open(infile, "r") as f:
-            reader = csv.DictReader(f, delimiter=delimiter)
+            reader = get_csv_reader(f, delimiter)
             out = json.dumps( [ row for row in reader ] )
     if out is None:
         raise "No JSON output. Try again."
