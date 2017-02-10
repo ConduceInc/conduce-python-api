@@ -92,14 +92,13 @@ def _make_get_request(uri, **kwargs):
     else:
         host = cfg['default-host']
 
-    if 'user' in kwargs and kwargs['user']:
-        user = kwargs['user']
-    else:
-        user = cfg['default-user']
-
     if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
     else:
+        if 'user' in kwargs and kwargs['user']:
+            user = kwargs['user']
+        else:
+            user = cfg['default-user']
         auth = session.get_session(host, user)
 
     url = 'https://%s/%s' % (host, uri)
@@ -383,14 +382,13 @@ def _make_post_request(payload, uri, **kwargs):
     else:
         host = cfg['default-host']
 
-    if 'user' in kwargs and kwargs['user']:
-        user = kwargs['user']
-    else:
-        user = cfg['default-user']
-
     if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
     else:
+        if 'user' in kwargs and kwargs['user']:
+            user = kwargs['user']
+        else:
+            user = cfg['default-user']
         auth = session.get_session(host, user)
 
     url = 'https://%s/%s' % (host, uri)
