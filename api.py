@@ -317,6 +317,11 @@ def remove_template(**kwargs):
 def create_template(name, template_def, **kwargs):
     return make_post_request(template_def, 'templates/create/%s' % name, **kwargs)
 
+def get_template(id, **kwargs):
+    return make_get_request('templates/get/%s' % id, **kwargs)
+
+def save_template(id, template_def, **kwargs):
+    return make_post_request(template_def, 'templates/save/%s' % id, **kwargs)
 
 def set_time(orchestration_id, time_def, **kwargs):
     return make_post_request(time_def, 'orchestration/%s/set-time' % orchestration_id, **kwargs)
