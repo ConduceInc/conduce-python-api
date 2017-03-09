@@ -374,6 +374,10 @@ def remove_orchestration(**kwargs):
 def create_orchestration(orchestration_def, **kwargs):
     return make_post_request(orchestration_def, 'orchestrations/create', **kwargs)
 
+def save_as_orchestration(orchestration_id, saveas_orchestration_def, replace, **kwargs):
+    if replace:
+        saveas_orchestration_def["replace"] = True
+    return make_post_request(saveas_orchestration_def, 'orchestrations/save-as/{}'.format(orchestration_id), **kwargs)
 
 def make_post_request(payload, fragment, **kwargs):
     return _make_post_request(payload, compose_uri(fragment), **kwargs)
