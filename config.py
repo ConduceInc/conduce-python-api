@@ -86,7 +86,7 @@ def get_api_key_config(args):
 
     if get_env_from_host(args.host) in config[args.user]['api-keys']:
         key = config[args.user]['api-keys'][get_env_from_host(args.host)]
-        return 'user: %s\nhost: %s\nkey:  %s' % (args.user, args.host, key)
+        return 'user: {}\nhost: {}\nkey:  {}'.format(args.user, args.host, key)
 
 
 def get_api_key(user, host):

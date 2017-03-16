@@ -26,7 +26,7 @@ def list_saved(object_to_list, **kwargs):
 
 
 def list_object(object_to_list, **kwargs):
-    return make_get_request("conduce/api/v1/%s/list" % object_to_list, **kwargs)
+    return make_get_request("conduce/api/v1/{}/list".format(object_to_list), **kwargs)
 
 
 def list_datasets(**kwargs):
@@ -51,7 +51,7 @@ def wait_for_job(job_id, **kwargs):
 
         #TODO: This is probably dead code
         if int(response.status_code / 100) != 2:
-            print "Error code %s: %s" % (response.status_code, response.text)
+            print "Error code {}: {}".format(response.status_code, response.text)
             return False;
 
         if response.ok:
@@ -66,9 +66,9 @@ def wait_for_job(job_id, **kwargs):
 def compose_uri(fragment):
     prefix = 'conduce/api/v1'
     fragment = fragment.lstrip('/')
-    uri = '%s' % fragment
+    uri = '{}'.format(fragment)
     if not prefix in fragment:
-        uri = '%s/%s' % (prefix, fragment)
+        uri = '{}/{}'.format(prefix, fragment)
 
     return uri
 
@@ -79,7 +79,7 @@ def get_generic_data(dataset_id, entity_id, **kwargs):
 
 
 def get_entity(dataset_id, entity_id, **kwargs):
-    return make_get_request('datasets/entity/%s/%s' % (dataset_id, entity_id), **kwargs)
+    return make_get_request('datasets/entity/{}/{}'.format(dataset_id, entity_id), **kwargs)
 
 def make_get_request(fragment, **kwargs):
     return _make_get_request(compose_uri(fragment), **kwargs)
@@ -101,7 +101,7 @@ def _make_get_request(uri, **kwargs):
             user = cfg['default-user']
         auth = session.get_session(host, user)
 
-    url = 'https://%s/%s' % (host, uri)
+    url = 'https://{}/{}'.format(host, uri)
     if 'Authorization' in auth:
         response = requests.get(url, headers=auth)
     else:
@@ -162,7 +162,7 @@ def ingest_entities(dataset_id, data, **kwargs):
     if isinstance(data, list):
         data = {'entities': data}
 
-    response = make_post_request(data, 'datasets/add-data/%s' % dataset_id, **kwargs)
+    response = make_post_request(data, 'datasets/add-data/{}'.format(dataset_id), **kwargs)
     if 'location' in response.headers:
         job_id = response.headers['location']
         response = wait_for_job(job_id, **kwargs)
@@ -170,7 +170,7 @@ def ingest_entities(dataset_id, data, **kwargs):
 
 
 def _remove_dataset(dataset_id, **kwargs):
-    response = make_post_request(None, 'datasets/delete/%s' % dataset_id, **kwargs)
+    response = make_post_request(None, 'datasets/delete/{}'.format(dataset_id), **kwargs)
     response.raise_for_status()
     return True
 
@@ -201,7 +201,7 @@ def remove_dataset(**kwargs):
         elif kwargs['all']:
             for dataset in to_remove:
                 _remove_dataset(dataset['id'], **kwargs)
-            return_message = "Removed %s datasets" % len(to_remove)
+            return_message = "Removed {:d} datasets".format(len(to_remove))
         elif len(to_remove) > 1:
             return_message = "Matching datasets:\n"
             return_message += json.dumps(to_remove)
@@ -213,13 +213,13 @@ def remove_dataset(**kwargs):
 
 
 def _remove_substrate(substrate_id, **kwargs):
-    response = make_post_request(None, 'substrates/delete/%s' % substrate_id, **kwargs)
+    response = make_post_request(None, 'substrates/delete/{}'.format(substrate_id), **kwargs)
     response.raise_for_status()
     return True
 
 
 def _remove_thing_by_id(uri_thing, thing_id, **kwargs):
-    response = make_post_request(None, ('%s/delete/%s' % (uri_thing, thing_id)), **kwargs)
+    response = make_post_request(None, ('{}/delete/{}'.format(uri_thing, thing_id)), **kwargs)
     response.raise_for_status()
     return True
 
@@ -228,11 +228,11 @@ def _remove_thing(thing, **kwargs):
     return_message = None
 
     if not 'things' in kwargs:
-        things = '%ss' % thing
+        things = '{}s'.format(thing)
     else:
         things = kwargs['things']
     if not 'thing_list' in kwargs:
-        thing_list = '%s_list' % thing
+        thing_list = '{}_list'.format(thing)
     else:
         thing_list = kwargs['thing_list']
     if not 'uri_thing' in kwargs:
@@ -241,7 +241,7 @@ def _remove_thing(thing, **kwargs):
         uri_thing = kwargs['uri_thing']
         del kwargs['uri_thing']
 
-    search_uri = '%s/search' % uri_thing
+    search_uri = '{}/search'.format(uri_thing)
 
     if not 'id' in kwargs:
         kwargs['id'] = None
@@ -264,19 +264,19 @@ def _remove_thing(thing, **kwargs):
                     to_remove.append(thing_obj)
             if len(to_remove) == 1:
                 _remove_thing_by_id(uri_thing, to_remove[0]['id'], **kwargs)
-                return_message = 'Removed 1 %s' % thing
+                return_message = 'Removed 1 {}'.format(thing)
             elif kwargs['all']:
                 for thing_obj in to_remove:
                     _remove_thing_by_id(uri_thing, thing_obj['id'], **kwargs)
-                return_message = "Removed %s %s" % (len(to_remove), things)
+                return_message = "Removed {:d} {}".format(len(to_remove), things)
             elif len(to_remove) > 1:
-                return_message = "Matching %s:\n" % things
+                return_message = "Matching {}:\n".format(things)
                 return_message += json.dumps(to_remove)
-                return_message += "\n\nName or regular expression matched multiple %s.  Pass --all to remove all matching %s." % (things, things)
+                return_message += "\n\nName or regular expression matched multiple {}.  Pass --all to remove all matching {}.".format(things, things)
             else:
-                return_message = "No matching %s found." % things
+                return_message = "No matching {} found.".format(things)
         else:
-            return_message = "The query did not match any %s." % things
+            return_message = "The query did not match any {}.".format(things)
 
     return return_message
 
@@ -286,7 +286,7 @@ def remove_substrate(**kwargs):
 
 
 def create_substrate(name, substrate_def, **kwargs):
-    return make_post_request(substrate_def, 'substrates/create/%s' % name, **kwargs)
+    return make_post_request(substrate_def, 'substrates/create/{}'.format(name), **kwargs)
 
 
 # NOTE No 'remove lens' method because they are supposedly dropped when the orchestration is removed.
@@ -295,18 +295,18 @@ def set_lens_order(lens_id_list, orchestration_id, **kwargs):
     # NOTE Provide the lenses ordered top-to-bottom, but this API wants them the other way around!
     ids = list(reversed(lens_id_list))
     param = { "lens_ids": ids }
-    return make_post_request(param, '/conduce/api/v1/orchestration/%s/reorder-lenses' % orchestration_id, **kwargs)
+    return make_post_request(param, '/conduce/api/v1/orchestration/{}/reorder-lenses'.format(orchestration_id), **kwargs)
 
 def change_lens_opacity(orchestration_id, lens_id, opacity, **kwargs):
     param = { "lens_id":lens_id, "opacity":opacity }
-    return make_post_request(param, '/conduce/api/v1/orchestration/%s/change-lens-opacity' % orchestration_id, **kwargs)
+    return make_post_request(param, '/conduce/api/v1/orchestration/{}/change-lens-opacity'.format(orchestration_id), **kwargs)
 
 def create_lens(name, lens_def, orchestration_id, **kwargs):
-    return make_post_request(lens_def, 'orchestration/%s/create-lens' % orchestration_id, **kwargs)
+    return make_post_request(lens_def, 'orchestration/{}/create-lens'.format(orchestration_id), **kwargs)
 
 
 def _remove_template(template_id, **kwargs):
-    response = make_post_request(None, 'templates/delete/%s' % template_id, **kwargs)
+    response = make_post_request(None, 'templates/delete/{}'.format(template_id), **kwargs)
     response.raise_for_status()
     return True
 
@@ -315,16 +315,16 @@ def remove_template(**kwargs):
     return _remove_thing('template', **kwargs)
 
 def create_template(name, template_def, **kwargs):
-    return make_post_request(template_def, 'templates/create/%s' % name, **kwargs)
+    return make_post_request(template_def, 'templates/create/{}'.format(name), **kwargs)
 
 def get_template(id, **kwargs):
-    return make_get_request('templates/get/%s' % id, **kwargs)
+    return make_get_request('templates/get/{}'.format(id), **kwargs)
 
 def save_template(id, template_def, **kwargs):
-    return make_post_request(template_def, 'templates/save/%s' % id, **kwargs)
+    return make_post_request(template_def, 'templates/save/{}'.format(id), **kwargs)
 
 def set_time(orchestration_id, time_def, **kwargs):
-    return make_post_request(time_def, 'orchestration/%s/set-time' % orchestration_id, **kwargs)
+    return make_post_request(time_def, 'orchestration/{}/set-time'.format(orchestration_id), **kwargs)
 
 def set_time_fixed(orchestration_id, **kwargs):
     time_config = {}
@@ -364,7 +364,7 @@ def move_camera(orchestration_id, config, **kwargs):
         "over":{"x":1, "y":0, "z":0},
         "aperture":config['aperture']
     }
-    return make_post_request(camera, 'orchestration/%s/move-camera' % orchestration_id, **kwargs)
+    return make_post_request(camera, 'orchestration/{}/move-camera'.format(orchestration_id), **kwargs)
 
 
 def remove_orchestration(**kwargs):
@@ -377,7 +377,7 @@ def create_orchestration(orchestration_def, **kwargs):
 def save_as_orchestration(orchestration_id, saveas_orchestration_def, replace, **kwargs):
     if replace:
         saveas_orchestration_def["replace"] = True
-    return make_post_request(saveas_orchestration_def, 'orchestrations/save-as/%s' % orchestration_id, **kwargs)
+    return make_post_request(saveas_orchestration_def, 'orchestrations/save-as/{}'.format(orchestration_id), **kwargs)
 
 def make_post_request(payload, fragment, **kwargs):
     return _make_post_request(payload, compose_uri(fragment), **kwargs)
@@ -400,7 +400,7 @@ def _make_post_request(payload, uri, **kwargs):
             user = cfg['default-user']
         auth = session.get_session(host, user)
 
-    url = 'https://%s/%s' % (host, uri)
+    url = 'https://{}/{}'.format(host, uri)
     if 'Authorization' in auth:
         if 'headers' in kwargs and kwargs['headers']:
             headers = kwargs['headers']
@@ -409,11 +409,11 @@ def _make_post_request(payload, uri, **kwargs):
             headers = auth
 
         if 'orchestrations/delete' in uri:
-            headers['Origin'] = "https://%s" % host
+            headers['Origin'] = "https://{}".format(host)
         response = requests.post(url, json=payload, headers=headers)
     else:
         if 'orchestrations/delete' in uri:
-            headers['Origin'] = "https://%s" % host
+            headers['Origin'] = "https://{}".format(host)
         response = requests.post(url, json=payload, cookies=auth, headers=headers)
     response.raise_for_status()
     return response
@@ -427,7 +427,7 @@ def create_asset(name, content, mime_type, **kwargs):
     else:
         headers = content_type
 
-    return file_post_request(content, 'userassets/create/%s' % name, headers=headers, **kwargs)
+    return file_post_request(content, 'userassets/create/{}'.format(name), headers=headers, **kwargs)
 
 
 def file_post_request(payload, fragment, **kwargs):
@@ -451,7 +451,7 @@ def _file_post_request(payload, uri, **kwargs):
             user = cfg['default-user']
         auth = session.get_session(host, user)
 
-    url = 'https://%s/%s' % (host, uri)
+    url = 'https://{}/{}'.format(host, uri)
     if 'Authorization' in auth:
         if 'headers' in kwargs and kwargs['headers']:
             headers = kwargs['headers']
@@ -469,4 +469,4 @@ def remove_asset(**kwargs):
     return _remove_thing('asset', uri_thing='userassets', **kwargs)
 
 def _remove_asset(asset_id, **kwargs):
-    return make_post_request({}, 'userassets/delete/%s' % asset_id, **kwargs)
+    return make_post_request({}, 'userassets/delete/{}'.format(asset_id), **kwargs)

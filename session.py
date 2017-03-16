@@ -7,7 +7,7 @@ def api_key_header(api_key):
     if not api_key:
         return None
 
-    return {'Authorization':'Bearer %s' % api_key}
+    return {'Authorization':'Bearer {}'.format(api_key)}
 
 def get_session(host, email):
     api_key = config.get_api_key(email, host)
@@ -27,8 +27,8 @@ def get_session(host, email):
 
     if cookies is None or not validate_session(host, cookies):
         print
-        print "host: %s" % host
-        print "user: %s" % email
+        print "host: {}".format(host)
+        print "user: {}".format(email)
         cookies = login(host, email, getpass.getpass())
         with open(cookie_file_path, 'w') as cookie_file:
             pickle.dump(requests.utils.dict_from_cookiejar(cookies), cookie_file)
@@ -37,7 +37,7 @@ def get_session(host, email):
 
 
 def validate_session(host, cookies):
-    response = requests.get("https://%s/api/validate-session" % host, cookies=cookies)
+    response = requests.get("https://{}/api/validate-session".format(host), cookies=cookies)
     if response.status_code == 401:
         print "Session expired"
         cookies = None
@@ -52,7 +52,7 @@ def login(host, email, password):
     if password is None:
         raise Exception('No password provided for login')
 
-    response = requests.post("https://%s/api/login" % host, json={
+    response = requests.post("https://{}/api/login".format(host), json={
         "email": email,
         "password": password,
         "keep": False,

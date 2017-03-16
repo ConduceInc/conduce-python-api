@@ -39,7 +39,7 @@ def get_csv_reader(infile, delimiter):
             infile.seek(0)
             return csv.DictReader(infile, dialect=dialect)
         except Exception as e:
-            print '%s (using default)' % str(e)
+            print '{} (using default)'.format(str(e))
             infile.seek(0)
             return csv.DictReader(infile)
     else:
