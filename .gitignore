@@ -1,0 +1,5 @@
+.DS_Store
+.*.sw*
+*.dwl*
+*.bak
+*.pyc
