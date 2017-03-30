@@ -1,3 +1,9 @@
+# Conduce Python API
+
+This library implements the most commonly used Conduce API endpoints.  It can be used for creating datasets and ingesting data, managing lenses and templates, and uploading various resources.
+
+`api.py` is the majority of the implementation.  `conduce.py` is a command line utility for invoking the API.  It also servers as a representative implementation of the library.
+
 # Conduce Command Line Utilities
 
 ## Getting started
