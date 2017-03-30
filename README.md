@@ -1,6 +1,6 @@
-#Conduce Command Line Utilities
+# Conduce Command Line Utilities
 
-##Getting started
+## Getting started
 If you want to use the CLI without any setup you may fully specify your requests on the command line.
 
 To list all datasets just:
@@ -33,7 +33,7 @@ python conduce.py config set api-key --key=valid_api_key --user=valid_user --hos
 
 If you provide an API key for your default user and host you will never have to enter credentials to use that account as long as the API key is valid.
 
-##Features
+## Features
 
 The CLI provides many high level functions.  These include:
 
@@ -45,7 +45,7 @@ The CLI provides many high level functions.  These include:
 All CLI functionality is available through `conduce/api.py` and all API functionality should be usable with or without a `.conduceconfig` file.
 
 
-##Conduce Configuration
+## Conduce Configuration
 
 A basic configuration looks like:
 
