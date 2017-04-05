@@ -379,6 +379,9 @@ def save_as_orchestration(orchestration_id, saveas_orchestration_def, replace, *
         saveas_orchestration_def["replace"] = True
     return make_post_request(saveas_orchestration_def, 'orchestrations/save-as/{}'.format(orchestration_id), **kwargs)
 
+def save_orchestration(orchestration_id, **kwargs):
+    return make_post_request(None, 'orchestrations/save/{}'.format(orchestration_id), **kwargs)
+
 def make_post_request(payload, fragment, **kwargs):
     return _make_post_request(payload, compose_uri(fragment), **kwargs)
 
