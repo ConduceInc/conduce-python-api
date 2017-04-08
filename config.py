@@ -50,11 +50,11 @@ def get_full_config():
 
 
 def get_env_from_host(host):
-    if 'stg' in host:
+    if 'stg' == host:
         return 'stg-app'
-    elif 'dev' in host:
+    elif 'dev' == host:
         return 'dev-app'
-    elif 'prd' in host:
+    elif 'prd' == host:
         return 'prd-app'
 
     return host.split('.')[0]
@@ -84,9 +84,10 @@ def get_api_key_config(args):
     if not args.host:
         args.host = config['default-host']
 
+
     if get_env_from_host(args.host) in config[args.user]['api-keys']:
         key = config[args.user]['api-keys'][get_env_from_host(args.host)]
-        return 'user: {}\nhost: {}\nkey:  {}'.format(args.user, args.host, key)
+        return "{{ 'user': '{}', 'host': '{}', 'api-key': '{}' }}".format(args.user, args.host, key)
 
 
 def get_api_key(user, host):
