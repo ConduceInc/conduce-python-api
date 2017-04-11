@@ -167,9 +167,15 @@ if __name__ == '__main__':
         result = args.func(args)
         if result:
             if hasattr(result, 'content'):
-                print jsbeautifier.beautify(result.content)
+                try:
+                    print json.dumps(json.loads(result.content), indent=2)
+                except:
+                    print result.content
             else:
-                print jsbeautifier.beautify(result)
+                try:
+                    print json.dumps(json.loads(result), indent=2)
+                except:
+                    print result
     except requests.exceptions.HTTPError as e:
         print e
         print e.response.text
