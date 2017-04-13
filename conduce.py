@@ -47,6 +47,15 @@ def remove_dataset(args):
     return api.remove_dataset(**vars(args))
 
 
+def set_api_key(args):
+    if args.new == True:
+        args.key = api.create_api_key(**vars(args))
+    if args.key == None:
+        raise ValueError('An API must either be provided with the --key argument or you must generate a new key with --new')
+    config.set_api_key(args)
+    return "API key set for {} on {}".format(args.user, args.host)
+
+
 def send_get_request(args):
     uri = args.uri
     del vars(args)['uri']
@@ -88,7 +97,8 @@ if __name__ == '__main__':
     parser_config_set_api_key.add_argument('--user', help='The user to which the API key belongs')
     parser_config_set_api_key.add_argument('--host', help='The server on which the API key is valid')
     parser_config_set_api_key.add_argument('--key', help='The API key')
-    parser_config_set_api_key.set_defaults(func=config.set_api_key)
+    parser_config_set_api_key.add_argument('--new', help='Generate a new API key', action='store_true')
+    parser_config_set_api_key.set_defaults(func=set_api_key)
 
     parser_config_get = parser_config_subparsers.add_parser('get', help='Get Conduce configuration setting')
     parser_config_get_subparsers = parser_config_get.add_subparsers(help='get subcommands')
@@ -161,7 +171,7 @@ if __name__ == '__main__':
 
     args = arg_parser.parse_args()
 
-    config = config.get_full_config()
+    user_config = config.get_full_config()
 
     try:
         result = args.func(args)
