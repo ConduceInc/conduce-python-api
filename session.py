@@ -37,7 +37,7 @@ def get_session(host, email):
 
 
 def validate_session(host, cookies):
-    response = requests.get("https://{}/api/validate-session".format(host), cookies=cookies)
+    response = requests.get("https://{}/conduce/api/v1/user/validate-session".format(host), cookies=cookies)
     if response.status_code == 401:
         print "Session expired"
         cookies = None
@@ -52,7 +52,7 @@ def login(host, email, password):
     if password is None:
         raise Exception('No password provided for login')
 
-    response = requests.post("https://{}/api/login".format(host), json={
+    response = requests.post("https://{}/conduce/api/v1/user/login".format(host), json={
         "email": email,
         "password": password,
         "keep": False,
