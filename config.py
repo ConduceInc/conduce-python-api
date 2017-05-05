@@ -92,8 +92,9 @@ def get_api_key_config(args):
 
 def get_api_key(user, host):
     config = open_config()
-    if get_env_from_host(host) in config[user]['api-keys']:
-        return config[user]['api-keys'][get_env_from_host(host)]
+    if user in config:
+        if get_env_from_host(host) in config[user]['api-keys']:
+            return config[user]['api-keys'][get_env_from_host(host)]
 
 
 def get_default_user(args):
