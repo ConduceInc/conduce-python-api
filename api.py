@@ -374,13 +374,21 @@ def remove_orchestration(**kwargs):
 def create_orchestration(orchestration_def, **kwargs):
     return make_post_request(orchestration_def, 'orchestrations/create', **kwargs)
 
+
 def save_as_orchestration(orchestration_id, saveas_orchestration_def, replace, **kwargs):
     if replace:
         saveas_orchestration_def["replace"] = True
     return make_post_request(saveas_orchestration_def, 'orchestrations/save-as/{}'.format(orchestration_id), **kwargs)
 
+
 def save_orchestration(orchestration_id, **kwargs):
     return make_post_request(None, 'orchestrations/save/{}'.format(orchestration_id), **kwargs)
+
+
+def create_api_key(**kwargs):
+    response = make_post_request({"description": "Generated and used by conduce-python-api"}, 'apikeys/create', **kwargs);
+    return json.loads(response.content)['apikey'];
+
 
 def make_post_request(payload, fragment, **kwargs):
     return _make_post_request(payload, compose_uri(fragment), **kwargs)
@@ -403,6 +411,7 @@ def _make_post_request(payload, uri, **kwargs):
             user = cfg['default-user']
         auth = session.get_session(host, user)
 
+    headers = {}
     url = 'https://{}/{}'.format(host, uri)
     if 'Authorization' in auth:
         if 'headers' in kwargs and kwargs['headers']:
@@ -454,6 +463,7 @@ def _file_post_request(payload, uri, **kwargs):
             user = cfg['default-user']
         auth = session.get_session(host, user)
 
+    headers = {}
     url = 'https://{}/{}'.format(host, uri)
     if 'Authorization' in auth:
         if 'headers' in kwargs and kwargs['headers']:
