@@ -62,7 +62,7 @@ def send_post_request(args):
 
 
 if __name__ == '__main__':
-    import argparse, jsbeautifier
+    import argparse
 
     arg_parser = argparse.ArgumentParser(description='Conduce command line utility')
     #TODO: figure out how to propagate these arguments to subcommands

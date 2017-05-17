@@ -17,7 +17,7 @@ def walk_up_find(search_path, start_dir=os.getcwd()):
         if cwd == '/' or cwd == '' or cwd == ' ':
             break
         cwd = os.path.dirname(cwd)
-    
+
     print search_path, "not found"
     return None
 
@@ -331,7 +331,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('filename', help='The file to be sorted')
     arg_parser.add_argument('-f', '--field', help='The field to sort on', default='Date Completed')
     arg_parser.add_argument('-o', '--outfile', help='The file to be saved')
-    arg_parser.add_argument('-p', '--stdout', help='The file to be saved', action='store_true')
+    arg_parser.add_argument('-p', '--stdout', help='Dump output to stdout', action='store_true')
 
     args = arg_parser.parse_args()
 
@@ -344,5 +344,4 @@ if __name__ == '__main__':
         args.stdout = True
 
     entities = csv_to_entities(args.filename, outfile, args.stdout)
-    import jsbeautifier
-    print jsbeautifier.beautify(json.dumps(entities))
+    print json.dumps(entities, indent=2)
