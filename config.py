@@ -1,4 +1,5 @@
-import yaml, os
+import yaml
+import os
 
 
 config_file_path = os.path.join(os.path.expanduser('~'), '.conduceconfig')
@@ -9,7 +10,7 @@ def open_config():
     if not os.path.isfile(config_file_path):
         with open(config_file_path, 'w') as config_file:
             print 'creating new configuration'
-            new_config = {'default-host':'dev-app.conduce.com'}
+            new_config = {'default-host': 'dev-app.conduce.com'}
             yaml.dump(new_config, config_file, default_flow_style=False)
 
     with open(config_file_path, 'r') as config_file:
@@ -71,7 +72,7 @@ def set_api_key(args):
         raise Exception('No API key specified')
 
     if not args.user in config:
-        config[args.user] = {'api-keys':{'dev-app':"", 'stg-app':"", 'prd-app':""}}
+        config[args.user] = {'api-keys': {'dev-app': "", 'stg-app': "", 'prd-app': ""}}
     config[args.user]['api-keys'][get_env_from_host(args.host)] = args.key
 
     save_config(config)
@@ -83,7 +84,6 @@ def get_api_key_config(args):
         args.user = config['default-user']
     if not args.host:
         args.host = config['default-host']
-
 
     if get_env_from_host(args.host) in config[args.user]['api-keys']:
         key = config[args.user]['api-keys'][get_env_from_host(args.host)]
@@ -102,7 +102,7 @@ def get_default_user(args):
     if not config:
         return "Error opening configuration file"
 
-    return  config['default-user']
+    return config['default-user']
 
 
 def get_default_host(args):
@@ -110,7 +110,7 @@ def get_default_host(args):
     if not config:
         return "Error opening configuration file"
 
-    return  config['default-host']
+    return config['default-host']
 
 
 def config(command):

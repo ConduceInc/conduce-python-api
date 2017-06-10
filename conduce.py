@@ -70,11 +70,11 @@ def send_post_request(args):
     return api.make_post_request(json.loads(args.data), uri, **vars(args))
 
 
-if __name__ == '__main__':
+def main():
     import argparse
 
     arg_parser = argparse.ArgumentParser(description='Conduce command line utility')
-    #TODO: figure out how to propagate these arguments to subcommands
+    # TODO: figure out how to propagate these arguments to subcommands
     #arg_parser.add_argument('--user', help='The user whose objects will be listed')
     #arg_parser.add_argument('--host', help='The server from which objects will be listed')
     subparsers = arg_parser.add_subparsers(help='help for subcommands')
@@ -176,6 +176,8 @@ if __name__ == '__main__':
     try:
         result = args.func(args)
         if result:
+            if hasattr(result, 'headers'):
+                print result.headers
             if hasattr(result, 'content'):
                 try:
                     print json.dumps(json.loads(result.content), indent=2)
@@ -189,3 +191,6 @@ if __name__ == '__main__':
     except requests.exceptions.HTTPError as e:
         print e
         print e.response.text
+
+if __name__ == '__main__':
+    main()
