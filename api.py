@@ -113,6 +113,38 @@ def _make_get_request(uri, **kwargs):
     return response
 
 
+def create_team(team_name, **kwargs):
+    return make_post_request({'name': team_name}, 'team-create', **kwargs)
+
+
+def list_teams(**kwargs):
+    return make_get_request('user/list-teams', **kwargs)
+
+
+def add_user_to_team(team_id, email_address, **kwargs):
+    return make_post_request({'invitee': {'email': email_address}}, 'team/{}/invite'.format(team_id), **kwargs)
+
+
+def list_team_members(team_id, **kwargs):
+    return make_get_request('team/{}/users'.format(team_id), **kwargs)
+
+
+def create_group(team_id, group_name, **kwargs):
+    return make_post_request({'name': group_name}, 'team/{}/group-create'.format(team_id), **kwargs)
+
+
+def list_groups(team_id, **kwargs):
+    return make_get_request('team/{}/group-list'.format(team_id), **kwargs)
+
+
+def add_user_to_group(team_id, group_id, user_id, **kwargs):
+    return make_post_request({'id': user_id}, 'team/{}/group/{}/add-user'.format(team_id, group_id), **kwargs)
+
+
+def list_group_members(team_id, group_id, **kwargs):
+    return make_get_request('team/{}/group/{}/users'.format(team_id, group_id), **kwargs)
+
+
 def create_dataset(dataset_name, **kwargs):
     response = make_post_request({'name': dataset_name}, 'datasets/create', **kwargs)
     response_dict = json.loads(response.content)
