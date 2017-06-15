@@ -4,10 +4,20 @@ This library implements the most commonly used Conduce API endpoints.  It can be
 
 `api.py` is the majority of the implementation.  `conduce.py` is a command line utility for invoking the API.  It also servers as a representative implementation of the library.
 
+# Installation
+
+If you want this library available to import for various functions and want command line
+utilities added to the path install this using:
+
+    sudo python setup.py install
+
 # Conduce Command Line Utilities
 
 ## Getting started
 If you want to use the CLI without any setup you may fully specify your requests on the command line.
+
+The examples below assume this is running from source, and use the `python conduce.py` command.  If this
+library is installed, you can substitute in `conduce-api`.
 
 To list all datasets just:
 
