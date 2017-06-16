@@ -176,6 +176,8 @@ if __name__ == '__main__':
     try:
         result = args.func(args)
         if result:
+            if hasattr(result, 'headers'):
+                print result.headers
             if hasattr(result, 'content'):
                 try:
                     print json.dumps(json.loads(result.content), indent=2)
