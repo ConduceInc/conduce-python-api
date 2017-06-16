@@ -1,13 +1,16 @@
-import requests, getpass
+import requests
+import getpass
 import os
 import pickle
 import config
+
 
 def api_key_header(api_key):
     if not api_key:
         return None
 
-    return {'Authorization':'Bearer {}'.format(api_key)}
+    return {'Authorization': 'Bearer {}'.format(api_key)}
+
 
 def get_session(host, email):
     api_key = config.get_api_key(email, host)

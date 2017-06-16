@@ -6,6 +6,7 @@ import time
 import re
 import urlparse
 
+
 def deprecated(func):
     '''This is a decorator which can be used to mark functions
     as deprecated. It will result in a warning being emitted
@@ -49,10 +50,10 @@ def wait_for_job(job_id, **kwargs):
         response = make_get_request(job_id, **kwargs)
         response.raise_for_status()
 
-        #TODO: This is probably dead code
+        # TODO: This is probably dead code
         if int(response.status_code / 100) != 2:
             print "Error code {}: {}".format(response.status_code, response.text)
-            return False;
+            return False
 
         if response.ok:
             msg = response.json()
@@ -81,8 +82,10 @@ def get_generic_data(dataset_id, entity_id, **kwargs):
 def get_entity(dataset_id, entity_id, **kwargs):
     return make_get_request('datasets/entity/{}/{}'.format(dataset_id, entity_id), **kwargs)
 
+
 def make_get_request(fragment, **kwargs):
     return _make_get_request(compose_uri(fragment), **kwargs)
+
 
 def _make_get_request(uri, **kwargs):
     cfg = config.get_full_config()
@@ -111,7 +114,7 @@ def _make_get_request(uri, **kwargs):
 
 
 def create_dataset(dataset_name, **kwargs):
-    response = make_post_request({'name':dataset_name}, 'datasets/create', **kwargs)
+    response = make_post_request({'name': dataset_name}, 'datasets/create', **kwargs)
     response_dict = json.loads(response.content)
     if 'json' in kwargs and kwargs['json']:
         ingest_entities(response_dict['dataset'], json.load(open(kwargs['json'])), **kwargs)
@@ -144,7 +147,7 @@ def set_generic_data(dataset_id, key, data_string, **kwargs):
         "removed": True,
     }
 
-    ingest_entities(dataset_id, {'entities':[remove_entity]}, **kwargs)
+    ingest_entities(dataset_id, {'entities': [remove_entity]}, **kwargs)
 
     entity = {
         "identity": key,
@@ -155,7 +158,7 @@ def set_generic_data(dataset_id, key, data_string, **kwargs):
         "attrs": attributes,
     }
 
-    return ingest_entities(dataset_id, {'entities':[entity]}, **kwargs)
+    return ingest_entities(dataset_id, {'entities': [entity]}, **kwargs)
 
 
 def ingest_entities(dataset_id, data, **kwargs):
@@ -255,7 +258,7 @@ def _remove_thing(thing, **kwargs):
     if kwargs['id']:
         _remove_thing_by_id(uri_thing, kwargs['id'], **kwargs)
     elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
-        results = json.loads(make_post_request({'query':kwargs['name']}, search_uri, **kwargs).content)
+        results = json.loads(make_post_request({'query': kwargs['name']}, search_uri, **kwargs).content)
         if thing_list in results and 'files' in results[thing_list]:
             thing_obj_list = results[thing_list]['files']
             to_remove = []
@@ -294,12 +297,14 @@ def create_substrate(name, substrate_def, **kwargs):
 def set_lens_order(lens_id_list, orchestration_id, **kwargs):
     # NOTE Provide the lenses ordered top-to-bottom, but this API wants them the other way around!
     ids = list(reversed(lens_id_list))
-    param = { "lens_ids": ids }
+    param = {"lens_ids": ids}
     return make_post_request(param, '/conduce/api/v1/orchestration/{}/reorder-lenses'.format(orchestration_id), **kwargs)
 
+
 def change_lens_opacity(orchestration_id, lens_id, opacity, **kwargs):
-    param = { "lens_id":lens_id, "opacity":opacity }
+    param = {"lens_id": lens_id, "opacity": opacity}
     return make_post_request(param, '/conduce/api/v1/orchestration/{}/change-lens-opacity'.format(orchestration_id), **kwargs)
+
 
 def create_lens(name, lens_def, orchestration_id, **kwargs):
     return make_post_request(lens_def, 'orchestration/{}/create-lens'.format(orchestration_id), **kwargs)
@@ -314,17 +319,22 @@ def _remove_template(template_id, **kwargs):
 def remove_template(**kwargs):
     return _remove_thing('template', **kwargs)
 
+
 def create_template(name, template_def, **kwargs):
     return make_post_request(template_def, 'templates/create/{}'.format(name), **kwargs)
+
 
 def get_template(id, **kwargs):
     return make_get_request('templates/get/{}'.format(id), **kwargs)
 
+
 def save_template(id, template_def, **kwargs):
     return make_post_request(template_def, 'templates/save/{}'.format(id), **kwargs)
 
+
 def set_time(orchestration_id, time_def, **kwargs):
     return make_post_request(time_def, 'orchestration/{}/set-time'.format(orchestration_id), **kwargs)
+
 
 def set_time_fixed(orchestration_id, **kwargs):
     time_config = {}
@@ -332,15 +342,15 @@ def set_time_fixed(orchestration_id, **kwargs):
     start_ms = None
     if 'start' in kwargs and int(kwargs['start']):
         start_ms = kwargs['start']
-        time_config["start"] = {"bound_value":start_ms, "type":"FIXED"}
+        time_config["start"] = {"bound_value": start_ms, "type": "FIXED"}
     end_ms = None
     if 'end' in kwargs and int(kwargs['end']):
         end_ms = kwargs['end']
-        time_config["end"] = {"bound_value":end_ms, "type":"FIXED"}
+        time_config["end"] = {"bound_value": end_ms, "type": "FIXED"}
     if start_ms and end_ms and (end_ms < start_ms):
         # Swap the values
-        time_config["start"] = {"bound_value":end_ms, "type":"FIXED"}
-        time_config["end"] = {"bound_value":start_ms, "type":"FIXED"}
+        time_config["start"] = {"bound_value": end_ms, "type": "FIXED"}
+        time_config["end"] = {"bound_value": start_ms, "type": "FIXED"}
 
     ctrl_params = {}
     if 'initial' in kwargs and int(kwargs['initial']):
@@ -359,10 +369,10 @@ def set_time_fixed(orchestration_id, **kwargs):
 
 def move_camera(orchestration_id, config, **kwargs):
     camera = {
-        "position":config['position'],
-        "normal":{"x":0, "y":0, "z":1},
-        "over":{"x":1, "y":0, "z":0},
-        "aperture":config['aperture']
+        "position": config['position'],
+        "normal": {"x": 0, "y": 0, "z": 1},
+        "over": {"x": 1, "y": 0, "z": 0},
+        "aperture": config['aperture']
     }
     return make_post_request(camera, 'orchestration/{}/move-camera'.format(orchestration_id), **kwargs)
 
@@ -386,8 +396,8 @@ def save_orchestration(orchestration_id, **kwargs):
 
 
 def create_api_key(**kwargs):
-    response = make_post_request({"description": "Generated and used by conduce-python-api"}, 'apikeys/create', **kwargs);
-    return json.loads(response.content)['apikey'];
+    response = make_post_request({"description": "Generated and used by conduce-python-api"}, 'apikeys/create', **kwargs)
+    return json.loads(response.content)['apikey']
 
 
 def make_post_request(payload, fragment, **kwargs):
@@ -480,6 +490,7 @@ def _file_post_request(payload, uri, **kwargs):
 
 def remove_asset(**kwargs):
     return _remove_thing('asset', uri_thing='userassets', **kwargs)
+
 
 def _remove_asset(asset_id, **kwargs):
     return make_post_request({}, 'userassets/delete/{}'.format(asset_id), **kwargs)
