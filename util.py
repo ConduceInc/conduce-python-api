@@ -53,11 +53,11 @@ def csv_to_json(infile, outfile=None, toStdout=False, **kwargs):
 
     if hasattr(infile, 'read'):
         reader = get_csv_reader(infile, delimiter)
-        out = json.dumps( [ row for row in reader ] )
+        out = json.dumps([row for row in reader])
     else:
         with open(infile, "r") as f:
             reader = get_csv_reader(f, delimiter)
-            out = json.dumps( [ row for row in reader ] )
+            out = json.dumps([row for row in reader])
     if out is None:
         raise "No JSON output. Try again."
     else:
@@ -66,7 +66,7 @@ def csv_to_json(infile, outfile=None, toStdout=False, **kwargs):
             print
         if not outfile is None:
             with open(outfile, "w") as output_file:
-               json.dump(out, output_file)
+                json.dump(out, output_file)
 
     return json.loads(out)
 
@@ -166,7 +166,6 @@ def get_x_score(key, value):
     return 0
 
 
-
 def get_y_score(key, value):
     key = key.lower()
     score = 0
@@ -224,7 +223,7 @@ def get_field_value(raw_entity, key_map, field):
 
 
 def build_attribute(key, value):
-    attribute = {'key':key}
+    attribute = {'key': key}
     try:
         float_val = float(value)
         if float.is_integer(float_val):
@@ -253,7 +252,7 @@ def csv_to_entities(infile, outfile=None, toStdout=False):
 
 
 def score_fields(raw_entities, keys):
-    #TODO: Use up to 100 values to score fields
+    # TODO: Use up to 100 values to score fields
     key_scores = {}
     for key in keys:
         key_scores[key] = {}
@@ -277,11 +276,12 @@ def map_keys(key_scores, keys):
                 max_score = key_scores[key][score]
                 max_key = key
 
-        key_map[score[:-6]] = {'key':max_key,'score':max_score}
+        key_map[score[:-6]] = {'key': max_key, 'score': max_score}
 
-    #TODO: Filter to single key match with highest score
+    # TODO: Filter to single key match with highest score
 
     return key_map
+
 
 def generate_entities(raw_entities, key_map):
     critical_keys = [d['key'] for d in key_map.values()]
@@ -298,22 +298,24 @@ def generate_entities(raw_entities, key_map):
                 'x': float(get_field_value(raw_entity, key_map, 'x')),
                 'y': float(get_field_value(raw_entity, key_map, 'y')),
                 'z': float(get_field_value(raw_entity, key_map, 'z')),
-                }],
+            }],
             'attrs': get_attributes(attribute_keys, raw_entity),
         }
         entities.append(entity)
 
     return entities
 
+
 def dict_to_entities(raw_entities):
     keys = raw_entities[0].keys()
-    fields = ['identity','kind','x','y','z','timestamp_ms','endtime_ms']
+    fields = ['identity', 'kind', 'x', 'y', 'z', 'timestamp_ms', 'endtime_ms']
 
     key_scores = score_fields(raw_entities, keys)
     key_map = map_keys(key_scores, keys)
     entities = generate_entities(raw_entities, key_map)
 
-    return {'entities':entities}
+    return {'entities': entities}
+
 
 def get_dataset_id(dataset_name, **kwargs):
     datasets = json.loads(api.list_datasets(**kwargs).content)

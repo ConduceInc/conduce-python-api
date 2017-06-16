@@ -74,7 +74,7 @@ if __name__ == '__main__':
     import argparse
 
     arg_parser = argparse.ArgumentParser(description='Conduce command line utility')
-    #TODO: figure out how to propagate these arguments to subcommands
+    # TODO: figure out how to propagate these arguments to subcommands
     #arg_parser.add_argument('--user', help='The user whose objects will be listed')
     #arg_parser.add_argument('--host', help='The server from which objects will be listed')
     subparsers = arg_parser.add_subparsers(help='help for subcommands')
