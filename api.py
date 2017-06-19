@@ -1,3 +1,4 @@
+import util
 import requests
 import session
 import config
@@ -25,8 +26,6 @@ def retry_on_retryable_error(exception):
         return false
 
     return isinstance(exception, RETRYABLE_ERRORS)
-
-
 
 
 def deprecated(func):
@@ -465,7 +464,7 @@ def save_orchestration(orchestration_id, **kwargs):
 
 def create_api_key(**kwargs):
     response = make_post_request(
-        {"description": "Generated and used by conduce-python-api"}, 'apikeys/create', **kwargs);
+        {"description": "Generated and used by conduce-python-api"}, 'apikeys/create', **kwargs)
     return json.loads(response.content)['apikey']
 
 
