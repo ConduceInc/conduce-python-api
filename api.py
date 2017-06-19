@@ -5,6 +5,28 @@ import json
 import time
 import re
 import urlparse
+import httplib2
+
+from retrying import retry
+
+# Retry transport and file IO errors.
+RETRYABLE_ERRORS = (httplib2.HttpLib2Error)
+
+# Number of times to retry failed downloads.
+NUM_RETRIES = 5
+
+WAIT_EXPONENTIAL_MULTIPLIER = 1000
+
+
+def retry_on_retryable_error(exception):
+    """Return True if we should retry (in this case when it's an IOError), False otherwise"""
+
+    if isinstance(exception, HttpError) and exception.resp.status < 500:
+        return false
+
+    return isinstance(exception, RETRYABLE_ERRORS)
+
+
 
 
 def deprecated(func):
@@ -87,6 +109,7 @@ def make_get_request(fragment, **kwargs):
     return _make_get_request(compose_uri(fragment), **kwargs)
 
 
+@retry(retry_on_exception=retry_on_retryable_error, wait_exponential_multiplier=WAIT_EXPONENTIAL_MULTIPLIER, stop_max_attempt_number=NUM_RETRIES)
 def _make_get_request(uri, **kwargs):
     cfg = config.get_full_config()
 
@@ -114,12 +137,15 @@ def _make_get_request(uri, **kwargs):
 
 
 def create_dataset(dataset_name, **kwargs):
-    response = make_post_request({'name': dataset_name}, 'datasets/create', **kwargs)
+    response = make_post_request(
+        {'name': dataset_name}, 'datasets/create', **kwargs)
     response_dict = json.loads(response.content)
     if 'json' in kwargs and kwargs['json']:
-        ingest_entities(response_dict['dataset'], json.load(open(kwargs['json'])), **kwargs)
+        ingest_entities(response_dict['dataset'], json.load(
+            open(kwargs['json'])), **kwargs)
     elif 'csv' in kwargs and kwargs['csv']:
-        ingest_entities(response_dict['dataset'], util.csv_to_entities(kwargs['csv']), **kwargs)
+        ingest_entities(response_dict['dataset'], util.csv_to_entities(
+            kwargs['csv']), **kwargs)
 
     return response
 
@@ -165,7 +191,8 @@ def ingest_entities(dataset_id, data, **kwargs):
     if isinstance(data, list):
         data = {'entities': data}
 
-    response = make_post_request(data, 'datasets/add-data/{}'.format(dataset_id), **kwargs)
+    response = make_post_request(
+        data, 'datasets/add-data/{}'.format(dataset_id), **kwargs)
     if 'location' in response.headers:
         job_id = response.headers['location']
         response = wait_for_job(job_id, **kwargs)
@@ -173,7 +200,8 @@ def ingest_entities(dataset_id, data, **kwargs):
 
 
 def _remove_dataset(dataset_id, **kwargs):
-    response = make_post_request(None, 'datasets/delete/{}'.format(dataset_id), **kwargs)
+    response = make_post_request(
+        None, 'datasets/delete/{}'.format(dataset_id), **kwargs)
     response.raise_for_status()
     return True
 
@@ -216,13 +244,15 @@ def remove_dataset(**kwargs):
 
 
 def _remove_substrate(substrate_id, **kwargs):
-    response = make_post_request(None, 'substrates/delete/{}'.format(substrate_id), **kwargs)
+    response = make_post_request(
+        None, 'substrates/delete/{}'.format(substrate_id), **kwargs)
     response.raise_for_status()
     return True
 
 
 def _remove_thing_by_id(uri_thing, thing_id, **kwargs):
-    response = make_post_request(None, ('{}/delete/{}'.format(uri_thing, thing_id)), **kwargs)
+    response = make_post_request(
+        None, ('{}/delete/{}'.format(uri_thing, thing_id)), **kwargs)
     response.raise_for_status()
     return True
 
@@ -258,7 +288,8 @@ def _remove_thing(thing, **kwargs):
     if kwargs['id']:
         _remove_thing_by_id(uri_thing, kwargs['id'], **kwargs)
     elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
-        results = json.loads(make_post_request({'query': kwargs['name']}, search_uri, **kwargs).content)
+        results = json.loads(make_post_request(
+            {'query': kwargs['name']}, search_uri, **kwargs).content)
         if thing_list in results and 'files' in results[thing_list]:
             thing_obj_list = results[thing_list]['files']
             to_remove = []
@@ -271,11 +302,13 @@ def _remove_thing(thing, **kwargs):
             elif kwargs['all']:
                 for thing_obj in to_remove:
                     _remove_thing_by_id(uri_thing, thing_obj['id'], **kwargs)
-                return_message = "Removed {:d} {}".format(len(to_remove), things)
+                return_message = "Removed {:d} {}".format(
+                    len(to_remove), things)
             elif len(to_remove) > 1:
                 return_message = "Matching {}:\n".format(things)
                 return_message += json.dumps(to_remove)
-                return_message += "\n\nName or regular expression matched multiple {}.  Pass --all to remove all matching {}.".format(things, things)
+                return_message += "\n\nName or regular expression matched multiple {}.  Pass --all to remove all matching {}.".format(
+                    things, things)
             else:
                 return_message = "No matching {} found.".format(things)
         else:
@@ -292,10 +325,12 @@ def create_substrate(name, substrate_def, **kwargs):
     return make_post_request(substrate_def, 'substrates/create/{}'.format(name), **kwargs)
 
 
-# NOTE No 'remove lens' method because they are supposedly dropped when the orchestration is removed.
+# NOTE No 'remove lens' method because they are supposedly dropped when
+# the orchestration is removed.
 
 def set_lens_order(lens_id_list, orchestration_id, **kwargs):
-    # NOTE Provide the lenses ordered top-to-bottom, but this API wants them the other way around!
+    # NOTE Provide the lenses ordered top-to-bottom, but this API wants them
+    # the other way around!
     ids = list(reversed(lens_id_list))
     param = {"lens_ids": ids}
     return make_post_request(param, '/conduce/api/v1/orchestration/{}/reorder-lenses'.format(orchestration_id), **kwargs)
@@ -311,7 +346,8 @@ def create_lens(name, lens_def, orchestration_id, **kwargs):
 
 
 def _remove_template(template_id, **kwargs):
-    response = make_post_request(None, 'templates/delete/{}'.format(template_id), **kwargs)
+    response = make_post_request(
+        None, 'templates/delete/{}'.format(template_id), **kwargs)
     response.raise_for_status()
     return True
 
@@ -396,7 +432,8 @@ def save_orchestration(orchestration_id, **kwargs):
 
 
 def create_api_key(**kwargs):
-    response = make_post_request({"description": "Generated and used by conduce-python-api"}, 'apikeys/create', **kwargs)
+    response = make_post_request(
+        {"description": "Generated and used by conduce-python-api"}, 'apikeys/create', **kwargs);
     return json.loads(response.content)['apikey']
 
 
@@ -404,6 +441,7 @@ def make_post_request(payload, fragment, **kwargs):
     return _make_post_request(payload, compose_uri(fragment), **kwargs)
 
 
+@retry(retry_on_exception=retry_on_retryable_error, wait_exponential_multiplier=WAIT_EXPONENTIAL_MULTIPLIER, stop_max_attempt_number=NUM_RETRIES)
 def _make_post_request(payload, uri, **kwargs):
     cfg = config.get_full_config()
 
@@ -436,7 +474,8 @@ def _make_post_request(payload, uri, **kwargs):
     else:
         if 'orchestrations/delete' in uri:
             headers['Origin'] = "https://{}".format(host)
-        response = requests.post(url, json=payload, cookies=auth, headers=headers)
+        response = requests.post(
+            url, json=payload, cookies=auth, headers=headers)
     response.raise_for_status()
     return response
 
@@ -483,7 +522,8 @@ def _file_post_request(payload, uri, **kwargs):
             headers = auth
         response = requests.post(url, data=payload, headers=headers)
     else:
-        response = requests.post(url, data=payload, cookies=auth, headers=headers)
+        response = requests.post(
+            url, data=payload, cookies=auth, headers=headers)
     response.raise_for_status()
     return response
 
