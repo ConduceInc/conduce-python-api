@@ -35,11 +35,19 @@ def list_team_members(args):
     return api.list_team_members(team_id, **vars(args))
 
 
+def add_team_user(args):
+    team_id = args.team_id
+    del vars(args)['team_id']
+    email = args.email
+    del vars(args)['email']
+
+    return api.add_user_to_team(team_id, email, **vars(args))
+
+
 def create_group(args):
     team_id = args.team_id
-    name = args.name
-
     del vars(args)['team_id']
+    name = args.name
     del vars(args)['name']
 
     return api.create_group(team_id, name, **vars(args))
@@ -59,6 +67,17 @@ def list_group_members(args):
     del vars(args)['group_id']
 
     return api.list_group_members(team_id, group_id, **vars(args))
+
+
+def add_group_user(args):
+    team_id = args.team_id
+    del vars(args)['team_id']
+    group_id = args.group_id
+    del vars(args)['group_id']
+    user_id = args.user_id
+    del vars(args)['user_id']
+
+    return api.add_user_to_group(team_id, group_id, user_id, **vars(args))
 
 
 def set_generic_data(args):
@@ -115,9 +134,11 @@ if __name__ == '__main__':
     import argparse
 
     arg_parser = argparse.ArgumentParser(description='Conduce command line utility')
-    # TODO: figure out how to propagate these arguments to subcommands
-    #arg_parser.add_argument('--user', help='The user whose objects will be listed')
-    #arg_parser.add_argument('--host', help='The server from which objects will be listed')
+    api_cmd_parser = argparse.ArgumentParser(add_help=False)
+    api_cmd_parser.add_argument('--user', help='The user whose is making the request')
+    api_cmd_parser.add_argument('--host', help='The server on which the command will run')
+    api_cmd_parser.add_argument('--api-key', help='The API key used to authenticate')
+
     subparsers = arg_parser.add_subparsers(help='help for subcommands')
 
     parser_config = subparsers.add_parser('config', help='Conduce configuration settings')
@@ -171,48 +192,47 @@ if __name__ == '__main__':
     parser_create_dataset.add_argument('--csv', help='Optional: A CSV file that can be parsed as Conduce data')
     parser_create_dataset.set_defaults(func=create_dataset)
 
-    parser_create_team = subparsers.add_parser('create-team', help='Create a Conduce team')
+    parser_team = subparsers.add_parser('team', help='Conduce team operations')
+    parser_team_subparsers = parser_team.add_subparsers(help='team subcommands')
+
+    parser_create_team = parser_team_subparsers.add_parser('create', parents=[api_cmd_parser], help='Create a Conduce team')
     parser_create_team.add_argument('name', help='The name to be given to the new team')
-    parser_create_team.add_argument('--user', help='The user whose is making the request')
-    parser_create_team.add_argument('--host', help='The server on which the command will run')
-    parser_create_team.add_argument('--api-key', help='The API key used to authenticate')
     parser_create_team.set_defaults(func=create_team)
 
-    parser_list_teams = subparsers.add_parser('list-teams', help='List Conduce teams')
-    parser_list_teams.add_argument('--user', help='The user whose is making the request')
-    parser_list_teams.add_argument('--host', help='The server on which the command will run')
-    parser_list_teams.add_argument('--api-key', help='The API key used to authenticate')
+    parser_list_teams = parser_team_subparsers.add_parser('list', parents=[api_cmd_parser], help='List Conduce teams')
     parser_list_teams.set_defaults(func=list_teams)
 
-    parser_list_team_members = subparsers.add_parser('list-team-members', help='List members of team')
+    parser_list_team_members = parser_team_subparsers.add_parser('list-members', parents=[api_cmd_parser], help='List members of team')
     parser_list_team_members.add_argument('team_id', help='The team to list')
-    parser_list_team_members.add_argument('--user', help='The user whose is making the request')
-    parser_list_team_members.add_argument('--host', help='The server on which the command will run')
-    parser_list_team_members.add_argument('--api-key', help='The API key used to authenticate')
     parser_list_team_members.set_defaults(func=list_team_members)
 
-    parser_create_group = subparsers.add_parser('create-group', help='Create a Conduce team')
-    parser_create_group.add_argument('name', help='The name to be given to the new team')
-    parser_create_group.add_argument('team_id', help='The team the new group belongs to')
-    parser_create_group.add_argument('--user', help='The user whose is making the request')
-    parser_create_group.add_argument('--host', help='The server on which the command will run')
-    parser_create_group.add_argument('--api-key', help='The API key used to authenticate')
+    parser_add_team_user = parser_team_subparsers.add_parser('add-user', parents=[api_cmd_parser], help='add user to team')
+    parser_add_team_user.add_argument('team_id', help='The UUID of the team to which the user will be added')
+    parser_add_team_user.add_argument('email', help='Email address of the Conduce user being added')
+    parser_add_team_user.set_defaults(func=add_team_user)
+
+    parser_group = subparsers.add_parser('group', help='Conduce group operations')
+    parser_group_subparsers = parser_group.add_subparsers(help='group subcommands')
+
+    parser_create_group = parser_group_subparsers.add_parser('create', parents=[api_cmd_parser], help='Create a Conduce group')
+    parser_create_group.add_argument('team_id', help='The UUID of the team to which the group belongs')
+    parser_create_group.add_argument('name', help='The name to be given to the new group')
     parser_create_group.set_defaults(func=create_group)
 
-    parser_list_groups = subparsers.add_parser('list-groups', help='List Conduce groups')
-    parser_list_groups.add_argument('team_id', help='The team the new group belongs to')
-    parser_list_groups.add_argument('--user', help='The user whose is making the request')
-    parser_list_groups.add_argument('--host', help='The server on which the command will run')
-    parser_list_groups.add_argument('--api-key', help='The API key used to authenticate')
+    parser_list_groups = parser_group_subparsers.add_parser('list', parents=[api_cmd_parser], help='List Conduce groups')
+    parser_list_groups.add_argument('team_id', help='The UUID of the team to which the group belongs')
     parser_list_groups.set_defaults(func=list_groups)
 
-    parser_list_group_members = subparsers.add_parser('list-group-members', help='List members of group')
-    parser_list_group_members.add_argument('team_id', help='The team the group belongs to')
+    parser_list_group_members = parser_group_subparsers.add_parser('list-members', parents=[api_cmd_parser], help='List members of group')
+    parser_list_group_members.add_argument('team_id', help='The UUID of the team to which the group belongs')
     parser_list_group_members.add_argument('group_id', help='The group to list')
-    parser_list_group_members.add_argument('--user', help='The user whose is making the request')
-    parser_list_group_members.add_argument('--host', help='The server on which the command will run')
-    parser_list_group_members.add_argument('--api-key', help='The API key used to authenticate')
     parser_list_group_members.set_defaults(func=list_group_members)
+
+    parser_add_group_user = parser_group_subparsers.add_parser('add-user', parents=[api_cmd_parser], help='Add user to group')
+    parser_add_group_user.add_argument('team_id', help='The UUID of the team to which the group belongs')
+    parser_add_group_user.add_argument('group_id', help='The UUID of the group to which the user will be added')
+    parser_add_group_user.add_argument('user_id', help='The UUID of the user being added')
+    parser_add_group_user.set_defaults(func=add_group_user)
 
     parser_set_generic_data = subparsers.add_parser('set-generic-data', help='Add generic data to Conduce dataset')
     parser_set_generic_data.add_argument('--json', help='The data to be consumed')
