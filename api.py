@@ -22,8 +22,8 @@ WAIT_EXPONENTIAL_MULTIPLIER = 1000
 def retry_on_retryable_error(exception):
     """Return True if we should retry (in this case when it's an IOError), False otherwise"""
 
-    if isinstance(exception, HttpError) and exception.resp.status < 500:
-        return false
+    if isinstance(exception, requests.exceptions.HTTPError) and exception.response.status_code < 500:
+        return False
 
     return isinstance(exception, RETRYABLE_ERRORS)
 
