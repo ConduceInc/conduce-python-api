@@ -116,6 +116,74 @@ def set_api_key(args):
     return "API key set for {} on {}".format(args.user, args.host)
 
 
+def set_owner(args):
+    team_id = args.team_id
+    del vars(args)['team_id']
+    resource_id = args.resource_id
+    del vars(args)['resource_id']
+
+    api.set_owner(team_id, resource_id, **vars(args))
+
+
+def list_permissions(args):
+    resource_id = args.resource_id
+    del vars(args)['resource_id']
+
+    return api.list_permissions(resource_id, **vars(args))
+
+
+def parse_permissions(permissions):
+    permissions_dict = {'read': False, 'write': False, 'share': False}
+    if 'r' in permissions:
+        permissions_dict['read'] = True
+    if 'w' in permissions:
+        permissions_dict['write'] = True
+    if 's' in permissions:
+        permissions_dict['share'] = True
+
+    return permissions_dict
+
+
+def set_public_permissions(args):
+    resource_id = args.resource_id
+    del vars(args)['resource_id']
+
+    p = parse_permissions(args.permissions)
+
+    api.set_public_permissions(resource_id, p['read'], p['write'], p['share'], **vars(args))
+
+
+def set_team_permissions(args):
+    resource_id = args.resource_id
+    del vars(args)['resource_id']
+
+    p = parse_permissions(args.permissions)
+
+    api.set_team_permissions(resource_id, p['read'], p['write'], p['share'], **vars(args))
+
+
+def set_group_permissions(args):
+    group_id = args.group_id
+    del vars(args)['group_id']
+    resource_id = args.resource_id
+    del vars(args)['resource_id']
+
+    p = parse_permissions(args.permissions)
+
+    api.set_group_permissions(group_id, resource_id, p['read'], p['write'], p['share'], **vars(args))
+
+
+def set_user_permissions(args):
+    user_id = args.user_id
+    del vars(args)['user_id']
+    resource_id = args.resource_id
+    del vars(args)['resource_id']
+
+    p = parse_permissions(args.permissions)
+
+    api.set_user_permissions(user_id, resource_id, p['read'], p['write'], p['share'], **vars(args))
+
+
 def send_get_request(args):
     uri = args.uri
     del vars(args)['uri']
@@ -261,6 +329,38 @@ def main():
     parser_get_generic_data.add_argument('--regex', help='Remove datasets that match the regular expression')
     parser_get_generic_data.add_argument('--all', help='Remove all matching datasets', action='store_true')
     parser_get_generic_data.set_defaults(func=remove_dataset)
+
+    parser_permissions = subparsers.add_parser('permissions', help='Conduce permissions operations')
+    parser_permissions_subparsers = parser_permissions.add_subparsers(help='permissions subcommands')
+
+    parser_set_owner = parser_permissions_subparsers.add_parser('set-owner', parents=[api_cmd_parser], help='Set the owner of this resource')
+    parser_set_owner.add_argument('team_id', help='The UUID of the team to which the user belongs')
+    parser_set_owner.add_argument('resource_id', help='The UUID of the resource being modified')
+    parser_set_owner.set_defaults(func=set_owner)
+
+    parser_list_permissions = parser_permissions_subparsers.add_parser('list', parents=[api_cmd_parser], help='List permissions of a resource')
+    parser_list_permissions.add_argument('resource_id', help='The UUID of the resource to be listed')
+    parser_list_permissions.set_defaults(func=list_permissions)
+
+    parser_set_permissions = parser_permissions_subparsers.add_parser('set', parents=[api_cmd_parser], help='Set permissions of a resource')
+    parser_set_permissions.add_argument('permissions', help='The permissions to enable [r|w|s]')
+    parser_set_permissions.add_argument('resource_id', help='The UUID of the resource to be listed')
+    parser_set_permissions_subparsers = parser_set_permissions.add_subparsers(help='set permissions subcommands')
+
+    parser_set_public_permissions = parser_set_permissions_subparsers.add_parser(
+        'public', parents=[api_cmd_parser], help='Set public permissions of a resource')
+    parser_set_public_permissions.set_defaults(func=set_public_permissions)
+
+    parser_set_team_permissions = parser_set_permissions_subparsers.add_parser('team', parents=[api_cmd_parser], help='Set team permissions of a resource')
+    parser_set_team_permissions.set_defaults(func=set_team_permissions)
+
+    parser_set_group_permissions = parser_set_permissions_subparsers.add_parser('group', parents=[api_cmd_parser], help='Set team permissions of a resource')
+    parser_set_group_permissions.add_argument('group_id', help='The group UUID')
+    parser_set_group_permissions.set_defaults(func=set_group_permissions)
+
+    parser_set_user_permissions = parser_set_permissions_subparsers.add_parser('user', parents=[api_cmd_parser], help='Set team permissions of a resource')
+    parser_set_user_permissions.add_argument('user_id', help='The user UUID')
+    parser_set_user_permissions.set_defaults(func=set_user_permissions)
 
     parser_get = subparsers.add_parser('get', help='Make an arbitrary get request')
     parser_get.add_argument('uri', help='The URI of the resource being requested')

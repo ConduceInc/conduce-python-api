@@ -167,6 +167,59 @@ def list_group_members(team_id, group_id, **kwargs):
     return make_get_request('team/{}/group/{}/users'.format(team_id, group_id), **kwargs)
 
 
+def set_owner(team_id, resource_id, **kwargs):
+    return make_post_request({}, 'acl/{}/transfer-to-team/{}'.format(resource_id, team_id), **kwargs)
+
+
+def list_permissions(resource_id, **kwargs):
+    return make_get_request('acl/{}/view'.format(resource_id), **kwargs)
+
+
+def set_public_permissions(resource_id, read, write, share, **kwargs):
+    target_string = 'public'
+    return set_permissions(target_string, resource_id, read, write, share, **kwargs)
+
+
+def set_team_permissions(resource_id, read, write, share, **kwargs):
+    target_string = 'team'
+    return set_permissions(target_string, resource_id, read, write, share, **kwargs)
+
+
+def set_group_permissions(group_id, resource_id, read, write, share, **kwargs):
+    target_string = 'group/{}'.format(group_id)
+    return set_permissions(target_string, resource_id, read, write, share, **kwargs)
+
+
+def set_user_permissions(user_id, resource_id, read, write, share, **kwargs):
+    target_string = 'user/{}'.format(user_id)
+    return set_permissions(target_string, resource_id, read, write, share, **kwargs)
+
+
+def grant_permissions(target_string, resource_id, read, write, share, **kwargs):
+    permissions = {
+        'share': share,
+        'write': write,
+        'read': read,
+        'target': target_string
+    }
+    return make_post_request(permissions, 'acl/{}/grant'.format(resource_id), **kwargs)
+
+
+def revoke_permissions(target_string, resource_id, read, write, share, **kwargs):
+    permissions = {
+        'share': share,
+        'write': write,
+        'read': read,
+        'target': target_string
+    }
+    return make_post_request(permissions, 'acl/{}/revoke'.format(resource_id), **kwargs)
+
+
+def set_permissions(target_string, resource_id, read, write, share, **kwargs):
+    grant_permissions(target_string, resource_id, read, write, share, **kwargs)
+    revoke_permissions(target_string, resource_id, not read, not write, not share, **kwargs)
+
+
 def create_dataset(dataset_name, **kwargs):
     response = make_post_request(
         {'name': dataset_name}, 'datasets/create', **kwargs)
