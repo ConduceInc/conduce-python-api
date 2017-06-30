@@ -5,6 +5,7 @@ setup(
     version="0.1.0",
     description="Python Distribution Utilities",
     author="Conduce",
+    install_requires=["httplib2", "retrying"],
     author_email="support@conduce.com",
     url="https://www.conduce.com",
     packages=["conduce"],
