@@ -64,25 +64,18 @@ def list_templates(**kwargs):
 
 
 def wait_for_job(job_id, **kwargs):
-    finished = False
-
-    while not finished:
+    while True:
         time.sleep(0.5)
         response = make_get_request(job_id, **kwargs)
         response.raise_for_status()
 
-        # TODO: This is probably dead code
-        if int(response.status_code / 100) != 2:
-            print "Error code {}: {}".format(response.status_code, response.text)
-            return False
-
         if response.ok:
             msg = response.json()
             if 'response' in msg:
-                finished = True
+                return response
         else:
-            print resp, resp.content
-            break
+            print response.status_code, response.text
+            return response
 
 
 def compose_uri(fragment):
