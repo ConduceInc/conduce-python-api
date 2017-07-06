@@ -149,7 +149,7 @@ class ConduceAPIClient(object):
     def create_folder(self, folder_name, exists_ok=False):
         #Returns whether the folder was new
         try:
-            self.api_post('/templates/new_folder', {"name": folder_name})
+            self.api_post('/folders/create', {"name": folder_name})
             return True
         except ConduceError as exc:
             if exists_ok and exc.code == 400 and "already exists" in exc.text:
@@ -191,7 +191,7 @@ class ConduceAPIClient(object):
             filters["mime-type"] = mime_type
         req = self.api_post("/userassets/search", filters)
         ret = req.json()
-        return ret["asset-list"]
+        return ret["asset_list"]
 
     def find_userasset(self, name):
         return self._find_resource_by_name(USER_ASSET, name)
@@ -221,7 +221,7 @@ class ConduceAPIClient(object):
             filters["query"] = filename_contains
         req = self.api_post("/templates/search", filters)
         ret = req.json()
-        return ret["template-list"]
+        return ret["template_list"]
 
     def find_template(self, name):
         #need to support search_templates(folder=conduce_folder, filename_contains=template["name"])
