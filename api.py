@@ -334,31 +334,31 @@ def _remove_substrate(substrate_id, **kwargs):
     return True
 
 
-def _remove_thing_by_id(uri_thing, thing_id, **kwargs):
+def _remove_resource_by_id(uri_resource, resource_id, **kwargs):
     response = make_post_request(
-        None, ('{}/delete/{}'.format(uri_thing, thing_id)), **kwargs)
+        None, ('{}/delete/{}'.format(uri_resource, resource_id)), **kwargs)
     response.raise_for_status()
     return True
 
 
-def _remove_thing(thing, **kwargs):
+def _remove_resource(resource, **kwargs):
     return_message = None
 
-    if not 'things' in kwargs:
-        things = '{}s'.format(thing)
+    if not 'resources' in kwargs:
+        resources = '{}s'.format(resource)
     else:
-        things = kwargs['things']
-    if not 'thing_list' in kwargs:
-        thing_list = '{}_list'.format(thing)
+        resources = kwargs['resources']
+    if not 'resource_list' in kwargs:
+        resource_list = '{}_list'.format(resource)
     else:
-        thing_list = kwargs['thing_list']
-    if not 'uri_thing' in kwargs:
-        uri_thing = things
+        resource_list = kwargs['resource_list']
+    if not 'uri_resource' in kwargs:
+        uri_resource = resources
     else:
-        uri_thing = kwargs['uri_thing']
-        del kwargs['uri_thing']
+        uri_resource = kwargs['uri_resource']
+        del kwargs['uri_resource']
 
-    search_uri = '{}/search'.format(uri_thing)
+    search_uri = '{}/search'.format(uri_resource)
 
     if not 'id' in kwargs:
         kwargs['id'] = None
@@ -370,39 +370,39 @@ def _remove_thing(thing, **kwargs):
         kwargs['all'] = None
 
     if kwargs['id']:
-        _remove_thing_by_id(uri_thing, kwargs['id'], **kwargs)
+        _remove_resource_by_id(uri_resource, kwargs['id'], **kwargs)
     elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
         results = json.loads(make_post_request(
             {'query': kwargs['name']}, search_uri, **kwargs).content)
-        if thing_list in results and 'files' in results[thing_list]:
-            thing_obj_list = results[thing_list]['files']
+        if resource_list in results and 'files' in results[resource_list]:
+            resource_obj_list = results[resource_list]['files']
             to_remove = []
-            for thing_obj in thing_obj_list:
-                if thing_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], thing_obj['name'])):
-                    to_remove.append(thing_obj)
+            for resource_obj in resource_obj_list:
+                if resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])):
+                    to_remove.append(resource_obj)
             if len(to_remove) == 1:
-                _remove_thing_by_id(uri_thing, to_remove[0]['id'], **kwargs)
-                return_message = 'Removed 1 {}'.format(thing)
+                _remove_resource_by_id(uri_resource, to_remove[0]['id'], **kwargs)
+                return_message = 'Removed 1 {}'.format(resource)
             elif kwargs['all']:
-                for thing_obj in to_remove:
-                    _remove_thing_by_id(uri_thing, thing_obj['id'], **kwargs)
+                for resource_obj in to_remove:
+                    _remove_resource_by_id(uri_resource, resource_obj['id'], **kwargs)
                 return_message = "Removed {:d} {}".format(
-                    len(to_remove), things)
+                    len(to_remove), resources)
             elif len(to_remove) > 1:
-                return_message = "Matching {}:\n".format(things)
+                return_message = "Matching {}:\n".format(resources)
                 return_message += json.dumps(to_remove)
                 return_message += "\n\nName or regular expression matched multiple {}.  Pass --all to remove all matching {}.".format(
-                    things, things)
+                    resources, resources)
             else:
-                return_message = "No matching {} found.".format(things)
+                return_message = "No matching {} found.".format(resources)
         else:
-            return_message = "The query did not match any {}.".format(things)
+            return_message = "The query did not match any {}.".format(resources)
 
     return return_message
 
 
 def remove_substrate(**kwargs):
-    return _remove_thing('substrate', **kwargs)
+    return _remove_resource('substrate', **kwargs)
 
 
 def create_substrate(name, substrate_def, **kwargs):
@@ -437,7 +437,7 @@ def _remove_template(template_id, **kwargs):
 
 
 def remove_template(**kwargs):
-    return _remove_thing('template', **kwargs)
+    return _remove_resource('template', **kwargs)
 
 
 def create_template(name, template_def, **kwargs):
@@ -498,7 +498,7 @@ def move_camera(orchestration_id, config, **kwargs):
 
 
 def remove_orchestration(**kwargs):
-    return _remove_thing('orchestration', **kwargs)
+    return _remove_resource('orchestration', **kwargs)
 
 
 def create_orchestration(orchestration_def, **kwargs):
@@ -613,7 +613,7 @@ def _file_post_request(payload, uri, **kwargs):
 
 
 def remove_asset(**kwargs):
-    return _remove_thing('asset', uri_thing='userassets', **kwargs)
+    return _remove_resource('asset', uri_resource='userassets', **kwargs)
 
 
 def _remove_asset(asset_id, **kwargs):
