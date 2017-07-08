@@ -290,6 +290,25 @@ def _remove_dataset(dataset_id, **kwargs):
     return True
 
 
+def find_dataset(**kwargs):
+    return_message = None
+    if not 'id' in kwargs:
+        kwargs['id'] = None
+    if not 'regex' in kwargs:
+        kwargs['regex'] = None
+    if not 'name' in kwargs:
+        kwargs['name'] = None
+
+    found = []
+    if kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
+        datasets = json.loads(list_datasets(**kwargs).content)
+        for dataset in datasets:
+            if dataset['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], dataset['name'])) or dataset['id'] == kwargs['id']:
+                found.append(dataset)
+
+    return found
+
+
 def remove_dataset(**kwargs):
     return_message = None
     if not 'id' in kwargs:
@@ -334,11 +353,55 @@ def _remove_substrate(substrate_id, **kwargs):
     return True
 
 
-def _remove_resource_by_id(uri_resource, resource_id, **kwargs):
+def _remove_resource_by_id(uri_part, resource_id, **kwargs):
     response = make_post_request(
-        None, ('{}/delete/{}'.format(uri_resource, resource_id)), **kwargs)
+        None, ('{}/delete/{}'.format(uri_part, resource_id)), **kwargs)
     response.raise_for_status()
     return True
+
+
+def _find_resource(resource, **kwargs):
+    return_message = None
+
+    if not 'resources' in kwargs:
+        resources = '{}s'.format(resource)
+    else:
+        resources = kwargs['resources']
+    if not 'resource_list' in kwargs:
+        resource_list = '{}_list'.format(resource)
+    else:
+        resource_list = kwargs['resource_list']
+    if not 'uri_part' in kwargs:
+        uri_part = resources
+    else:
+        uri_part = kwargs['uri_part']
+        del kwargs['uri_part']
+
+    search_uri = '{}/search'.format(uri_part)
+
+    if 'id' in kwargs:
+        payload = {'query': kwargs['id']}
+    elif 'name' in kwargs:
+        payload = {'query': kwargs['name']}
+    elif 'regex' in kwargs:
+        payload = {'query': kwargs['regex']}
+
+    if not 'id' in kwargs:
+        kwargs['id'] = None
+    if not 'regex' in kwargs:
+        kwargs['regex'] = None
+    if not 'name' in kwargs:
+        kwargs['name'] = None
+
+    results = json.loads(make_post_request(payload, search_uri, **kwargs).content)
+    found = []
+    if resource_list in results and 'files' in results[resource_list]:
+        resource_obj_list = results[resource_list]['files']
+        for resource_obj in resource_obj_list:
+            if resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])):
+                found.append(resource_obj)
+
+    return found
 
 
 def _remove_resource(resource, **kwargs):
@@ -352,13 +415,13 @@ def _remove_resource(resource, **kwargs):
         resource_list = '{}_list'.format(resource)
     else:
         resource_list = kwargs['resource_list']
-    if not 'uri_resource' in kwargs:
-        uri_resource = resources
+    if not 'uri_part' in kwargs:
+        uri_part = resources
     else:
-        uri_resource = kwargs['uri_resource']
-        del kwargs['uri_resource']
+        uri_part = kwargs['uri_part']
+        del kwargs['uri_part']
 
-    search_uri = '{}/search'.format(uri_resource)
+    search_uri = '{}/search'.format(uri_part)
 
     if not 'id' in kwargs:
         kwargs['id'] = None
@@ -370,10 +433,13 @@ def _remove_resource(resource, **kwargs):
         kwargs['all'] = None
 
     if kwargs['id']:
-        _remove_resource_by_id(uri_resource, kwargs['id'], **kwargs)
+        _remove_resource_by_id(uri_part, kwargs['id'], **kwargs)
     elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
-        results = json.loads(make_post_request(
-            {'query': kwargs['name']}, search_uri, **kwargs).content)
+        if kwargs['name']:
+            payload = {'query': kwargs['name']}
+        elif kwargs['id']:
+            payload = {'query': kwargs['id']}
+        results = json.loads(make_post_request(payload, search_uri, **kwargs).content)
         if resource_list in results and 'files' in results[resource_list]:
             resource_obj_list = results[resource_list]['files']
             to_remove = []
@@ -381,11 +447,11 @@ def _remove_resource(resource, **kwargs):
                 if resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])):
                     to_remove.append(resource_obj)
             if len(to_remove) == 1:
-                _remove_resource_by_id(uri_resource, to_remove[0]['id'], **kwargs)
+                _remove_resource_by_id(uri_part, to_remove[0]['id'], **kwargs)
                 return_message = 'Removed 1 {}'.format(resource)
             elif kwargs['all']:
                 for resource_obj in to_remove:
-                    _remove_resource_by_id(uri_resource, resource_obj['id'], **kwargs)
+                    _remove_resource_by_id(uri_part, resource_obj['id'], **kwargs)
                 return_message = "Removed {:d} {}".format(
                     len(to_remove), resources)
             elif len(to_remove) > 1:
@@ -399,6 +465,10 @@ def _remove_resource(resource, **kwargs):
             return_message = "The query did not match any {}.".format(resources)
 
     return return_message
+
+
+def find_substrate(**kwargs):
+    return _find_resource('substrate', **kwargs)
 
 
 def remove_substrate(**kwargs):
@@ -434,6 +504,10 @@ def _remove_template(template_id, **kwargs):
         None, 'templates/delete/{}'.format(template_id), **kwargs)
     response.raise_for_status()
     return True
+
+
+def find_template(**kwargs):
+    return _find_resource('template', **kwargs)
 
 
 def remove_template(**kwargs):
@@ -495,6 +569,10 @@ def move_camera(orchestration_id, config, **kwargs):
         "aperture": config['aperture']
     }
     return make_post_request(camera, 'orchestration/{}/move-camera'.format(orchestration_id), **kwargs)
+
+
+def find_orchestration(**kwargs):
+    return _find_resource('orchestration', **kwargs)
 
 
 def remove_orchestration(**kwargs):
@@ -612,8 +690,12 @@ def _file_post_request(payload, uri, **kwargs):
     return response
 
 
+def find_asset(**kwargs):
+    return _find_resource('asset', uri_part='userassets', **kwargs)
+
+
 def remove_asset(**kwargs):
-    return _remove_resource('asset', uri_resource='userassets', **kwargs)
+    return _remove_resource('asset', uri_part='userassets', **kwargs)
 
 
 def _remove_asset(asset_id, **kwargs):
