@@ -76,11 +76,23 @@ def build_groups(groups, team_id, **kwargs):
             group_id = json.loads(response.content)['groop']['id']
         group_members = json.loads(api.list_group_members(team_id, group_id, **kwargs).content)['members']
         for user in users['users']:
-            user_id = get_user_id(user['email'], team_members)
-            if user_id is None:
-                api.add_user_to_team(team_id, user['email'], **kwargs)
-            if user_id is not None and not user_in_group(user_id, group_members):
-                api.add_user_to_group(team_id, group_id, user_id, **kwargs)
+            if api.account_exists(user['email'], **kwargs):
+                user_id = get_user_id(user['email'], team_members)
+                if user_id is None:
+                    print 'Adding {} to team'.format(user['email'])
+                    api.add_user_to_team(team_id, user['email'], **kwargs)
+                if user_id is not None and not user_in_group(user_id, group_members):
+                    print 'Adding user {} to group {}'.format(user['email'], name)
+                    api.add_user_to_group(team_id, group_id, user_id, **kwargs)
+            else:
+                if kwargs['create_accounts']:
+                    print 'Creating account for {}'.format(user['email'])
+                    response = api.create_account(user['name'], user['email'], **kwargs)
+                    user_id = json.loads(response.content)['id']
+                    api.add_user_to_team(team_id, user['email'], **kwargs)
+                    api.add_user_to_group(team_id, group_id, user_id, **kwargs)
+                else:
+                    print '{} cannot be added to team/group.  Account does not exist.'.format(user['email'])
 
 
 def build_team(config, **kwargs):
