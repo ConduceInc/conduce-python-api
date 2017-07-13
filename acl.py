@@ -80,7 +80,8 @@ def build_groups(groups, team_id, **kwargs):
                 user_id = get_user_id(user['email'], team_members)
                 if user_id is None:
                     print 'Adding {} to team'.format(user['email'])
-                    api.add_user_to_team(team_id, user['email'], **kwargs)
+                    response = api.add_user_to_team(team_id, user['email'], **kwargs)
+                    user_id = json.loads(response.content)['invite']['invitee']['id']
                 if user_id is not None and not user_in_group(user_id, group_members):
                     print 'Adding user {} to group {}'.format(user['email'], name)
                     api.add_user_to_group(team_id, group_id, user_id, **kwargs)
