@@ -693,3 +693,18 @@ def remove_asset(**kwargs):
 
 def _remove_asset(asset_id, **kwargs):
     return make_post_request({}, 'userassets/delete/{}'.format(asset_id), **kwargs)
+
+
+def account_exists(email, **kwargs):
+    try:
+        make_post_request({'email': email}, 'user/public/email-available', **kwargs)
+        return False
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 409:
+            return True
+        else:
+            raise e
+
+
+def create_account(name, email, **kwargs):
+    return make_post_request({'email': email, 'name': name}, 'admin/create-user', **kwargs)

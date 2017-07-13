@@ -198,6 +198,13 @@ def send_post_request(args):
     return api.make_post_request(json.loads(args.data), uri, **vars(args))
 
 
+def account_exists(args):
+    email = args.email
+    del vars(args)['email']
+
+    return api.account_exists(email, **vars(args))
+
+
 def main():
     import argparse
 
@@ -302,6 +309,10 @@ def main():
     parser_add_group_user.add_argument('user_id', help='The UUID of the user being added')
     parser_add_group_user.set_defaults(func=add_group_user)
 
+    parser_account_exists = subparsers.add_parser('account-exists', parents=[api_cmd_parser], help='')
+    parser_account_exists.add_argument('email', help='The email address to check')
+    parser_account_exists.set_defaults(func=account_exists)
+
     parser_set_generic_data = subparsers.add_parser('set-generic-data', help='Add generic data to Conduce dataset')
     parser_set_generic_data.add_argument('--json', help='The data to be consumed')
     parser_set_generic_data.add_argument('--csv', help='The data to be consumed')
@@ -397,6 +408,7 @@ def main():
     except requests.exceptions.HTTPError as e:
         print e
         print e.response.text
+
 
 if __name__ == '__main__':
     main()
