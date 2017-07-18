@@ -6,12 +6,15 @@ import json
 import time
 import re
 import urlparse
-import httplib2
 
 from retrying import retry
 
+from requests.exceptions import ConnectionError
+from requests.exceptions import HTTPError
+from requests.exceptions import Timeout
+
 # Retry transport and file IO errors.
-RETRYABLE_ERRORS = (httplib2.HttpLib2Error)
+RETRYABLE_ERRORS = (HTTPError, ConnectionError, Timeout)
 
 # Number of times to retry failed downloads.
 NUM_RETRIES = 5
@@ -20,9 +23,9 @@ WAIT_EXPONENTIAL_MULTIPLIER = 1000
 
 
 def retry_on_retryable_error(exception):
-    """Return True if we should retry (in this case when it's an IOError), False otherwise"""
+    """Return True if we should retry, False otherwise"""
 
-    if isinstance(exception, requests.exceptions.HTTPError) and exception.response.status_code < 500:
+    if isinstance(exception, HTTPError) and exception.response.status_code < 500:
         return False
 
     return isinstance(exception, RETRYABLE_ERRORS)
