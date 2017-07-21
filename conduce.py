@@ -107,6 +107,10 @@ def remove_dataset(args):
     return api.remove_dataset(**vars(args))
 
 
+def clear_dataset(args):
+    return api.clear_dataset(**vars(args))
+
+
 def set_api_key(args):
     if args.new == True:
         args.key = api.create_api_key(**vars(args))
@@ -251,18 +255,12 @@ def main():
     parser_config_get_api_key.add_argument('--host', help='The server on which the API key is valid')
     parser_config_get_api_key.set_defaults(func=config.get_api_key_config)
 
-    parser_config_list = subparsers.add_parser('list', help='List "objects" owned by user')
+    parser_config_list = subparsers.add_parser('list',  parents=[api_cmd_parser], help='List "objects" owned by user')
     parser_config_list.add_argument('object_to_list', help='Conduce object to list')
-    parser_config_list.add_argument('--user', help='The user whose objects will be listed')
-    parser_config_list.add_argument('--host', help='The server from which objects will be listed')
-    parser_config_list.add_argument('--api-key', help='The API key used to authenticate')
     parser_config_list.set_defaults(func=list_from_args)
 
-    parser_create_dataset = subparsers.add_parser('create-dataset', help='Create a Conduce dataset')
+    parser_create_dataset = subparsers.add_parser('create-dataset', parents=[api_cmd_parser], help='Create a Conduce dataset')
     parser_create_dataset.add_argument('name', help='The name to be given to the new dataset')
-    parser_create_dataset.add_argument('--user', help='The user whose objects will be listed')
-    parser_create_dataset.add_argument('--host', help='The server from which objects will be listed')
-    parser_create_dataset.add_argument('--api-key', help='The API key used to authenticate')
     parser_create_dataset.add_argument('--json', help='Optional: A well formatted Conduce entities JSON file')
     parser_create_dataset.add_argument('--csv', help='Optional: A CSV file that can be parsed as Conduce data')
     parser_create_dataset.set_defaults(func=create_dataset)
@@ -313,28 +311,26 @@ def main():
     parser_account_exists.add_argument('email', help='The email address to check')
     parser_account_exists.set_defaults(func=account_exists)
 
-    parser_set_generic_data = subparsers.add_parser('set-generic-data', help='Add generic data to Conduce dataset')
+    parser_set_generic_data = subparsers.add_parser('set-generic-data',  parents=[api_cmd_parser], help='Add generic data to Conduce dataset')
     parser_set_generic_data.add_argument('--json', help='The data to be consumed')
     parser_set_generic_data.add_argument('--csv', help='The data to be consumed')
-    parser_set_generic_data.add_argument('--user', help='The user who owns the data')
-    parser_set_generic_data.add_argument('--host', help='The server to receive the data')
-    parser_set_generic_data.add_argument('--api-key', help='The API key used to authenticate to the server')
     parser_set_generic_data.add_argument('--dataset-id', help='The ID of the dataset to send data to')
     parser_set_generic_data.add_argument('--key', help='Unique name with which to lookup data')
     parser_set_generic_data.set_defaults(func=set_generic_data)
 
-    parser_get_generic_data = subparsers.add_parser('get-generic-data', help='Retrieve generic data from Conduce dataset')
-    parser_get_generic_data.add_argument('--user', help='The user who owns the data')
-    parser_get_generic_data.add_argument('--host', help='The server on which the data resides')
-    parser_get_generic_data.add_argument('--api-key', help='The API key used to authenticate to the server')
+    parser_get_generic_data = subparsers.add_parser('get-generic-data', parents=[api_cmd_parser], help='Retrieve generic data from Conduce dataset')
     parser_get_generic_data.add_argument('--dataset-id', help='The ID of the dataset to get the data from')
     parser_get_generic_data.add_argument('--key', help='Unique ID of entity to retrieve data from')
     parser_get_generic_data.set_defaults(func=get_generic_data)
 
-    parser_get_generic_data = subparsers.add_parser('remove-dataset', help='Remove a dataset from Conduce')
-    parser_get_generic_data.add_argument('--user', help='The user who owns the data')
-    parser_get_generic_data.add_argument('--host', help='The server on which the data resides')
-    parser_get_generic_data.add_argument('--api-key', help='The API key used to authenticate to the server')
+    parser_get_generic_data = subparsers.add_parser('clear-dataset', parents=[api_cmd_parser], help='Remove all records from a Conduce dataset')
+    parser_get_generic_data.add_argument('--id', help='The ID of the dataset to be cleared')
+    parser_get_generic_data.add_argument('--name', help='The name of the dataset to be cleared')
+    parser_get_generic_data.add_argument('--regex', help='clear datasets that match the regular expression')
+    parser_get_generic_data.add_argument('--all', help='clear all matching datasets', action='store_true')
+    parser_get_generic_data.set_defaults(func=clear_dataset)
+
+    parser_get_generic_data = subparsers.add_parser('remove-dataset', parents=[api_cmd_parser], help='Remove a dataset from Conduce')
     parser_get_generic_data.add_argument('--id', help='The ID of the dataset to be removed')
     parser_get_generic_data.add_argument('--name', help='The name of the dataset to be removed')
     parser_get_generic_data.add_argument('--regex', help='Remove datasets that match the regular expression')
@@ -373,17 +369,13 @@ def main():
     parser_set_user_permissions.add_argument('user_id', help='The user UUID')
     parser_set_user_permissions.set_defaults(func=set_user_permissions)
 
-    parser_get = subparsers.add_parser('get', help='Make an arbitrary get request')
+    parser_get = subparsers.add_parser('get',  parents=[api_cmd_parser], help='Make an arbitrary get request')
     parser_get.add_argument('uri', help='The URI of the resource being requested')
-    parser_get.add_argument('--user', help='The user to which the API key belongs')
-    parser_get.add_argument('--host', help='The server on which the API key is valid')
     parser_get.set_defaults(func=send_get_request)
 
-    parser_post = subparsers.add_parser('post', help='Make an arbitrary post request')
+    parser_post = subparsers.add_parser('post', parents=[api_cmd_parser], help='Make an arbitrary post request')
     parser_post.add_argument('uri', help='The URI of the resource being requested')
     parser_post.add_argument('data', help='The data being posted')
-    parser_post.add_argument('--user', help='The user to which the API key belongs')
-    parser_post.add_argument('--host', help='The server on which the API key is valid')
     parser_post.set_defaults(func=send_post_request)
 
     args = arg_parser.parse_args()
