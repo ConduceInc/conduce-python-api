@@ -27,7 +27,7 @@ If you want to use the CLI without any setup you may fully specify your requests
 To list all datasets just:
 
 ```
-conduce-api list datasets --host=dev-app.conduce.com --user=enterprise_test@conduce.com
+conduce-api list datasets --host=app.conduce.com --user=email@example.com
 ```
 
 Otherwise you'll want to setup a configuration, either by adding `~/.conduceconfig` and entering the configuration data, or by using the `config` subcommand:
@@ -76,9 +76,9 @@ All CLI functionality is available through `conduce/api.py` and all API function
 A basic configuration looks like:
 
 ```
-default-host: dev-app.conduce.com
-default-user: enterprise_test@conduce.com
-dhl-dev@conduce.com:
+default-host: app.conduce.com
+default-user: email@example.com
+email@example.com:
   api-keys:
     dev-app: 'valid_api_key'
     prd-app: ''
