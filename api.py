@@ -261,6 +261,7 @@ def set_generic_data(dataset_id, key, data_string, **kwargs):
 
 
 def ingest_entities(dataset_id, data, **kwargs):
+    print data
     if isinstance(data, list):
         data = {'entities': data}
 

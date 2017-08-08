@@ -27,9 +27,23 @@ def format_mac_address(mac_address):
 
 
 def string_to_timestamp_ms(datetime_string, ignoretz=True):
-    EPOCH = parser.parse("1970-01-01T00:00:00.000+0000", ignoretz=ignoretz)
-    timestamp = parser.parse(datetime_string, ignoretz=ignoretz)
-    return int((timestamp - EPOCH).total_seconds() * 1000)
+    try:
+        return int(datetime_string)
+    except Exception as e:
+        pass
+
+    try:
+        return float(datetime_string) * 1000
+    except Exception as e:
+        pass
+
+    try:
+        EPOCH = parser.parse("1970-01-01T00:00:00.000+0000", ignoretz=ignoretz)
+        timestamp = parser.parse(datetime_string, ignoretz=ignoretz)
+        return int((timestamp - EPOCH).total_seconds() * 1000)
+    except ValueError as e:
+        print 'Could not parse datetime string:', datetime_string
+        raise e
 
 
 def get_csv_reader(infile, delimiter):
@@ -202,9 +216,9 @@ def get_default(field):
     if field == 'identity':
         return uuid.uuid4()
     elif field == 'timestamp_ms':
-        return string_to_timestamp_ms('2000-01-01T00:00:00')
+        return 0
     elif field == 'endtime_ms':
-        return string_to_timestamp_ms('2020-01-01T00:00:00')
+        return 0
     elif field == 'kind':
         return 'default'
     elif field == 'x':
@@ -231,7 +245,7 @@ def build_attribute(key, value):
         float_val = float(value)
         if float.is_integer(float_val):
             attribute['type'] = 'INT64'
-            attribute['int64_value'] = float_val
+            attribute['int64_value'] = int(float_val)
         else:
             attribute['type'] = 'DOUBLE'
             attribute['double_value'] = float_val
@@ -295,8 +309,8 @@ def generate_entities(raw_entities, key_map):
         entity = {
             'identity': get_field_value(raw_entity, key_map, 'identity'),
             'kind': get_field_value(raw_entity, key_map, 'kind'),
-            'timestamp_ms': get_field_value(raw_entity, key_map, 'timestamp_ms'),
-            'endtime_ms': get_field_value(raw_entity, key_map, 'endtime_ms'),
+            'timestamp_ms': string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'timestamp_ms')),
+            'endtime_ms': string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'endtime_ms')),
             'path': [{
                 'x': float(get_field_value(raw_entity, key_map, 'x')),
                 'y': float(get_field_value(raw_entity, key_map, 'y')),
