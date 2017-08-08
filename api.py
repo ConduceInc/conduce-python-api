@@ -219,13 +219,6 @@ def set_permissions(target_string, resource_id, read, write, share, **kwargs):
 def create_dataset(dataset_name, **kwargs):
     response = make_post_request(
         {'name': dataset_name}, 'datasets/create', **kwargs)
-    response_dict = json.loads(response.content)
-    if 'json' in kwargs and kwargs['json']:
-        ingest_entities(response_dict['dataset'], json.load(
-            open(kwargs['json'])), **kwargs)
-    elif 'csv' in kwargs and kwargs['csv']:
-        ingest_entities(response_dict['dataset'], util.csv_to_entities(
-            kwargs['csv']), **kwargs)
 
     return response
 
@@ -276,20 +269,21 @@ def ingest_entities(dataset_id, data, **kwargs):
     if 'location' in response.headers:
         job_id = response.headers['location']
         response = wait_for_job(job_id, **kwargs)
+
     return response
 
 
 def _clear_dataset(dataset_id, **kwargs):
     response = make_post_request(
         None, 'datasets/clear/{}'.format(dataset_id), **kwargs)
-    response.raise_for_status()
+
     return True
 
 
 def _remove_dataset(dataset_id, **kwargs):
     response = make_post_request(
         None, 'datasets/delete/{}'.format(dataset_id), **kwargs)
-    response.raise_for_status()
+
     return True
 
 
@@ -389,14 +383,14 @@ def remove_dataset(**kwargs):
 def _remove_substrate(substrate_id, **kwargs):
     response = make_post_request(
         None, 'substrates/delete/{}'.format(substrate_id), **kwargs)
-    response.raise_for_status()
+
     return True
 
 
 def _remove_resource_by_id(uri_part, resource_id, **kwargs):
     response = make_post_request(
         None, ('{}/delete/{}'.format(uri_part, resource_id)), **kwargs)
-    response.raise_for_status()
+
     return True
 
 
@@ -542,7 +536,7 @@ def create_lens(name, lens_def, orchestration_id, **kwargs):
 def _remove_template(template_id, **kwargs):
     response = make_post_request(
         None, 'templates/delete/{}'.format(template_id), **kwargs)
-    response.raise_for_status()
+
     return True
 
 

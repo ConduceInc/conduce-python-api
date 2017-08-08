@@ -59,7 +59,7 @@ def csv_to_json(infile, outfile=None, toStdout=False, **kwargs):
             reader = get_csv_reader(f, delimiter)
             out = json.dumps([row for row in reader])
     if out is None:
-        raise "No JSON output. Try again."
+        raise RuntimeError("No JSON output. Try again.")
     else:
         if toStdout is True:
             print out
@@ -218,7 +218,10 @@ def get_default(field):
 
 def get_field_value(raw_entity, key_map, field):
     if not key_map[field]['key']:
-        return get_default(field)
+        if field == 'endtime_ms':
+            return get_field_value(raw_entity, key_map, 'timestamp_ms')
+        else:
+            return get_default(field)
     return raw_entity[key_map[field]['key']]
 
 
@@ -324,6 +327,24 @@ def get_dataset_id(dataset_name, **kwargs):
             return dataset['id']
 
     return None
+
+
+def ingest_json(dataset_id, json_file, **kwargs):
+    api.ingest_entities(dataset_id, json.load(open(json_file)), **kwargs)
+
+
+def ingest_csv(dataset_id, csv_file, **kwargs):
+    api.ingest_entities(dataset_id, csv_to_entities(kwargs['csv']), **kwargs)
+
+
+def ingest_file(dataset_id, **kwargs):
+    if 'json' in kwargs and kwargs['json']:
+        return ingest_json(dataset_id, kwargs['json'], **kwargs)
+    elif 'csv' in kwargs and kwargs['csv']:
+        return ingest_csv(dataset_id, kwargs['csv'], **kwargs)
+    else:
+        raise NotImplementedError('Unrecognized file format')
+
 
 if __name__ == '__main__':
     import argparse

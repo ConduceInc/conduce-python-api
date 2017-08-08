@@ -3,6 +3,7 @@ import session
 import config
 import json
 import api
+import util
 
 
 def list_from_args(args):
@@ -17,7 +18,21 @@ def list_datasets(args):
 
 
 def create_dataset(args):
-    return api.create_dataset(args.name, **vars(args))
+    response = api.create_dataset(args.name, **vars(args))
+
+    response_dict = json.loads(response.content)
+
+    if args.json or args.csv:
+        print json.dumps(response_dict, indent=2)
+        response = util.ingest_file(response_dict['dataset'], **vars(args))
+
+    return response
+
+
+def ingest_data(args):
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    return util.ingest_file(dataset_id, **vars(args))
 
 
 def create_team(args):
@@ -265,6 +280,12 @@ def main():
     parser_create_dataset.add_argument('--csv', help='Optional: A CSV file that can be parsed as Conduce data')
     parser_create_dataset.set_defaults(func=create_dataset)
 
+    parser_ingest_data = subparsers.add_parser('ingest-data', parents=[api_cmd_parser], help='Create a Conduce dataset')
+    parser_ingest_data.add_argument('dataset_id', help='The ID of the dataset to receive the entities')
+    parser_ingest_data.add_argument('--json', help='Optional: A well formatted Conduce entities JSON file')
+    parser_ingest_data.add_argument('--csv', help='Optional: A CSV file that can be parsed as Conduce data')
+    parser_ingest_data.set_defaults(func=ingest_data)
+
     parser_team = subparsers.add_parser('team', help='Conduce team operations')
     parser_team_subparsers = parser_team.add_subparsers(help='team subcommands')
 
@@ -391,7 +412,7 @@ def main():
                 try:
                     print json.dumps(json.loads(result.content), indent=2)
                 except:
-                    print result.content
+                    print result
             else:
                 try:
                     print json.dumps(json.loads(result), indent=2)
