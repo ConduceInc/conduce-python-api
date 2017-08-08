@@ -279,6 +279,13 @@ def ingest_entities(dataset_id, data, **kwargs):
     return response
 
 
+def _clear_dataset(dataset_id, **kwargs):
+    response = make_post_request(
+        None, 'datasets/clear/{}'.format(dataset_id), **kwargs)
+    response.raise_for_status()
+    return True
+
+
 def _remove_dataset(dataset_id, **kwargs):
     response = make_post_request(
         None, 'datasets/delete/{}'.format(dataset_id), **kwargs)
@@ -303,6 +310,43 @@ def find_dataset(**kwargs):
                 found.append(dataset)
 
     return found
+
+
+def clear_dataset(**kwargs):
+    return_message = None
+    if not 'id' in kwargs:
+        kwargs['id'] = None
+    if not 'regex' in kwargs:
+        kwargs['regex'] = None
+    if not 'name' in kwargs:
+        kwargs['name'] = None
+    if not 'all' in kwargs:
+        kwargs['all'] = None
+
+    if kwargs['id']:
+        _clear_dataset(kwargs['id'], **kwargs)
+        return_message = 'cleared 1 dataset'
+    elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
+        datasets = json.loads(list_datasets(**kwargs).content)
+        to_clear = []
+        for dataset in datasets:
+            if dataset['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], dataset['name'])):
+                to_clear.append(dataset)
+        if len(to_clear) == 1:
+            _clear_dataset(to_clear[0]['id'], **kwargs)
+            return_message = 'cleared 1 dataset'
+        elif kwargs['all']:
+            for dataset in to_clear:
+                _clear_dataset(dataset['id'], **kwargs)
+            return_message = "cleared {:d} datasets".format(len(to_clear))
+        elif len(to_clear) > 1:
+            return_message = "Matching datasets:\n"
+            return_message += json.dumps(to_clear)
+            return_message += "\n\nName or regular expression matched multiple datasets.  Pass --all to clear all matching datasets."
+        else:
+            return_message = "No matching datasets found."
+
+    return return_message
 
 
 def remove_dataset(**kwargs):
