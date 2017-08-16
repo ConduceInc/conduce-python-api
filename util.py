@@ -27,9 +27,23 @@ def format_mac_address(mac_address):
 
 
 def string_to_timestamp_ms(datetime_string, ignoretz=True):
-    EPOCH = parser.parse("1970-01-01T00:00:00.000+0000", ignoretz=ignoretz)
-    timestamp = parser.parse(datetime_string, ignoretz=ignoretz)
-    return int((timestamp - EPOCH).total_seconds() * 1000)
+    try:
+        return int(datetime_string)
+    except Exception as e:
+        pass
+
+    try:
+        return float(datetime_string) * 1000
+    except Exception as e:
+        pass
+
+    try:
+        EPOCH = parser.parse("1970-01-01T00:00:00.000+0000", ignoretz=ignoretz)
+        timestamp = parser.parse(datetime_string, ignoretz=ignoretz)
+        return int((timestamp - EPOCH).total_seconds() * 1000)
+    except ValueError as e:
+        print 'Could not parse datetime string:', datetime_string
+        raise e
 
 
 def get_csv_reader(infile, delimiter):
@@ -59,7 +73,7 @@ def csv_to_json(infile, outfile=None, toStdout=False, **kwargs):
             reader = get_csv_reader(f, delimiter)
             out = json.dumps([row for row in reader])
     if out is None:
-        raise "No JSON output. Try again."
+        raise RuntimeError("No JSON output. Try again.")
     else:
         if toStdout is True:
             print out
@@ -202,9 +216,9 @@ def get_default(field):
     if field == 'identity':
         return uuid.uuid4()
     elif field == 'timestamp_ms':
-        return string_to_timestamp_ms('2000-01-01T00:00:00')
+        return 0
     elif field == 'endtime_ms':
-        return string_to_timestamp_ms('2020-01-01T00:00:00')
+        return 0
     elif field == 'kind':
         return 'default'
     elif field == 'x':
@@ -218,7 +232,10 @@ def get_default(field):
 
 def get_field_value(raw_entity, key_map, field):
     if not key_map[field]['key']:
-        return get_default(field)
+        if field == 'endtime_ms':
+            return get_field_value(raw_entity, key_map, 'timestamp_ms')
+        else:
+            return get_default(field)
     return raw_entity[key_map[field]['key']]
 
 
@@ -228,7 +245,7 @@ def build_attribute(key, value):
         float_val = float(value)
         if float.is_integer(float_val):
             attribute['type'] = 'INT64'
-            attribute['int64_value'] = float_val
+            attribute['int64_value'] = int(float_val)
         else:
             attribute['type'] = 'DOUBLE'
             attribute['double_value'] = float_val
@@ -292,8 +309,8 @@ def generate_entities(raw_entities, key_map):
         entity = {
             'identity': get_field_value(raw_entity, key_map, 'identity'),
             'kind': get_field_value(raw_entity, key_map, 'kind'),
-            'timestamp_ms': get_field_value(raw_entity, key_map, 'timestamp_ms'),
-            'endtime_ms': get_field_value(raw_entity, key_map, 'endtime_ms'),
+            'timestamp_ms': string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'timestamp_ms')),
+            'endtime_ms': string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'endtime_ms')),
             'path': [{
                 'x': float(get_field_value(raw_entity, key_map, 'x')),
                 'y': float(get_field_value(raw_entity, key_map, 'y')),
@@ -324,6 +341,24 @@ def get_dataset_id(dataset_name, **kwargs):
             return dataset['id']
 
     return None
+
+
+def ingest_json(dataset_id, json_file, **kwargs):
+    api.ingest_entities(dataset_id, json.load(open(json_file)), **kwargs)
+
+
+def ingest_csv(dataset_id, csv_file, **kwargs):
+    api.ingest_entities(dataset_id, csv_to_entities(kwargs['csv']), **kwargs)
+
+
+def ingest_file(dataset_id, **kwargs):
+    if 'json' in kwargs and kwargs['json']:
+        return ingest_json(dataset_id, kwargs['json'], **kwargs)
+    elif 'csv' in kwargs and kwargs['csv']:
+        return ingest_csv(dataset_id, kwargs['csv'], **kwargs)
+    else:
+        raise NotImplementedError('Unrecognized file format')
+
 
 if __name__ == '__main__':
     import argparse
