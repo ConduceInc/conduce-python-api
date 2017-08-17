@@ -22,19 +22,14 @@ NUM_RETRIES = 5
 WAIT_EXPONENTIAL_MULTIPLIER = 1000
 
 
-def retry_on_retryable_error(exception):
-    """Return True if we should retry, False otherwise"""
-
+def _retry_on_retryable_error(exception):
     if isinstance(exception, HTTPError) and exception.response.status_code < 500:
         return False
 
     return isinstance(exception, RETRYABLE_ERRORS)
 
 
-def deprecated(func):
-    '''This is a decorator which can be used to mark functions
-    as deprecated. It will result in a warning being emitted
-    when the function is used.'''
+def _deprecated(func):
     def new_func(*args, **kwargs):
         warnings.warn("Call to deprecated function {}.".format(func.__name__),
                       category=DeprecationWarning)
@@ -45,7 +40,7 @@ def deprecated(func):
     return new_func
 
 
-@deprecated
+@_deprecated
 def list_saved(object_to_list, **kwargs):
     return list_object(object_to_list, **kwargs)
 
@@ -101,10 +96,41 @@ def get_entity(dataset_id, entity_id, **kwargs):
 
 
 def make_get_request(fragment, **kwargs):
+    """
+    Send an HTTP GET request to a Conduce server.
+
+    Sends an HTTP GET request for the specified endpoint to a Conduce server.
+
+    Parameters
+    ----------
+    fragment : string
+        The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
+
+    **kwargs : key-value
+        Target host and user authorization parameters used to make the request.
+
+        host : string
+            The Conduce server's hostname (ex. app.conduce.com) 
+        api_key : string
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precident.
+        user : string
+            The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
+
+    Returns
+    -------
+    requests.Response
+        The HTTP response from the server.
+
+    Raises
+    ------
+    requests.HTTPError
+        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+
+    """
     return _make_get_request(compose_uri(fragment), **kwargs)
 
 
-@retry(retry_on_exception=retry_on_retryable_error, wait_exponential_multiplier=WAIT_EXPONENTIAL_MULTIPLIER, stop_max_attempt_number=NUM_RETRIES)
+@retry(retry_on_exception=_retry_on_retryable_error, wait_exponential_multiplier=WAIT_EXPONENTIAL_MULTIPLIER, stop_max_attempt_number=NUM_RETRIES)
 def _make_get_request(uri, **kwargs):
     cfg = config.get_full_config()
 
@@ -217,6 +243,25 @@ def set_permissions(target_string, resource_id, read, write, share, **kwargs):
 
 
 def create_dataset(dataset_name, **kwargs):
+    """
+    Create a new user owned dataset.
+
+    Creates a dataset with the specified name.  The dataset will be owned by the user who authorized the requested.
+
+    Parameters
+    ----------
+    dataset_name : string
+        A string used to help identify a dataset
+
+    **kwargs
+        See :py:func:`make_post_request`
+
+    Returns
+    -------
+    requests.Response
+        The HTTP response from the server in the form of a dictionary with a single key `dataset`. It's value is the datasets unique identifier (UUID).
+
+    """
     response = make_post_request(
         {'name': dataset_name}, 'datasets/create', **kwargs)
 
@@ -635,10 +680,44 @@ def create_api_key(**kwargs):
 
 
 def make_post_request(payload, fragment, **kwargs):
+    """
+    Send an HTTP POST request to a Conduce server.
+
+    Sends an HTTP POST request for the specified endpoint to a Conduce server.
+
+    Parameters
+    ----------
+    payload : dictionary
+        A dictionary representation of JSON content to be posted to the Conduce server.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/#more-complicated-post-requests>`_ for more information.
+
+    fragment : string
+        The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
+
+    **kwargs : key-value
+        Target host and user authorization parameters used to make the request.
+
+        host : string
+            The Conduce server's hostname (ex. app.conduce.com) 
+        api_key : string
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precident.
+        user : string
+            The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
+
+    Returns
+    -------
+    requests.Response
+        The HTTP response from the server.
+
+    Raises
+    ------
+    requests.HTTPError
+        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+
+    """
     return _make_post_request(payload, compose_uri(fragment), **kwargs)
 
 
-@retry(retry_on_exception=retry_on_retryable_error, wait_exponential_multiplier=WAIT_EXPONENTIAL_MULTIPLIER, stop_max_attempt_number=NUM_RETRIES)
+@retry(retry_on_exception=_retry_on_retryable_error, wait_exponential_multiplier=WAIT_EXPONENTIAL_MULTIPLIER, stop_max_attempt_number=NUM_RETRIES)
 def _make_post_request(payload, uri, **kwargs):
     cfg = config.get_full_config()
 
