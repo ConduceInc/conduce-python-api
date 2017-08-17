@@ -10,6 +10,7 @@ Welcome to Conduce Python API's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   intro
 
 
 Indices and tables
