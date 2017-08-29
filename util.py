@@ -6,6 +6,7 @@ import re
 from dateutil import parser
 import copy
 import api
+import pytz
 
 
 def walk_up_find(search_path, start_dir=os.getcwd()):
@@ -26,7 +27,7 @@ def format_mac_address(mac_address):
     return re.sub('[:-]', '', mac_address).upper().strip()
 
 
-def string_to_timestamp_ms(datetime_string, ignoretz=True):
+def string_to_timestamp_ms(datetime_string, ignoretz=True, tz=None):
     try:
         return int(datetime_string)
     except Exception as e:
@@ -37,9 +38,14 @@ def string_to_timestamp_ms(datetime_string, ignoretz=True):
     except Exception as e:
         pass
 
+    if tz is not None:
+        ignoretz = False
+
     try:
         EPOCH = parser.parse("1970-01-01T00:00:00.000+0000", ignoretz=ignoretz)
         timestamp = parser.parse(datetime_string, ignoretz=ignoretz)
+        if tz is not None:
+            timestamp = timestamp.replace(tzinfo=pytz.timezone(tz))
         return int((timestamp - EPOCH).total_seconds() * 1000)
     except ValueError as e:
         print 'Could not parse datetime string:', datetime_string
