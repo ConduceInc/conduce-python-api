@@ -64,6 +64,28 @@ def list_templates(**kwargs):
 
 
 def wait_for_job(job_id, **kwargs):
+    """
+    Wait for a job to complete.
+
+    Block execution until the completion of an asynchronous job.
+
+    Parameters
+    ----------
+    job_id : string
+        The UUID that identified the job to query.  The job ID is returned in the response header of the request that starts the job.
+    **kwargs:
+        See :py:func:`make_get_request`
+
+    Returns
+    -------
+    requests.Response
+        Returns the final response message when the job is no longer running.
+
+    Raises
+    ------
+    requests.HTTPError
+        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+    """
     while True:
         time.sleep(0.5)
         response = make_get_request(job_id, **kwargs)
@@ -323,8 +345,7 @@ def create_dataset(dataset_name, **kwargs):
     Returns
     -------
     requests.Response
-        The HTTP response from the server in the form of a dictionary with a single key `dataset`. It's value is the datasets unique identifier (UUID).
-
+        The HTTP response from the server in the form of a dictionary with a single key, `dataset`.  Its value is the dataset's unique identifier (UUID).
     """
 
     return create_json_resource('DATASET', dataset_name, {'backend': 'SAGE_BACKEND'}, **kwargs)

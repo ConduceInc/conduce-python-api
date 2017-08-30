@@ -3,22 +3,24 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Conduce Python API's documentation!
-==============================================
+==================
+Conduce Python API
+==================
+
+.. note::  This document is a work in progress.
+
+
+What's covered here
+-------------------
+Conduce is a data visualization platform design to enable users to integrate data from disparate systems and present them for analysis and discovery.
+This document provides a detailed description of the Python API and provides examples of its use.
+
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   intro
+   api_ref
 
 
-Indices and tables
-==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-.. automodule:: api
-   :members:
