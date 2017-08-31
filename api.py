@@ -110,7 +110,7 @@ def make_get_request(fragment, **kwargs):
         Target host and user authorization parameters used to make the request.
 
         host : string
-            The Conduce server's hostname (ex. app.conduce.com) 
+            The Conduce server's hostname (ex. app.conduce.com)
         api_key : string
             The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precident.
         user : string
@@ -439,31 +439,16 @@ def _remove_resource_by_id(uri_part, resource_id, **kwargs):
     return True
 
 
-def _find_resource(resource, **kwargs):
+def _find_resource(resource_type, **kwargs):
     return_message = None
 
-    if not 'resources' in kwargs:
-        resources = '{}s'.format(resource)
-    else:
-        resources = kwargs['resources']
-    if not 'resource_list' in kwargs:
-        resource_list = '{}_list'.format(resource)
-    else:
-        resource_list = kwargs['resource_list']
-    if not 'uri_part' in kwargs:
-        uri_part = resources
-    else:
-        uri_part = kwargs['uri_part']
-        del kwargs['uri_part']
+    search_uri = 'conduce/api/v2/resources/searches'
 
-    search_uri = '{}/search'.format(uri_part)
+    payload = {}
+    if 'name' in kwargs:
+        payload = {'tags': ['name:{}'.format(kwargs['name'])]}
 
-    if 'id' in kwargs:
-        payload = {'query': kwargs['id']}
-    elif 'name' in kwargs:
-        payload = {'query': kwargs['name']}
-    elif 'regex' in kwargs:
-        payload = {'query': kwargs['regex']}
+    payload['type'] = resource_type
 
     if not 'id' in kwargs:
         kwargs['id'] = None
@@ -474,11 +459,13 @@ def _find_resource(resource, **kwargs):
 
     results = json.loads(make_post_request(payload, search_uri, **kwargs).content)
     found = []
-    if resource_list in results and 'files' in results[resource_list]:
-        resource_obj_list = results[resource_list]['files']
-        for resource_obj in resource_obj_list:
-            if resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])):
-                found.append(resource_obj)
+    if 'resources' in results:
+        if kwargs['name'] is None and kwargs['regex'] is None and kwargs['id'] is None:
+            return results['resources']
+        else:
+            for resource_obj in results['resources']:
+                if resource_obj['id'] == kwargs['id'] or resource_obj['name'] == kwargs['name'] or re.match(kwargs['regex'], resource_obj['name']):
+                    found.append(resource_obj)
 
     return found
 
@@ -547,7 +534,7 @@ def _remove_resource(resource, **kwargs):
 
 
 def find_substrate(**kwargs):
-    return _find_resource('substrate', **kwargs)
+    return _find_resource('SUBSTRATE', **kwargs)
 
 
 def remove_substrate(**kwargs):
@@ -586,7 +573,7 @@ def _remove_template(template_id, **kwargs):
 
 
 def find_template(**kwargs):
-    return _find_resource('template', **kwargs)
+    return _find_resource('LENS_TEMPLATE', **kwargs)
 
 
 def remove_template(**kwargs):
@@ -651,7 +638,7 @@ def move_camera(orchestration_id, config, **kwargs):
 
 
 def find_orchestration(**kwargs):
-    return _find_resource('orchestration', **kwargs)
+    return _find_resource('ORCHESTRATION', **kwargs)
 
 
 def remove_orchestration(**kwargs):
@@ -687,7 +674,8 @@ def make_post_request(payload, fragment, **kwargs):
     Parameters
     ----------
     payload : dictionary
-        A dictionary representation of JSON content to be posted to the Conduce server.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/#more-complicated-post-requests>`_ for more information.
+        #more-complicated-post-requests>`_ for more information.
+        A dictionary representation of JSON content to be posted to the Conduce server.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
 
     fragment : string
         The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
@@ -696,7 +684,7 @@ def make_post_request(payload, fragment, **kwargs):
         Target host and user authorization parameters used to make the request.
 
         host : string
-            The Conduce server's hostname (ex. app.conduce.com) 
+            The Conduce server's hostname (ex. app.conduce.com)
         api_key : string
             The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precident.
         user : string
@@ -804,7 +792,7 @@ def _file_post_request(payload, uri, **kwargs):
 
 
 def find_asset(**kwargs):
-    return _find_resource('asset', uri_part='userassets', **kwargs)
+    return _find_resource('ASSET', uri_part='userassets', **kwargs)
 
 
 def remove_asset(**kwargs):
