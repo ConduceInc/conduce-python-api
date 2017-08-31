@@ -389,7 +389,7 @@ def _clear_dataset(dataset_id, **kwargs):
 
 
 def _remove_dataset(dataset_id, **kwargs):
-    return _remove_resource_by_id(dataset_id, **kwargs)
+    return remove_resource(dataset_id, **kwargs)
 
 
 def find_dataset(**kwargs):
@@ -485,10 +485,10 @@ def remove_dataset(**kwargs):
 
 
 def _remove_substrate(substrate_id, **kwargs):
-    return _remove_resource_by_id(substrate_id, **kwargs)
+    return remove_resource(substrate_id, **kwargs)
 
 
-def _remove_resource_by_id(resource_id, **kwargs):
+def remove_resource(resource_id, **kwargs):
     return make_delete_request('conduce/api/v2/resources?id={}&permanent={}'.format(resource_id, kwargs.get('permanent', False)), **kwargs)
 
 
@@ -536,7 +536,7 @@ def _remove_resource(resource, **kwargs):
         kwargs['all'] = None
 
     if kwargs['id']:
-        _remove_resource_by_id(kwargs['id'], **kwargs)
+        remove_resource(kwargs['id'], **kwargs)
     elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
         if kwargs['name']:
             payload = {'query': kwargs['name']}
@@ -550,11 +550,11 @@ def _remove_resource(resource, **kwargs):
                 if resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])):
                     to_remove.append(resource_obj)
             if len(to_remove) == 1:
-                _remove_resource_by_id(to_remove[0]['id'], **kwargs)
+                remove_resource(to_remove[0]['id'], **kwargs)
                 return_message = 'Removed 1 {}'.format(resource)
             elif kwargs['all']:
                 for resource_obj in to_remove:
-                    _remove_resource_by_id(resource_obj['id'], **kwargs)
+                    remove_resource(resource_obj['id'], **kwargs)
                 return_message = "Removed {:d} {}".format(
                     len(to_remove), resources)
             elif len(to_remove) > 1:
@@ -603,7 +603,7 @@ def create_lens(name, lens_def, orchestration_id, **kwargs):
 
 
 def _remove_template(template_id, **kwargs):
-    return _remove_resource_by_id(template_id, **kwargs)
+    return remove_resource(template_id, **kwargs)
 
 
 def find_template(**kwargs):
@@ -809,7 +809,7 @@ def remove_asset(**kwargs):
 
 
 def _remove_asset(asset_id, **kwargs):
-    return _remove_resource_by_id(asset_id, **kwargs)
+    return remove_resource(asset_id, **kwargs)
 
 
 def account_exists(email, **kwargs):
