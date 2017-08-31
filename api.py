@@ -579,7 +579,7 @@ def remove_substrate(**kwargs):
 
 
 def create_substrate(name, substrate_def, **kwargs):
-    return create_json_resource('SUBSTRATE', substrate_def, **kwargs)
+    return create_json_resource('SUBSTRATE', name, substrate_def, **kwargs)
 
 
 # NOTE No 'remove lens' method because they are supposedly dropped when
@@ -615,7 +615,7 @@ def remove_template(**kwargs):
 
 
 def create_template(name, template_def, **kwargs):
-    return create_json_resource('LENS_TEMPLATE', template_def, **kwargs)
+    return create_json_resource('LENS_TEMPLATE', name, template_def, **kwargs)
 
 
 def get_template(id, **kwargs):
@@ -679,8 +679,11 @@ def remove_orchestration(**kwargs):
     return _remove_resource('ORCHESTRATION', **kwargs)
 
 
-def create_json_resource(resource_type, content, **kwargs):
+def create_json_resource(resource_type, resource_name, content, **kwargs):
+    content.pop('name', None)
+
     resource_def = {
+        'name': resource_name,
         'tags': kwargs['tags']
         'type': resource_type,
         'mime': 'application/json',
@@ -690,8 +693,8 @@ def create_json_resource(resource_type, content, **kwargs):
     return make_post_request(resource_def, 'conduce/api/v2/resources', **kwargs)
 
 
-def create_orchestration(orchestration_def, **kwargs):
-    return create_json_resource('ORCHESTRATION', orchestration_def, **kwargs)
+def create_orchestration(name, orchestration_def, **kwargs):
+    return create_json_resource('ORCHESTRATION', name, orchestration_def, **kwargs)
 
 
 def save_as_orchestration(orchestration_id, saveas_orchestration_def, replace, **kwargs):
