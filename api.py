@@ -80,7 +80,7 @@ def compose_uri(fragment):
     prefix = 'conduce/api/v1'
     fragment = fragment.lstrip('/')
     uri = '{}'.format(fragment)
-    if not prefix in fragment:
+    if not 'conduce/api' in fragment:
         uri = '{}/{}'.format(prefix, fragment)
 
     return uri
