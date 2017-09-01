@@ -100,7 +100,8 @@ def set_generic_data(args):
         import util
         data = util.csv_to_json(args.csv)
     elif args.json:
-        data = args.json
+        with open(args.json) as json_file:
+            data = json.load(json_file)
 
     dataset_id = args.dataset_id
     key = args.key
