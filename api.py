@@ -7,6 +7,7 @@ import time
 import re
 import urlparse
 import base64
+import warnings
 
 from retrying import retry
 
@@ -42,24 +43,24 @@ def _deprecated(func):
 
 
 @_deprecated
-def list_saved(object_to_list, **kwargs):
-    return list_object(object_to_list, **kwargs)
-
-
 def list_object(object_to_list, **kwargs):
-    return make_get_request("conduce/api/v1/{}/list".format(object_to_list), **kwargs)
+    return list_resources(object_to_list.upper().rstrip('S'), **kwargs)
+
+
+def list_resources(resource_type, **kwargs):
+    return find_resource(resource_type, **kwargs)
 
 
 def list_datasets(**kwargs):
-    return list_object('datasets', **kwargs)
+    return list_resources('DATASET', **kwargs)
 
 
 def list_substrates(**kwargs):
-    return list_object('substrates', **kwargs)
+    return list_resources('SUBSTRATE', **kwargs)
 
 
 def list_templates(**kwargs):
-    return list_object('templates', **kwargs)
+    return list_resources('LENS_TEMPLATE', **kwargs)
 
 
 def wait_for_job(job_id, **kwargs):
@@ -325,10 +326,8 @@ def create_dataset(dataset_name, **kwargs):
         The HTTP response from the server in the form of a dictionary with a single key `dataset`. It's value is the datasets unique identifier (UUID).
 
     """
-    response = make_post_request(
-        {'name': dataset_name}, 'datasets/create', **kwargs)
 
-    return response
+    return create_json_resource('DATASET', dataset_name, {'backend': 'SAGE_BACKEND'}, **kwargs)
 
 
 def set_generic_data(dataset_id, key, data_string, **kwargs):
@@ -388,10 +387,6 @@ def _clear_dataset(dataset_id, **kwargs):
     return True
 
 
-def _remove_dataset(dataset_id, **kwargs):
-    return remove_resource(dataset_id, **kwargs)
-
-
 def find_dataset(**kwargs):
     if not 'id' in kwargs:
         kwargs['id'] = None
@@ -425,7 +420,7 @@ def clear_dataset(**kwargs):
         _clear_dataset(kwargs['id'], **kwargs)
         return_message = 'cleared 1 dataset'
     elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
-        datasets = json.loads(list_datasets(**kwargs).content)
+        datasets = list_datasets(**kwargs)
         to_clear = []
         for dataset in datasets:
             if dataset['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], dataset['name'])):
@@ -447,61 +442,16 @@ def clear_dataset(**kwargs):
     return return_message
 
 
-def remove_dataset(**kwargs):
-    return_message = None
-    if not 'id' in kwargs:
-        kwargs['id'] = None
-    if not 'regex' in kwargs:
-        kwargs['regex'] = None
-    if not 'name' in kwargs:
-        kwargs['name'] = None
-    if not 'all' in kwargs:
-        kwargs['all'] = None
-
-    if kwargs['id']:
-        _remove_dataset(kwargs['id'], **kwargs)
-        return_message = 'Removed 1 dataset'
-    elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
-        datasets = json.loads(list_datasets(**kwargs).content)
-        to_remove = []
-        for dataset in datasets:
-            if dataset['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], dataset['name'])):
-                to_remove.append(dataset)
-        if len(to_remove) == 1:
-            _remove_dataset(to_remove[0]['id'], **kwargs)
-            return_message = 'Removed 1 dataset'
-        elif kwargs['all']:
-            for dataset in to_remove:
-                _remove_dataset(dataset['id'], **kwargs)
-            return_message = "Removed {:d} datasets".format(len(to_remove))
-        elif len(to_remove) > 1:
-            return_message = "Matching datasets:\n"
-            return_message += json.dumps(to_remove)
-            return_message += "\n\nName or regular expression matched multiple datasets.  Pass --all to remove all matching datasets."
-        else:
-            return_message = "No matching datasets found."
-
-    return return_message
-
-
-def _remove_substrate(substrate_id, **kwargs):
-    return remove_resource(substrate_id, **kwargs)
-
-
-def remove_resource(resource_id, **kwargs):
-    return make_delete_request('conduce/api/v2/resources?id={}&permanent={}'.format(resource_id, kwargs.get('permanent', False)), **kwargs)
-
-
-def _find_resource(resource_type, **kwargs):
+def find_resource(resource_type, **kwargs):
     return_message = None
 
     search_uri = 'conduce/api/v2/resources/searches'
 
-    payload = {}
-    if 'name' in kwargs:
-        payload = {'tags': ['name:{}'.format(kwargs['name'])]}
-
-    payload['type'] = resource_type
+    payload = {'type': resource_type}
+    # TODO: can't query by name, uncomment the right one when it works
+    # if 'name' in kwargs:
+    #payload = {'tags': ['name:{}'.format(kwargs['name'])]}
+    #payload = {'name': kwargs['name']}
 
     if not 'id' in kwargs:
         kwargs['id'] = None
@@ -517,13 +467,17 @@ def _find_resource(resource_type, **kwargs):
             return results['resources']
         else:
             for resource_obj in results['resources']:
-                if resource_obj['id'] == kwargs['id'] or resource_obj['name'] == kwargs['name'] or re.match(kwargs['regex'], resource_obj['name']):
+                if resource_obj['id'] == kwargs['id'] or resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])):
                     found.append(resource_obj)
 
     return found
 
 
-def _remove_resource(resource, **kwargs):
+def _remove_resource(resource_id, **kwargs):
+    return make_delete_request('conduce/api/v2/resources/{}?permanent={}'.format(resource_id, kwargs.get('permanent', False)), **kwargs)
+
+
+def remove_resource(resource_type, **kwargs):
     return_message = None
 
     if not 'id' in kwargs:
@@ -536,110 +490,103 @@ def _remove_resource(resource, **kwargs):
         kwargs['all'] = None
 
     if kwargs['id']:
-        remove_resource(kwargs['id'], **kwargs)
+        _remove_resource(kwargs['id'], **kwargs)
     elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
-        if kwargs['name']:
-            payload = {'query': kwargs['name']}
-        elif kwargs['id']:
-            payload = {'query': kwargs['id']}
-        results = _find_resource(resource, **kwargs)
-        if resource_list in results and 'files' in results[resource_list]:
-            resource_obj_list = results[resource_list]['files']
-            to_remove = []
-            for resource_obj in resource_obj_list:
-                if resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])):
-                    to_remove.append(resource_obj)
-            if len(to_remove) == 1:
-                remove_resource(to_remove[0]['id'], **kwargs)
-                return_message = 'Removed 1 {}'.format(resource)
-            elif kwargs['all']:
-                for resource_obj in to_remove:
-                    remove_resource(resource_obj['id'], **kwargs)
-                return_message = "Removed {:d} {}".format(
-                    len(to_remove), resources)
-            elif len(to_remove) > 1:
-                return_message = "Matching {}:\n".format(resources)
-                return_message += json.dumps(to_remove)
-                return_message += "\n\nName or regular expression matched multiple {}.  Pass --all to remove all matching {}.".format(
-                    resources, resources)
-            else:
-                return_message = "No matching {} found.".format(resources)
+        results = find_resource(resource_type, **kwargs)
+        to_remove = []
+        for resource_obj in results:
+            if resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])):
+                to_remove.append(resource_obj)
+        if len(to_remove) == 1:
+            _remove_resource(to_remove[0]['id'], **kwargs)
+            return_message = 'Removed 1 {}'.format(resource_type)
+        elif kwargs['all']:
+            for resource_obj in to_remove:
+                _remove_resource(resource_obj['id'], **kwargs)
+            return_message = "Removed {:d} {}".format(
+                len(to_remove), resource_type)
+        elif len(to_remove) > 1:
+            return_message = "Matching {}:\n".format(resource_type)
+            return_message += json.dumps(to_remove)
+            return_message += "\n\nName or regular expression matched multiple {}.  Pass --all to remove all matching {}.".format(
+                resource_type, resource_type)
         else:
-            return_message = "The query did not match any {}.".format(resources)
+            return_message = "No matching {} found.".format(resource_type)
+    else:
+        return_message = "The query did not match any {}.".format(resource_type)
 
     return return_message
 
 
-def find_substrate(**kwargs):
-    return _find_resource('SUBSTRATE', **kwargs)
-
-
 def remove_substrate(**kwargs):
-    return _remove_resource('SUBSTRATE', **kwargs)
+    return remove_resource('SUBSTRATE', **kwargs)
+
+
+def remove_dataset(**kwargs):
+    return remove_resource('DATASET', **kwargs)
+
+
+def remove_template(**kwargs):
+    return remove_resource('LENS_TEMPLATE', **kwargs)
+
+
+def remove_asset(**kwargs):
+    return remove_resource('ASSET', **kwargs)
+
+
+def remove_orchestration(**kwargs):
+    return remove_resource('ORCHESTRATION', **kwargs)
 
 
 def create_substrate(name, substrate_def, **kwargs):
     return create_json_resource('SUBSTRATE', name, substrate_def, **kwargs)
 
 
-# NOTE No 'remove lens' method because they are supposedly dropped when
-# the orchestration is removed.
-
-def set_lens_order(lens_id_list, orchestration_id, **kwargs):
-    # NOTE Provide the lenses ordered top-to-bottom, but this API wants them
-    # the other way around!
-    ids = list(reversed(lens_id_list))
-    param = {"lens_ids": ids}
-    return make_post_request(param, '/conduce/api/v1/orchestration/{}/reorder-lenses'.format(orchestration_id), **kwargs)
+def find_orchestration(**kwargs):
+    return find_resource('ORCHESTRATION', **kwargs)
 
 
-def change_lens_opacity(orchestration_id, lens_id, opacity, **kwargs):
-    param = {"lens_id": lens_id, "opacity": opacity}
-    return make_post_request(param, '/conduce/api/v1/orchestration/{}/change-lens-opacity'.format(orchestration_id), **kwargs)
+def find_asset(**kwargs):
+    return find_resource('ASSET', **kwargs)
 
 
-def create_lens(name, lens_def, orchestration_id, **kwargs):
-    return make_post_request(lens_def, 'orchestration/{}/create-lens'.format(orchestration_id), **kwargs)
-
-
-def _remove_template(template_id, **kwargs):
-    return remove_resource(template_id, **kwargs)
+def find_substrate(**kwargs):
+    return find_resource('SUBSTRATE', **kwargs)
 
 
 def find_template(**kwargs):
-    return _find_resource('LENS_TEMPLATE', **kwargs)
-
-
-def remove_template(**kwargs):
-    return _remove_resource('LENS_TEMPLATE', **kwargs)
+    return find_resource('LENS_TEMPLATE', **kwargs)
 
 
 def create_template(name, template_def, **kwargs):
     return create_json_resource('LENS_TEMPLATE', name, template_def, **kwargs)
 
 
-def get_template(id, **kwargs):
-    return make_get_request('templates/get/{}'.format(id), **kwargs)
+def get_resource(resource_id, **kwargs):
+    fragment = 'conduce/api/v2/resources/{}'.format(resource_id)
+    if kwargs.get('raw', False):
+        fragment += '?content=raw'
+    return make_get_request(fragment, **kwargs)
 
 
-def save_template(id, template_def, **kwargs):
-    return make_post_request(template_def, 'templates/save/{}'.format(id), **kwargs)
+def _update_resource(resource_id, resource_def, **kwargs):
+    return make_put_request(resource_def, 'conduce/api/v2/resources/{}'.format(resource_id), **kwargs)
 
 
-def set_time(orchestration_id, time_def, **kwargs):
-    return make_post_request(time_def, 'orchestration/{}/set-time'.format(orchestration_id), **kwargs)
+def get_content(resource, **kwargs):
+    return json.loads(json.loads(resource)['content'])
 
 
-def set_time_fixed(orchestration_id, **kwargs):
+def get_time_fixed(time):
     time_config = {}
 
     start_ms = None
-    if 'start' in kwargs and int(kwargs['start']):
-        start_ms = kwargs['start']
+    if 'start' in time and int(time['start']):
+        start_ms = time['start']
         time_config["start"] = {"bound_value": start_ms, "type": "FIXED"}
     end_ms = None
-    if 'end' in kwargs and int(kwargs['end']):
-        end_ms = kwargs['end']
+    if 'end' in time and int(time['end']):
+        end_ms = time['end']
         time_config["end"] = {"bound_value": end_ms, "type": "FIXED"}
     if start_ms and end_ms and (end_ms < start_ms):
         # Swap the values
@@ -647,64 +594,65 @@ def set_time_fixed(orchestration_id, **kwargs):
         time_config["end"] = {"bound_value": start_ms, "type": "FIXED"}
 
     ctrl_params = {}
-    if 'initial' in kwargs and int(kwargs['initial']):
-        ctrl_params["timestamp_ms"] = kwargs['initial']
-    if 'playrate' in kwargs and int(kwargs['playrate']):
-        ctrl_params["playrate"] = kwargs['playrate']
-    if 'paused' in kwargs:
-        ctrl_params["paused"] = kwargs['paused']
+    if 'initial' in time and int(time['initial']):
+        ctrl_params["set_orch_time_ms"] = time['initial']
+    if 'playrate' in time and int(time['playrate']):
+        ctrl_params["playrate"] = time['playrate']
+    if 'paused' in time:
+        ctrl_params["paused"] = time['paused']
     if len(ctrl_params) > 0:
         time_config["time"] = ctrl_params
 
-    if len(time_config):
-        return set_time(orchestration_id, time_config, **kwargs)
-    return False
+    return time_config
 
 
-def move_camera(orchestration_id, config, **kwargs):
-    camera = {
+def get_camera(config):
+    return {
         "position": config['position'],
         "normal": {"x": 0, "y": 0, "z": 1},
         "over": {"x": 1, "y": 0, "z": 0},
         "aperture": config['aperture']
     }
-    return make_post_request(camera, 'orchestration/{}/move-camera'.format(orchestration_id), **kwargs)
 
 
-def find_orchestration(**kwargs):
-    return _find_resource('ORCHESTRATION', **kwargs)
+def is_base64_encoded(string):
+    try:
+        if base64.b64encode(base64.b64decode(string)) == string:
+            return True
+    except:
+        pass
+
+    return False
 
 
-def remove_orchestration(**kwargs):
-    return _remove_resource('ORCHESTRATION', **kwargs)
-
-
-def create_json_resource(resource_type, resource_name, content, **kwargs):
-    content.pop('name', None)
+def create_resource(resource_type, resource_name, content, mime_type, **kwargs):
+    if not (mime_type.startswith('text') or mime_type == 'application/json'):
+        if not is_base64_encoded(content):
+            print "base64 encoding content for {}".format(resource_name)
+            content = base64.b64encode(content)
 
     resource_def = {
         'name': resource_name,
-        'tags': kwargs['tags']
+        'tags': kwargs.get('tags', None),
         'type': resource_type,
-        'mime': 'application/json',
-        'content': json.dumps(content)
+        'mime': mime_type,
+        'content': content
     }
 
     return make_post_request(resource_def, 'conduce/api/v2/resources', **kwargs)
 
 
+def create_json_resource(resource_type, resource_name, content, **kwargs):
+    return create_resource(
+        resource_type,
+        resource_name,
+        json.dumps(content),
+        'application/json',
+        **kwargs)
+
+
 def create_orchestration(name, orchestration_def, **kwargs):
     return create_json_resource('ORCHESTRATION', name, orchestration_def, **kwargs)
-
-
-def save_as_orchestration(orchestration_id, saveas_orchestration_def, replace, **kwargs):
-    if replace:
-        saveas_orchestration_def["replace"] = True
-    return make_post_request(saveas_orchestration_def, 'orchestrations/save-as/{}'.format(orchestration_id), **kwargs)
-
-
-def save_orchestration(orchestration_id, **kwargs):
-    return make_post_request(None, 'orchestrations/save/{}'.format(orchestration_id), **kwargs)
 
 
 def create_api_key(**kwargs):
@@ -717,7 +665,7 @@ def make_post_request(payload, fragment, **kwargs):
     """
     Send an HTTP POST request to a Conduce server.
 
-    Sends an HTTP POST request for the specified endpoint to a Conduce server.
+    Sends an HTTP POST request for the specified endpoint to a Conduce server.  POST requests are used to create conduce resources.
 
     Parameters
     ----------
@@ -779,40 +727,190 @@ def _make_post_request(payload, uri, **kwargs):
         else:
             headers = auth
 
-        if 'orchestrations/delete' in uri:
-            headers['Origin'] = "https://{}".format(host)
         response = requests.post(url, json=payload, headers=headers)
     else:
-        if 'orchestrations/delete' in uri:
-            headers['Origin'] = "https://{}".format(host)
-        response = requests.post(
-            url, json=payload, cookies=auth, headers=headers)
+        response = requests.post(url, json=payload, cookies=auth, headers=headers)
+
     response.raise_for_status()
     return response
 
 
+def make_put_request(payload, fragment, **kwargs):
+    """
+    Send an HTTP PUT request to a Conduce server.
+
+    Sends an HTTP PUT request for the specified endpoint to a Conduce server.  PUT requests are used to replace/update Conduce resources.
+
+    Parameters
+    ----------
+    payload : dictionary
+        # more-complicated-post-requests>`_ for more information.
+        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
+
+    fragment : string
+        The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
+
+    **kwargs : key-value
+        Target host and user authorization parameters used to make the request.
+
+        host : string
+            The Conduce server's hostname (ex. app.conduce.com)
+        api_key : string
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precident.
+        user : string
+            The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
+
+    Returns
+    -------
+    requests.Response
+        The HTTP response from the server.
+
+    Raises
+    ------
+    requests.HTTPError
+        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+
+    """
+    return _make_put_request(payload, compose_uri(fragment), **kwargs)
+
+
+@retry(retry_on_exception=_retry_on_retryable_error, wait_exponential_multiplier=WAIT_EXPONENTIAL_MULTIPLIER, stop_max_attempt_number=NUM_RETRIES)
+def _make_put_request(payload, uri, **kwargs):
+    cfg = config.get_full_config()
+
+    if 'host' in kwargs and kwargs['host']:
+        host = kwargs['host']
+    else:
+        host = cfg['default-host']
+
+    if 'api_key' in kwargs and kwargs['api_key']:
+        auth = session.api_key_header(kwargs['api_key'])
+    else:
+        if 'user' in kwargs and kwargs['user']:
+            user = kwargs['user']
+        else:
+            user = cfg['default-user']
+        auth = session.get_session(host, user)
+
+    headers = {}
+    url = 'https://{}/{}'.format(host, uri)
+    if 'Authorization' in auth:
+        if 'headers' in kwargs and kwargs['headers']:
+            headers = kwargs['headers']
+            headers.update(auth)
+        else:
+            headers = auth
+
+        response = requests.put(url, json=payload, headers=headers)
+    else:
+        response = requests.put(url, json=payload, cookies=auth, headers=headers)
+
+    response.raise_for_status()
+    return response
+
+
+def make_put_request(payload, fragment, **kwargs):
+    """
+    Send an HTTP PATCH request to a Conduce server.
+
+    Sends an HTTP PATCH request for the specified endpoint to a Conduce server.  PATCH requests are used to modify Conduce resources.
+
+    Parameters
+    ----------
+    payload : dictionary
+        # more-complicated-post-requests>`_ for more information.
+        A dictionary representation of JSON content to be patched in the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
+
+    fragment : string
+        The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
+
+    **kwargs : key-value
+        Target host and user authorization parameters used to make the request.
+
+        host : string
+            The Conduce server's hostname (ex. app.conduce.com)
+        api_key : string
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precident.
+        user : string
+            The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
+
+    Returns
+    -------
+    requests.Response
+        The HTTP response from the server.
+
+    Raises
+    ------
+    requests.HTTPError
+        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+
+    """
+    return _make_put_request(payload, compose_uri(fragment), **kwargs)
+
+
+@retry(retry_on_exception=_retry_on_retryable_error, wait_exponential_multiplier=WAIT_EXPONENTIAL_MULTIPLIER, stop_max_attempt_number=NUM_RETRIES)
+def _make_put_request(payload, uri, **kwargs):
+    cfg = config.get_full_config()
+
+    if 'host' in kwargs and kwargs['host']:
+        host = kwargs['host']
+    else:
+        host = cfg['default-host']
+
+    if 'api_key' in kwargs and kwargs['api_key']:
+        auth = session.api_key_header(kwargs['api_key'])
+    else:
+        if 'user' in kwargs and kwargs['user']:
+            user = kwargs['user']
+        else:
+            user = cfg['default-user']
+        auth = session.get_session(host, user)
+
+    headers = {}
+    url = 'https://{}/{}'.format(host, uri)
+    if 'Authorization' in auth:
+        if 'headers' in kwargs and kwargs['headers']:
+            headers = kwargs['headers']
+            headers.update(auth)
+        else:
+            headers = auth
+
+        response = requests.put(url, json=payload, headers=headers)
+    else:
+        response = requests.put(url, json=payload, cookies=auth, headers=headers)
+
+    response.raise_for_status()
+    return response
+
+
+def update_orchestration(resource, **kwargs):
+    return update_resource(resource, **kwargs)
+
+
+def update_substrate(resource, **kwargs):
+    return update_resource(resource, **kwargs)
+
+
+def update_template(resource, **kwargs):
+    return update_resource(resource, **kwargs)
+
+
+def update_asset(resource, **kwargs):
+    return update_resource(resource, **kwargs)
+
+
+def update_resource(resource, **kwargs):
+    resource['revision'] += 1
+    return _update_resource(resource['id'], resource, **kwargs)
+
+
 def create_asset(name, content, mime_type, **kwargs):
-    resource_def = {
-        'name': name,
-        'tags': kwargs['tags']
-        'type': 'ASSET',
-        'mime': mime_type,
-        'content': base64.b64encode(bytes(content, 'utf-8'))
-    }
-
-    return make_post_request(resource_def, 'conduce/api/v2/resources', **kwargs)
-
-
-def find_asset(**kwargs):
-    return _find_resource('ASSET', uri_part='userassets', **kwargs)
-
-
-def remove_asset(**kwargs):
-    return _remove_resource('ASSET', uri_part='userassets', **kwargs)
-
-
-def _remove_asset(asset_id, **kwargs):
-    return remove_resource(asset_id, **kwargs)
+    return create_resource(
+        'ASSET',
+        name,
+        content,
+        mime_type,
+        **kwargs)
 
 
 def account_exists(email, **kwargs):

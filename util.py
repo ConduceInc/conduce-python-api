@@ -341,7 +341,7 @@ def dict_to_entities(raw_entities):
 
 
 def get_dataset_id(dataset_name, **kwargs):
-    datasets = json.loads(api.list_datasets(**kwargs).content)
+    datasets = api.list_datasets(**kwargs)
     for dataset in datasets:
         if dataset['name'] == dataset_name:
             return dataset['id']

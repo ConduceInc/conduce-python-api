@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="conduce",
-    version="0.2.1",
+    version="2.0.1",
     description="Python Distribution Utilities",
     author="Conduce",
     author_email="support@conduce.com",

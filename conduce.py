@@ -10,7 +10,10 @@ def list_from_args(args):
     object_to_list = args.object_to_list
     del vars(args)['object_to_list']
 
-    return api.list_object(object_to_list, **vars(args))
+    if object_to_list.lower() == "lenses" or object_to_list.lower() == "templates":
+        object_to_list = "LENS_TEMPLATE"
+
+    return api.list_resources(object_to_list.upper().rstrip('S'), **vars(args))
 
 
 def list_datasets(args):
@@ -410,12 +413,12 @@ def main():
                 print result.headers
             if hasattr(result, 'content'):
                 try:
-                    print json.dumps(json.loads(result.content), indent=2)
+                    print json.dumps(result.content, indent=2)
                 except:
-                    print result
+                    print result.content
             else:
                 try:
-                    print json.dumps(json.loads(result), indent=2)
+                    print json.dumps(result, indent=2)
                 except:
                     print result
     except requests.exceptions.HTTPError as e:
