@@ -48,7 +48,7 @@ def list_object(object_to_list, **kwargs):
 
 
 def list_resources(resource_type, **kwargs):
-    return find_resource(resource_type, **kwargs)
+    return find_resource(type=resource_type, **kwargs)
 
 
 def list_datasets(**kwargs):
@@ -387,24 +387,6 @@ def _clear_dataset(dataset_id, **kwargs):
     return True
 
 
-def find_dataset(**kwargs):
-    if not 'id' in kwargs:
-        kwargs['id'] = None
-    if not 'regex' in kwargs:
-        kwargs['regex'] = None
-    if not 'name' in kwargs:
-        kwargs['name'] = None
-
-    found = []
-    if kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
-        datasets = json.loads(list_datasets(**kwargs).content)
-        for dataset in datasets:
-            if dataset['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], dataset['name'])) or dataset['id'] == kwargs['id']:
-                found.append(dataset)
-
-    return found
-
-
 def clear_dataset(**kwargs):
     return_message = None
     if not 'id' in kwargs:
@@ -442,16 +424,24 @@ def clear_dataset(**kwargs):
     return return_message
 
 
-def find_resource(resource_type, **kwargs):
+def find_resource(**kwargs):
     return_message = None
 
     search_uri = 'conduce/api/v2/resources/searches'
 
-    payload = {'type': resource_type}
-    # TODO: can't query by name, uncomment the right one when it works
-    # if 'name' in kwargs:
-    #payload = {'tags': ['name:{}'.format(kwargs['name'])]}
-    #payload = {'name': kwargs['name']}
+    if kwargs.get('content', None) is not None:
+        search_uri += '?content={}'.format(kwargs.get('content', None))
+
+    payload = {}
+    if kwargs.get('type', None) is not None:
+        payload.update({'type': kwargs.get('type', None)})
+    # TODO: uncomment when fix is pushed to PRD
+    # if kwargs.get('name', None) is not None:
+    #    payload.update({'name': kwargs.get('name', None)})
+    if kwargs.get('mime', None) is not None:
+        payload.update({'mime': kwargs.get('mime', None)})
+    if kwargs.get('tags', None) is not None:
+        payload.update({'tags': kwargs.get('tags', None)})
 
     if not 'id' in kwargs:
         kwargs['id'] = None
@@ -461,6 +451,10 @@ def find_resource(resource_type, **kwargs):
         kwargs['name'] = None
 
     results = json.loads(make_post_request(payload, search_uri, **kwargs).content)
+
+    if kwargs.get('content', None) == 'id':
+        return results['resource_ids']
+
     found = []
     if 'resources' in results:
         if kwargs['name'] is None and kwargs['regex'] is None and kwargs['id'] is None:
@@ -492,7 +486,7 @@ def remove_resource(resource_type, **kwargs):
     if kwargs['id']:
         _remove_resource(kwargs['id'], **kwargs)
     elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
-        results = find_resource(resource_type, **kwargs)
+        results = find_resource(type=resource_type, **kwargs)
         to_remove = []
         for resource_obj in results:
             if resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])):
@@ -543,19 +537,23 @@ def create_substrate(name, substrate_def, **kwargs):
 
 
 def find_orchestration(**kwargs):
-    return find_resource('ORCHESTRATION', **kwargs)
+    return find_resource(type='ORCHESTRATION', **kwargs)
 
 
 def find_asset(**kwargs):
-    return find_resource('ASSET', **kwargs)
+    return find_resource(type='ASSET', **kwargs)
 
 
 def find_substrate(**kwargs):
-    return find_resource('SUBSTRATE', **kwargs)
+    return find_resource(type='SUBSTRATE', **kwargs)
 
 
 def find_template(**kwargs):
-    return find_resource('LENS_TEMPLATE', **kwargs)
+    return find_resource(type='LENS_TEMPLATE', **kwargs)
+
+
+def find_dataset(**kwargs):
+    return find_resource(type='DATASET', **kwargs)
 
 
 def create_template(name, template_def, **kwargs):
