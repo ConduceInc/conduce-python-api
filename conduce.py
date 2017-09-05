@@ -16,6 +16,23 @@ def list_from_args(args):
     return api.list_resources(object_to_list.upper().rstrip('S'), **vars(args))
 
 
+def find_resource(args):
+    if args.type is not None:
+        resource_type = args.type
+
+        if resource_type.lower() == "lenses" or resource_type.lower() == "templates":
+            resource_type = "LENS_TEMPLATE"
+
+        args.type = resource_type.upper().rstrip('S')
+
+    resources = api.find_resource(**vars(args))
+    if args.content == 'full':
+        for resource in resources:
+            resource['content'] = json.loads(resource['content'])
+
+    return resources
+
+
 def list_datasets(args):
     return api.list_datasets(**vars(args))
 
@@ -227,6 +244,14 @@ def account_exists(args):
     return api.account_exists(email, **vars(args))
 
 
+def get_entity(args):
+    datasets = api.find_dataset(id=args.dataset_id, name=args.dataset_name, regex=args.dataset_regex, host=args.host, user=args.user, api_key=args.api_key)
+    entities = []
+    for dataset in datasets:
+        entities.append(json.loads(api.get_entity(dataset['id'], args.entity_id, host=args.host, user=args.user, api_key=args.api_key).content))
+    return entities
+
+
 def main():
     import argparse
 
@@ -273,9 +298,18 @@ def main():
     parser_config_get_api_key.add_argument('--host', help='The server on which the API key is valid')
     parser_config_get_api_key.set_defaults(func=config.get_api_key_config)
 
-    parser_config_list = subparsers.add_parser('list',  parents=[api_cmd_parser], help='List "objects" owned by user')
+    parser_config_list = subparsers.add_parser('list',  parents=[api_cmd_parser], help='List resources by type')
     parser_config_list.add_argument('object_to_list', help='Conduce object to list')
+
     parser_config_list.set_defaults(func=list_from_args)
+
+    parser_config_find = subparsers.add_parser('find',  parents=[api_cmd_parser], help='Find resources that match the given parameters')
+    parser_config_find.add_argument('--type', help='Conduce reourse type to find')
+    parser_config_find.add_argument('--name', help='The name of the dataset to query')
+    parser_config_find.add_argument('--id', help='The ID of the dataset to query')
+    parser_config_find.add_argument('--regex', help='An expression to match datasets and query')
+    parser_config_find.add_argument('--content', help='Content to retreive: id,full,meta')
+    parser_config_find.set_defaults(func=find_resource)
 
     parser_create_dataset = subparsers.add_parser('create-dataset', parents=[api_cmd_parser], help='Create a Conduce dataset')
     parser_create_dataset.add_argument('name', help='The name to be given to the new dataset')
@@ -283,11 +317,18 @@ def main():
     parser_create_dataset.add_argument('--csv', help='Optional: A CSV file that can be parsed as Conduce data')
     parser_create_dataset.set_defaults(func=create_dataset)
 
-    parser_ingest_data = subparsers.add_parser('ingest-data', parents=[api_cmd_parser], help='Create a Conduce dataset')
+    parser_ingest_data = subparsers.add_parser('ingest-data', parents=[api_cmd_parser], help='Ingest data to a Conduce dataset')
     parser_ingest_data.add_argument('dataset_id', help='The ID of the dataset to receive the entities')
     parser_ingest_data.add_argument('--json', help='Optional: A well formatted Conduce entities JSON file')
     parser_ingest_data.add_argument('--csv', help='Optional: A CSV file that can be parsed as Conduce data')
     parser_ingest_data.set_defaults(func=ingest_data)
+
+    parser_get_entity = subparsers.add_parser('get-entity', parents=[api_cmd_parser], help='Get the latest state of a Conduce entity')
+    parser_get_entity.add_argument('entity_id', help='The ID of the entity to retrieve')
+    parser_get_entity.add_argument('--dataset-name', help='The name of the dataset to query')
+    parser_get_entity.add_argument('--dataset-id', help='The ID of the dataset to query')
+    parser_get_entity.add_argument('--dataset-regex', help='An expression to match datasets and query')
+    parser_get_entity.set_defaults(func=get_entity)
 
     parser_team = subparsers.add_parser('team', help='Conduce team operations')
     parser_team_subparsers = parser_team.add_subparsers(help='team subcommands')
@@ -412,15 +453,27 @@ def main():
             if hasattr(result, 'headers'):
                 print result.headers
             if hasattr(result, 'content'):
-                try:
-                    print json.dumps(result.content, indent=2)
-                except:
-                    print result.content
+                if isinstance(result.content, str):
+                    try:
+                        print json.dumps(json.loads(result.content), indent=2)
+                    except:
+                        print result.content
+                else:
+                    try:
+                        print json.dumps(result.content, indent=2)
+                    except:
+                        print result.content
             else:
-                try:
-                    print json.dumps(result, indent=2)
-                except:
-                    print result
+                if isinstance(result, str):
+                    try:
+                        print json.dumps(json.loads(result), indent=2)
+                    except:
+                        print result
+                else:
+                    try:
+                        print json.dumps(result, indent=2)
+                    except:
+                        print result
     except requests.exceptions.HTTPError as e:
         print e
         print e.response.text
