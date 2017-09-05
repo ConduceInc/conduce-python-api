@@ -306,7 +306,7 @@ def map_keys(key_scores, keys):
     return key_map
 
 
-def generate_entities(raw_entities, key_map):
+def generate_entities(raw_entities, key_map, **kwargs):
     critical_keys = [d['key'] for d in key_map.values()]
     entities = []
     for raw_entity in raw_entities:
@@ -316,7 +316,6 @@ def generate_entities(raw_entities, key_map):
             'identity': get_field_value(raw_entity, key_map, 'identity'),
             'kind': get_field_value(raw_entity, key_map, 'kind'),
             'timestamp_ms': string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'timestamp_ms')),
-            'endtime_ms': string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'endtime_ms')),
             'path': [{
                 'x': float(get_field_value(raw_entity, key_map, 'x')),
                 'y': float(get_field_value(raw_entity, key_map, 'y')),
@@ -324,18 +323,21 @@ def generate_entities(raw_entities, key_map):
             }],
             'attrs': get_attributes(attribute_keys, raw_entity),
         }
+        if not kwargs.get('infinite', False):
+            entity['endtime_ms'] = string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'endtime_ms'))
+
         entities.append(entity)
 
     return entities
 
 
-def dict_to_entities(raw_entities):
+def dict_to_entities(raw_entities, **kwargs):
     keys = raw_entities[0].keys()
     fields = ['identity', 'kind', 'x', 'y', 'z', 'timestamp_ms', 'endtime_ms']
 
     key_scores = score_fields(raw_entities, keys)
     key_map = map_keys(key_scores, keys)
-    entities = generate_entities(raw_entities, key_map)
+    entities = generate_entities(raw_entities, key_map, **kwargs)
 
     return {'entities': entities}
 
