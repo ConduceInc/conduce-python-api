@@ -562,17 +562,18 @@ def create_template(name, template_def, **kwargs):
 
 def get_resource(resource_id, **kwargs):
     fragment = 'conduce/api/v2/resources/{}'.format(resource_id)
-    if kwargs.get('raw', False):
+    if kwargs.get('raw', False) == True:
         fragment += '?content=raw'
-    return make_get_request(fragment, **kwargs)
+
+    response = make_get_request(fragment, **kwargs).content
+    if kwargs.get('raw', False) == False:
+        response = json.loads(response)
+
+    return response
 
 
 def _update_resource(resource_id, resource_def, **kwargs):
-    return make_put_request(resource_def, 'conduce/api/v2/resources/{}'.format(resource_id), **kwargs)
-
-
-def get_content(resource, **kwargs):
-    return json.loads(json.loads(resource)['content'])
+    return json.loads(make_put_request(resource_def, 'conduce/api/v2/resources/{}'.format(resource_id), **kwargs).content)
 
 
 def get_time_fixed(time):
@@ -637,7 +638,7 @@ def create_resource(resource_type, resource_name, content, mime_type, **kwargs):
         'content': content
     }
 
-    return make_post_request(resource_def, 'conduce/api/v2/resources', **kwargs)
+    return json.loads(make_post_request(resource_def, 'conduce/api/v2/resources', **kwargs).content)
 
 
 def create_json_resource(resource_type, resource_name, content, **kwargs):
