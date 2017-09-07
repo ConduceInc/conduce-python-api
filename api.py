@@ -808,7 +808,7 @@ def _make_put_request(payload, uri, **kwargs):
     return response
 
 
-def make_put_request(payload, fragment, **kwargs):
+def make_patch_request(payload, fragment, **kwargs):
     """
     Send an HTTP PATCH request to a Conduce server.
 
@@ -844,11 +844,11 @@ def make_put_request(payload, fragment, **kwargs):
         Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
 
     """
-    return _make_put_request(payload, compose_uri(fragment), **kwargs)
+    return _make_patch_request(payload, compose_uri(fragment), **kwargs)
 
 
 @retry(retry_on_exception=_retry_on_retryable_error, wait_exponential_multiplier=WAIT_EXPONENTIAL_MULTIPLIER, stop_max_attempt_number=NUM_RETRIES)
-def _make_put_request(payload, uri, **kwargs):
+def _make_patch_request(payload, uri, **kwargs):
     cfg = config.get_full_config()
 
     if 'host' in kwargs and kwargs['host']:
@@ -874,9 +874,9 @@ def _make_put_request(payload, uri, **kwargs):
         else:
             headers = auth
 
-        response = requests.put(url, json=payload, headers=headers)
+        response = requests.patch(url, json=payload, headers=headers)
     else:
-        response = requests.put(url, json=payload, cookies=auth, headers=headers)
+        response = requests.patch(url, json=payload, cookies=auth, headers=headers)
 
     response.raise_for_status()
     return response
@@ -910,6 +910,35 @@ def create_asset(name, content, mime_type, **kwargs):
         content,
         mime_type,
         **kwargs)
+
+
+def modify_asset_content(resource_id, content, mime_type, **kwargs):
+    return modify_resource_content(resource_id, content, mime_type, **kwargs)
+
+
+def modify_resource_json(resource_id, content, **kwargs):
+    return modify_resource_content(resource_id, content, 'application/json', **kwargs)
+
+
+def modify_resource_content(resource_id, content, mime_type, **kwargs):
+    if mime_type == 'application/json':
+        print "JSON encoding content for {}".format(resource_id)
+        content = json.dumps(content)
+    elif not (mime_type.startswith('text') or mime_type == 'application/json'):
+        if not is_base64_encoded(content):
+            print "base64 encoding content for {}".format(resource_id)
+            content = base64.b64encode(content)
+
+    return _modify_resource_content(resource_id, content, **kwargs)
+
+
+def _modify_resource_content(resource_id, content, **kwargs):
+    payload = [{
+        'path': '/content',
+        'value': content,
+        'op': 'add'
+    }]
+    return make_patch_request(payload, 'conduce/api/v2/resources/{}'.format(resource_id), **kwargs)
 
 
 def account_exists(email, **kwargs):
