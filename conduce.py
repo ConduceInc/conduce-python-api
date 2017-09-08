@@ -32,7 +32,7 @@ def find_resource(args):
             for resource in resources:
                 if resource.get('mime', 'invalid-mime') == 'application/json':
                     resource['content'] = json.loads(resource['content'])
-                elif 'text' not in resource:
+                elif not resource.get('mime', 'invalid-mime').startswith('text/'):
                     resource['content'] = base64.b64decode(resource['content'])
 
     return resources

@@ -617,7 +617,7 @@ def is_base64_encoded(string):
 
 
 def create_resource(resource_type, resource_name, content, mime_type, **kwargs):
-    if not (mime_type.startswith('text') or mime_type == 'application/json'):
+    if not (mime_type.startswith('text/') or mime_type == 'application/json'):
         if not is_base64_encoded(content):
             print "base64 encoding content for {}".format(resource_name)
             content = base64.b64encode(content)
@@ -916,7 +916,7 @@ def modify_resource_content(resource_id, content, mime_type, **kwargs):
     if mime_type == 'application/json':
         print "JSON encoding content for {}".format(resource_id)
         content = json.dumps(content)
-    elif not (mime_type.startswith('text') or mime_type == 'application/json'):
+    elif not (mime_type.startswith('text/') or mime_type == 'application/json'):
         if not is_base64_encoded(content):
             print "base64 encoding content for {}".format(resource_id)
             content = base64.b64encode(content)
