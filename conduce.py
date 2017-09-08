@@ -4,6 +4,7 @@ import config
 import json
 import api
 import util
+import base64
 
 
 def list_from_args(args):
@@ -26,9 +27,13 @@ def find_resource(args):
         args.type = resource_type.upper().rstrip('S')
 
     resources = api.find_resource(**vars(args))
-    if args.content == 'full':
-        for resource in resources:
-            resource['content'] = json.loads(resource['content'])
+    if args.decode:
+        if args.content == 'full':
+            for resource in resources:
+                if resource.get('mime', 'invalid-mime') == 'application/json':
+                    resource['content'] = json.loads(resource['content'])
+                elif 'text' not in resource:
+                    resource['content'] = base64.b64decode(resource['content'])
 
     return resources
 
@@ -137,6 +142,10 @@ def get_generic_data(args):
     del vars(args)['dataset_id']
     del vars(args)['key']
     return json.dumps(api.get_generic_data(dataset_id, key, **vars(args)))
+
+
+def remove_resource(args):
+    return api.remove_resource(**vars(args))
 
 
 def remove_dataset(args):
@@ -310,6 +319,7 @@ def main():
     parser_config_find.add_argument('--id', help='The ID of the dataset to query')
     parser_config_find.add_argument('--regex', help='An expression to match datasets and query')
     parser_config_find.add_argument('--content', help='Content to retreive: id,full,meta')
+    parser_config_find.add_argument('--decode', action='store_true', help='Decode base64 and JSON for full content requests')
     parser_config_find.set_defaults(func=find_resource)
 
     parser_create_dataset = subparsers.add_parser('create-dataset', parents=[api_cmd_parser], help='Create a Conduce dataset')
@@ -402,6 +412,13 @@ def main():
     parser_get_generic_data.add_argument('--regex', help='Remove datasets that match the regular expression')
     parser_get_generic_data.add_argument('--all', help='Remove all matching datasets', action='store_true')
     parser_get_generic_data.set_defaults(func=remove_dataset)
+
+    parser_get_generic_data = subparsers.add_parser('remove', parents=[api_cmd_parser], help='Remove a resource from Conduce')
+    parser_get_generic_data.add_argument('--id', help='The ID of the resource to be removed')
+    parser_get_generic_data.add_argument('--name', help='The name of the resource to be removed')
+    parser_get_generic_data.add_argument('--regex', help='Remove resources that match the regular expression')
+    parser_get_generic_data.add_argument('--all', help='Remove all matching resources', action='store_true')
+    parser_get_generic_data.set_defaults(func=remove_resource)
 
     parser_permissions = subparsers.add_parser('permissions', help='Conduce permissions operations')
     parser_permissions_subparsers = parser_permissions.add_subparsers(help='permissions subcommands')
