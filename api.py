@@ -933,12 +933,16 @@ def modify_resource_content(resource_id, content, mime_type, **kwargs):
 
 
 def _modify_resource_content(resource_id, content, **kwargs):
-    payload = [{
-        'path': '/content',
-        'value': content,
-        'op': 'add'
-    }]
-    return make_patch_request(payload, 'conduce/api/v2/resources/{}'.format(resource_id), **kwargs)
+    # payload = [{
+    #    'path': '/content',
+    #    'value': content,
+    #    'op': 'add'
+    #}]
+    # return make_patch_request(payload, 'conduce/api/v2/resources/{}'.format(resource_id), **kwargs)
+
+    resource = get_resource(resource_id, **kwargs)
+    resource['content'] = content
+    update_resource(resource, **kwargs)
 
 
 def account_exists(email, **kwargs):
