@@ -389,14 +389,11 @@ def _clear_dataset(dataset_id, **kwargs):
 
 def clear_dataset(**kwargs):
     return_message = None
-    if not 'id' in kwargs:
-        kwargs['id'] = None
-    if not 'regex' in kwargs:
-        kwargs['regex'] = None
-    if not 'name' in kwargs:
-        kwargs['name'] = None
-    if not 'all' in kwargs:
-        kwargs['all'] = None
+
+    kwargs['id'] = kwargs.get('id')
+    kwargs['regex'] = kwargs.get('regex')
+    kwargs['name'] = kwargs.get('name')
+    kwargs['all'] = kwargs.get('all')
 
     if kwargs['id']:
         _clear_dataset(kwargs['id'], **kwargs)
@@ -405,7 +402,7 @@ def clear_dataset(**kwargs):
         datasets = list_datasets(**kwargs)
         to_clear = []
         for dataset in datasets:
-            if dataset['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], dataset['name'])):
+            if dataset.get('name') is not None and (dataset['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], dataset['name']))):
                 to_clear.append(dataset)
         if len(to_clear) == 1:
             _clear_dataset(to_clear[0]['id'], **kwargs)
@@ -429,30 +426,27 @@ def find_resource(**kwargs):
 
     search_uri = 'conduce/api/v2/resources/searches'
 
-    if kwargs.get('content', None) is not None:
-        search_uri += '?content={}'.format(kwargs.get('content', None))
+    if kwargs.get('content') is not None:
+        search_uri += '?content={}'.format(kwargs.get('content'))
 
     payload = {}
-    if kwargs.get('type', None) is not None:
-        payload.update({'type': kwargs.get('type', None)})
+    if kwargs.get('type') is not None:
+        payload.update({'type': kwargs.get('type')})
     # TODO: uncomment when fix is pushed to PRD
-    # if kwargs.get('name', None) is not None:
-    #    payload.update({'name': kwargs.get('name', None)})
-    if kwargs.get('mime', None) is not None:
-        payload.update({'mime': kwargs.get('mime', None)})
-    if kwargs.get('tags', None) is not None:
-        payload.update({'tags': kwargs.get('tags', None)})
+    # if kwargs.get('name') is not None:
+    #    payload.update({'name': kwargs.get('name')})
+    if kwargs.get('mime') is not None:
+        payload.update({'mime': kwargs.get('mime')})
+    if kwargs.get('tags') is not None:
+        payload.update({'tags': kwargs.get('tags')})
 
-    if not 'id' in kwargs:
-        kwargs['id'] = None
-    if not 'regex' in kwargs:
-        kwargs['regex'] = None
-    if not 'name' in kwargs:
-        kwargs['name'] = None
+    kwargs['id'] = kwargs.get('id')
+    kwargs['regex'] = kwargs.get('regex')
+    kwargs['name'] = kwargs.get('name')
 
     results = json.loads(make_post_request(payload, search_uri, **kwargs).content)
 
-    if kwargs.get('content', None) == 'id':
+    if kwargs.get('content') == 'id':
         return results['resource_ids']
 
     found = []
@@ -461,7 +455,7 @@ def find_resource(**kwargs):
             return results['resources']
         else:
             for resource_obj in results['resources']:
-                if resource_obj['id'] == kwargs['id'] or resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])):
+                if (resource_obj.get('id') is not None and resource_obj['id'] == kwargs['id']) or (resource_obj.get('name') is not None and (resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])))):
                     found.append(resource_obj)
 
     return found
@@ -471,32 +465,30 @@ def _remove_resource(resource_id, **kwargs):
     return make_delete_request('conduce/api/v2/resources/{}?permanent={}'.format(resource_id, kwargs.get('permanent', False)), **kwargs)
 
 
-def remove_resource(resource_type, **kwargs):
+def remove_resource(**kwargs):
     return_message = None
 
-    if not 'id' in kwargs:
-        kwargs['id'] = None
-    if not 'regex' in kwargs:
-        kwargs['regex'] = None
-    if not 'name' in kwargs:
-        kwargs['name'] = None
-    if not 'all' in kwargs:
-        kwargs['all'] = None
+    resource_type = kwargs.get('type')
+
+    kwargs['id'] = kwargs.get('id')
+    kwargs['regex'] = kwargs.get('regex')
+    kwargs['name'] = kwargs.get('name')
+    kwargs['all'] = kwargs.get('all')
 
     if kwargs['id']:
         _remove_resource(kwargs['id'], **kwargs)
     elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
-        results = find_resource(type=resource_type, **kwargs)
+        results = find_resource(**kwargs)
         to_remove = []
         for resource_obj in results:
-            if resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])):
+            if resource_obj.get('name') is not None and (resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name']))):
                 to_remove.append(resource_obj)
         if len(to_remove) == 1:
             _remove_resource(to_remove[0]['id'], **kwargs)
             return_message = 'Removed 1 {}'.format(resource_type)
         elif kwargs['all']:
             for resource_obj in to_remove:
-                _remove_resource(resource_obj['id'], **kwargs)
+                _remove_resource(resource_obj.get('id'), **kwargs)
             return_message = "Removed {:d} {}".format(
                 len(to_remove), resource_type)
         elif len(to_remove) > 1:
@@ -513,23 +505,23 @@ def remove_resource(resource_type, **kwargs):
 
 
 def remove_substrate(**kwargs):
-    return remove_resource('SUBSTRATE', **kwargs)
+    return remove_resource(type='SUBSTRATE', **kwargs)
 
 
 def remove_dataset(**kwargs):
-    return remove_resource('DATASET', **kwargs)
+    return remove_resource(type='DATASET', **kwargs)
 
 
 def remove_template(**kwargs):
-    return remove_resource('LENS_TEMPLATE', **kwargs)
+    return remove_resource(type='LENS_TEMPLATE', **kwargs)
 
 
 def remove_asset(**kwargs):
-    return remove_resource('ASSET', **kwargs)
+    return remove_resource(type='ASSET', **kwargs)
 
 
 def remove_orchestration(**kwargs):
-    return remove_resource('ORCHESTRATION', **kwargs)
+    return remove_resource(type='ORCHESTRATION', **kwargs)
 
 
 def create_substrate(name, substrate_def, **kwargs):
@@ -625,14 +617,14 @@ def is_base64_encoded(string):
 
 
 def create_resource(resource_type, resource_name, content, mime_type, **kwargs):
-    if not (mime_type.startswith('text') or mime_type == 'application/json'):
+    if not (mime_type.startswith('text/') or mime_type == 'application/json'):
         if not is_base64_encoded(content):
             print "base64 encoding content for {}".format(resource_name)
             content = base64.b64encode(content)
 
     resource_def = {
         'name': resource_name,
-        'tags': kwargs.get('tags', None),
+        'tags': kwargs.get('tags'),
         'type': resource_type,
         'mime': mime_type,
         'content': content
@@ -924,7 +916,7 @@ def modify_resource_content(resource_id, content, mime_type, **kwargs):
     if mime_type == 'application/json':
         print "JSON encoding content for {}".format(resource_id)
         content = json.dumps(content)
-    elif not (mime_type.startswith('text') or mime_type == 'application/json'):
+    elif not (mime_type.startswith('text/') or mime_type == 'application/json'):
         if not is_base64_encoded(content):
             print "base64 encoding content for {}".format(resource_id)
             content = base64.b64encode(content)
