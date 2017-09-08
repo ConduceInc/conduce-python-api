@@ -936,7 +936,7 @@ def _modify_resource_content(resource_id, content, **kwargs):
     # payload = [{
     #    'path': '/content',
     #    'value': content,
-    #    'op': 'add'
+    #    'op': 'replace'
     #}]
     # return make_patch_request(payload, 'conduce/api/v2/resources/{}'.format(resource_id), **kwargs)
 
