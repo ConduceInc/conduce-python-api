@@ -402,7 +402,7 @@ def clear_dataset(**kwargs):
         datasets = list_datasets(**kwargs)
         to_clear = []
         for dataset in datasets:
-            if dataset.get('name', 0) == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], dataset.get('name', 0))):
+            if dataset.get('name') is not None and (dataset['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], dataset['name']))):
                 to_clear.append(dataset)
         if len(to_clear) == 1:
             _clear_dataset(to_clear[0]['id'], **kwargs)
@@ -455,7 +455,7 @@ def find_resource(**kwargs):
             return results['resources']
         else:
             for resource_obj in results['resources']:
-                if resource_obj.get('id', 0) == kwargs['id'] or resource_obj.get('name', 0) == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj.get('name', 0))):
+                if (resource_obj.get('id') is not None and resource_obj['id'] == kwargs['id']) or (resource_obj.get('name') is not None and (resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])))):
                     found.append(resource_obj)
 
     return found
@@ -481,7 +481,7 @@ def remove_resource(**kwargs):
         results = find_resource(**kwargs)
         to_remove = []
         for resource_obj in results:
-            if resource_obj.get('name', 0) == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj.get('name', 0))):
+            if resource_obj.get('name') is not None and (resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name']))):
                 to_remove.append(resource_obj)
         if len(to_remove) == 1:
             _remove_resource(to_remove[0]['id'], **kwargs)
