@@ -45,11 +45,9 @@ def list_datasets(args):
 def create_dataset(args):
     response = api.create_dataset(args.name, **vars(args))
 
-    response_dict = json.loads(response.content)
-
     if args.json or args.csv:
-        print json.dumps(response_dict, indent=2)
-        response = util.ingest_file(response_dict['dataset'], **vars(args))
+        print json.dumps(response, indent=2)
+        response = util.ingest_file(response['id'], **vars(args))
 
     return response
 
