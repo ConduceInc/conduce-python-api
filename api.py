@@ -921,10 +921,10 @@ def modify_resource_content(resource_id, content, mime_type, **kwargs):
             print "base64 encoding content for {}".format(resource_id)
             content = base64.b64encode(content)
 
-    return _modify_resource_content(resource_id, content, **kwargs)
+    return _modify_resource_content(resource_id, content, mime_type, **kwargs)
 
 
-def _modify_resource_content(resource_id, content, **kwargs):
+def _modify_resource_content(resource_id, content, mime_type, **kwargs):
     # payload = [{
     #    'path': '/content',
     #    'value': content,
@@ -934,6 +934,7 @@ def _modify_resource_content(resource_id, content, **kwargs):
 
     resource = get_resource(resource_id, **kwargs)
     resource['content'] = content
+    resource['mime'] = mime_type
     update_resource(resource, **kwargs)
 
 
