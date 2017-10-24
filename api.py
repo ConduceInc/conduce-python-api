@@ -72,7 +72,7 @@ def wait_for_job(job_id, **kwargs):
     Parameters
     ----------
     job_id : string
-        The UUID that identified the job to query.  The job ID is returned in the response header of the request that starts the job.
+        The UUID that identifies the job to query.  The job ID is returned in the response header of the request that starts the job.
     **kwargs:
         See :py:func:`make_get_request`
 
@@ -682,8 +682,7 @@ def make_post_request(payload, fragment, **kwargs):
     Parameters
     ----------
     payload : dictionary
-        # more-complicated-post-requests>`_ for more information.
-        A dictionary representation of JSON content to be posted to the Conduce server.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
+        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/#more-complicated-post-requests>`_ for more information.
 
     fragment : string
         The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
@@ -756,8 +755,7 @@ def make_put_request(payload, fragment, **kwargs):
     Parameters
     ----------
     payload : dictionary
-        # more-complicated-post-requests>`_ for more information.
-        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
+        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/#more-complicated-post-requests>`_ for more information.
 
     fragment : string
         The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
@@ -830,8 +828,7 @@ def make_patch_request(payload, fragment, **kwargs):
     Parameters
     ----------
     payload : dictionary
-        # more-complicated-post-requests>`_ for more information.
-        A dictionary representation of JSON content to be patched in the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
+        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/#more-complicated-post-requests>`_ for more information.
 
     fragment : string
         The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
