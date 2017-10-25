@@ -12,7 +12,7 @@ Conduce uses a concept called entity to define objects that exist in space and t
 Creating entities
 -----------------
 
-Entities are created from user data.  The data should describe people or things that exist in some location during some time span.  Data can be ingested from static files with thousands of records or real-time streams that provide state updates in real-time.  As an example we'll ingest the following real-time shipment data into an existing dataset named ``shipments``:
+An entity is a series of samples that describe the state of and object over a period of time.  A sample is the representation of an entity's momentary state.  Samples are created from user data.  The data should describe people or things that exist in some location during some time span.  Data can be ingested from static files with thousands of records or real-time streams that provide state updates in real-time.  As an example we'll ingest the following real-time shipment data into an existing dataset named ``shipments``:
 
 .. list-table:: Source data: real-time shipment status
    :header-rows: 1
@@ -69,7 +69,7 @@ A Conduce entity requires several fields:
  **kind**
      the type or category of the object.
  **time**
-     the time at which the data describing the entity (state) is valid.  Alternatively, the time at which the entity enters the state described by the other fields.
+     The moment at which the entity state described by this sample is valid.
  **coordinate**
      A coordinate pair that defines a location in a 2D cartisian coordinate system.
  **path**
@@ -119,15 +119,11 @@ In the example above you see that the ISO-8601 date time strings were converted 
 Ingesting entities
 ------------------
 
-In order to ingest our source data we must first convert each record into a Conduce entity as described above.  Once converted, the entities are added to a list.  That list is then set to the value of key/value pair.  The resulting object is referred to as an entity set.  An entity set is a key/value pair that holds a list of entities::
+In order to ingest our source data we must first convert each record into an entity sample as described above.  Once converted, the samples are added to a list.  The list may contain samples for multiple entities.  Once we have created our sample list we call :py:func:`ingest_entities`::
 
-    entity_set = { "entities": [ entity1, entity2, ...] }
+    ingest_entities(dataset_id, sample_list, host=app.conduce.com, api-key=00000000-0000-0000-0000-000000000000)
 
-Once we have created our entity set we call :py:func:`ingest_entities`::
-
-    ingest_entities(dataset_id, entity_set, host=app.conduce.com, api-key=00000000-0000-0000-0000-000000000000)
-
-This function takes a dataset ID as the first argument.  A dataset must exist before entities can be ingested into it.  See :py:func:`create_dataset` for more information on how to create a dataset.
+This function takes a dataset ID as the first argument.  A dataset must exist before samples can be ingested.  See :py:func:`create_dataset` for more information on how to create a dataset.
 
 -----------------
 Updating entities
