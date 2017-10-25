@@ -1,5 +1,7 @@
 .. _entity-set:
 
+We should update Conduce to allow us to use entities in this way instead :ref:`conduce-entities`
+
 ================
 Conduce Entities
 ================
@@ -168,6 +170,14 @@ Modifying records
 -----------------
 
 Stuff about modifying existing records (modify API)
+
+-----------
+Particulars
+-----------
+
+The kind of an entity may change.
+Conduce will not allow an entity to exist in two different states at the same time.  That is to say the duration defined by one entity record may not overlap with the duration defined by another.
+``endtime_ms`` must be greater than or equal to ``timestamp_ms``.
 
 ---------------
 More about time
