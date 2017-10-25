@@ -63,13 +63,15 @@ An entity is a series of samples that describe the state of and object over a pe
 
 The data in this table represents the present location of 5 shipments.  Each shipment has an ID, a shipping method, a date when it was last updated and a location in geographic coordinates.  Additionally the current state and value of the shipment is documented.  A Conduce entity is able to capture and represent all of this information.  These data records will be ingested as the first samples of 5 unique entities of the ``shipments`` dataset.
 
-A Conduce entity requires several fields:
+A Conduce entity requires four fields:
  **id**
      a unique string that represents a specific object that exists.
  **kind**
      the type or category of the object.
  **time**
      The moment at which the entity state described by this sample is valid.
+
+And one of:
  **coordinate**
      A coordinate pair that defines a location in a 2D cartisian coordinate system.
  **path**
@@ -83,9 +85,11 @@ A Conduce entity requires several fields:
  **geopolygon**
      A list of geographical coordinates that define closed shape.
 
+If more than one location is defined, only one will be used.  Precidence is undefined.
+
 Optionally, a Conduce entity may contain an arbitrary list of attributes.  These may be strings, integers, or floating point numbers.
 
-A source data record maps to an entity as follows::
+A source data record maps to a sample as follows::
 
     {
         "id": <ID>,
@@ -114,6 +118,8 @@ Example (first record in table)::
     }
 
 In the example above you see that the ISO-8601 date time strings were converted to an integer.  This integer represents the number of milliseconds that have accumulated since epoch (``1970-01-01T00:00:00+00:00``)
+
+More :ref:`example sample definitions <entity-sample-definitions>`
 
 ------------------
 Ingesting entities
