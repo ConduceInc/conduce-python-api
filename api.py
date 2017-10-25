@@ -398,12 +398,8 @@ def ingest_entities(dataset_id, data, **kwargs):
     ----------
     dataset_id : string
         The UUID that identifies the dataset to modify.
-    data : list,dict
-        This argument can take one of two forms, either a list of entity dictionaries, or a dictionary with a key, `entities`, whose value is a list of entity dictionaries::
-
-            { 'entities' : list_of_entity_dicts }
-
-        See :ref:`entity-set` for documentation on how to build an entity set.
+    data : list
+        A list of entity dictionaries.  See :ref:`entity-set` for documentation on how to build an entity list.
 
     **kwargs:
         See :py:func:`make_post_request`

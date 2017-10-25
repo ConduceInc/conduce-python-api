@@ -79,7 +79,7 @@ And one of:
  **polygon**
      A list of coordinates that define a closed shape in a 2D cartisian coordinate system.
  **geocoordinate**
-     a latitude and longitude (decimal degrees) that define the location at which the entity exists. 
+     A latitude and longitude (decimal degrees) that define the location at which the entity exists.
  **geopath**
      A list of geographical coordinates that define a series of connected line segments.
  **geopolygon**

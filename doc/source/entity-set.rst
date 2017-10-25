@@ -76,6 +76,7 @@ A Conduce entity requires several fields:
      the time at which the state is no longer valid.  For sample data (data that defines an entity's state at an instant in time), the endtime_ms and timestamp_ms fields should be set to the same value.
  **path**
      one or more points (point, path, or polygon) that describe the space occupied by the entity
+
 Optionally, a Conduce entity may contain an arbitrary list of attributes.  These may be strings, integers, or floating point numbers.
 
 A source data record maps to an entity as follows::

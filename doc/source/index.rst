@@ -19,7 +19,7 @@ Conduce is a data visualization platform design to enable users to integrate dat
    :maxdepth: 2
    :caption: Contents:
 
-   api_ref
+   api-ref
 
 
 
