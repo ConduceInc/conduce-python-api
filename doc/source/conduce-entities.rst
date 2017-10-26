@@ -63,7 +63,7 @@ An entity is a series of samples that describe the state of and object over a pe
 
 The data in this table represents the present location of 5 shipments.  Each shipment has an ID, a shipping method, a date when it was last updated and a location in geographic coordinates.  Additionally the current state and value of the shipment is documented.  A Conduce entity is able to capture and represent all of this information.  These data records will be ingested as the first samples of 5 unique entities of the ``shipments`` dataset.
 
-A Conduce entity requires four fields:
+An entity sample requires four fields:
  **id**
      a unique string that represents a specific object that exists.
  **kind**
@@ -110,8 +110,8 @@ Example (first record in table)::
         "kind": "ground",
         "time": 1508840529000,
         "geocoordinate": {
-            "lat": -91.571045,
-            "lon": 38.022131
+            "lon": -91.571045,
+            "lat": 38.022131
         },
         "Value": 102325.26,
         "Status": "delivered" 
