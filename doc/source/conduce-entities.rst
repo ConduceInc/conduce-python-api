@@ -72,13 +72,13 @@ An entity sample requires four fields:
      The moment at which the entity state described by this sample is valid.
 
 And one of:
- **coordinate**
+ **point**
      A coordinate pair that defines a location in a 2D cartisian coordinate system.
  **path**
      A list of coordinates that define a series of connected line segments in a 2D cartisian coordinate system.
  **polygon**
      A list of coordinates that define a closed shape in a 2D cartisian coordinate system.
- **geocoordinate**
+ **geopoint**
      A latitude and longitude (decimal degrees) that define the location at which the entity exists.
  **geopath**
      A list of geographical coordinates that define a series of connected line segments.
@@ -95,7 +95,7 @@ A source data record maps to a sample as follows::
         "id": <ID>,
         "kind": <Method>,
         "time": <Date> (converted to an integer milliseconds since epoch, 1970-Jan-01),
-        "geocoordinate": {
+        "geopoint": {
             "lat": <Longitude>,
             "lon": <Latitude>
         },
@@ -109,7 +109,7 @@ Example (first record in table)::
         "id": 1,
         "kind": "ground",
         "time": 1508840529000,
-        "geocoordinate": {
+        "geopoint": {
             "lon": -91.571045,
             "lat": 38.022131
         },
