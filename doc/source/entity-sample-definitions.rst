@@ -78,7 +78,7 @@ A geographic sample could also be represented with a point sample.::
         },
     }
 
-This same patter follows for the other location types.  The "geo" types provide a convenient way to specify latitude and longitude.
+This same pattern follows for the other location types.  The "geo" types provide a convenient way to specify latitude and longitude.
 
 
 --------------------
@@ -130,7 +130,7 @@ A geographic path sample describes a connected sequence of points in geographic 
 Polygon sample
 --------------------
 
-A path sample describes a closed sequence of points.  A polygon requires three points.::
+A polygon sample describes a closed sequence of points.  A polygon requires at least three points.  The last point in the list is implicitly connected to the first.::
 
     {
         "id": 1,
@@ -155,7 +155,7 @@ A path sample describes a closed sequence of points.  A polygon requires three p
 GeoPolygon sample
 --------------------
 
-A geographic path sample describes a closed sequence of points in geographic coordinates.  A polygon requires three points.::
+A geographic polygon sample describes a closed sequence of points in geographic coordinates.  Otherwise it has the same requirements as a polygon sample.::
 
     {
         "id": 1,
@@ -197,4 +197,4 @@ Attributes are used to define characteristics of entities not encompassed by the
         "pressure": 12
     }
 
-Here we've extended the entity sample from the previous example with attributes that further define the entity.  Each attribute can be used to effect how an entity is rendered in Conduce.
+Here we've extended the entity sample from the previous example with attributes that further define the entity.  Each attribute can be used to affect how an entity is rendered in Conduce.
