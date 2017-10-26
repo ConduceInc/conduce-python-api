@@ -125,11 +125,11 @@ More :ref:`example sample definitions <entity-sample-definitions>`
 Ingesting entities
 ------------------
 
-In order to ingest our source data we must first convert each record into an entity sample as described above.  Once converted, the samples are added to a list.  The list may contain samples for multiple entities.  Once we have created our sample list we call :py:func:`ingest_entities`::
+In order to ingest our source data we must first convert each record into an entity sample as described above.  Once converted, the samples are added to a list.  The list may contain samples for multiple entities.  Once we have created our sample list we call :py:func:`api.ingest_entities`::
 
     ingest_entities(dataset_id, sample_list, host=app.conduce.com, api-key=00000000-0000-0000-0000-000000000000)
 
-This function takes a dataset ID as the first argument.  A dataset must exist before samples can be ingested.  See :py:func:`create_dataset` for more information on how to create a dataset.
+This function takes a dataset ID as the first argument.  A dataset must exist before samples can be ingested.  See :py:func:`api.create_dataset` for more information on how to create a dataset.
 
 -----------------
 Updating entities

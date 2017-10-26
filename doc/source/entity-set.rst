@@ -135,11 +135,11 @@ In order to ingest our source data we must first convert each record into a Cond
 
     entity_set = { "entities": [ entity1, entity2, ...] }
 
-Once we have created our entity set we call :py:func:`ingest_entities`::
+Once we have created our entity set we call :py:func:`api.ingest_entities`::
 
     ingest_entities(dataset_id, entity_set, host=app.conduce.com, api-key=00000000-0000-0000-0000-000000000000)
 
-This function takes a dataset ID as the first argument.  A dataset must exist before entities can be ingested into it.  See :py:func:`create_dataset` for more information on how to create a dataset.
+This function takes a dataset ID as the first argument.  A dataset must exist before entities can be ingested into it.  See :py:func:`api.create_dataset` for more information on how to create a dataset.
 
 -----------------
 Updating entities
