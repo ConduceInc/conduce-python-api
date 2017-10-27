@@ -78,14 +78,8 @@ And one of:
      A list of coordinates that define a series of connected line segments in a 2D cartisian coordinate system.
  **polygon**
      A list of coordinates that define a closed shape in a 2D cartisian coordinate system.
- **geopoint**
-     A latitude and longitude (decimal degrees) that define the location at which the entity exists.
- **geopath**
-     A list of geographical coordinates that define a series of connected line segments.
- **geopolygon**
-     A list of geographical coordinates that define closed shape.
 
-If more than one location is defined, only one will be used.  Precidence is undefined.
+Each can be specified in ``(x,y)`` or ``(latitude,longitude)``. If coordinate types are mixed or multiple coordinate types are specified an error will result.  If more than one location is defined, only one will be used.  Precidence is undefined.
 
 Optionally, a Conduce entity may contain an arbitrary list of attributes.  These may be strings, integers, or floating point numbers.
 
@@ -95,7 +89,7 @@ A source data record maps to a sample as follows::
         "id": <ID>,
         "kind": <Method>,
         "time": <Date> (converted to an integer milliseconds since epoch, 1970-Jan-01),
-        "geopoint": {
+        "point": {
             "lat": <Longitude>,
             "lon": <Latitude>
         },
@@ -109,7 +103,7 @@ Example (first record in table)::
         "id": 1,
         "kind": "ground",
         "time": 1508840529000,
-        "geopoint": {
+        "point": {
             "lon": -91.571045,
             "lat": 38.022131
         },
@@ -160,6 +154,6 @@ Stuff about updating the state of an entity (append API)
 Particulars
 -----------
 
-The kind of an entity may change.
-Conduce will not allow an entity to exist in two different states at the same time.  That is to say that two samples describing the same entity cannot coincide. 
++ The kind of an entity may change.
++ Conduce will not allow an entity to exist in two different states at the same time.  That is to say that two samples describing the same entity cannot have the same timestamp. 
 

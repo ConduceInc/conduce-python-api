@@ -19,12 +19,6 @@ And one of the following location fields:
      A list of coordinates that define a series of connected line segments in a 2D cartisian coordinate system.
  **polygon**
      A list of coordinates that define a closed shape in a 2D cartisian coordinate system.
- **geopoint**
-     A latitude and longitude (decimal degrees) that define the location at which the entity exists.
- **geopath**
-     A list of geographical coordinates that define a series of connected line segments.
- **geopolygon**
-     A list of geographical coordinates that define closed shape.
 
 These options provide the user with the means to define entities with three different spatial representations and convenient structures for defining geographic coordinates.
 
@@ -50,9 +44,9 @@ A point sample defines an entity as a point in space.  Point samples are best us
         }
     }
 
---------------------
-GeoPoint sample
---------------------
+------------------------
+Geographic point sample
+------------------------
 
 A geopoint sample defines an entity at a point in space.  Coordinates are defined in latitude and longitude for convenience.::
 
@@ -60,7 +54,7 @@ A geopoint sample defines an entity at a point in space.  Coordinates are define
         "id": 1,
         "kind": "truck",
         "time": 1508840529000,
-        "geopoint": {
+        "point": {
             "lon": -91.571045,
             "lat": 38.022131
         },
@@ -103,9 +97,9 @@ A path sample describes a connected sequence of points.  A path requires at leas
         }]
     }
 
---------------------
-GeoPath sample
---------------------
+-----------------------
+Geographic path sample
+-----------------------
 
 A geographic path sample describes a connected sequence of points in geographic coordinates.  A path requires at least two points.::
 
@@ -136,7 +130,7 @@ A polygon sample describes a closed sequence of points.  A polygon requires at l
         "id": 1,
         "kind": "trace",
         "time": 1508840529000,
-        "path": [{
+        "polygon": [{
             "x": 571045,
             "y": 22131
         },{
@@ -151,9 +145,9 @@ A polygon sample describes a closed sequence of points.  A polygon requires at l
         }]
     }
 
---------------------
-GeoPolygon sample
---------------------
+------------------------------
+Geographic polygon sample
+------------------------------
 
 A geographic polygon sample describes a closed sequence of points in geographic coordinates.  Otherwise it has the same requirements as a polygon sample.::
 
@@ -161,7 +155,7 @@ A geographic polygon sample describes a closed sequence of points in geographic 
         "id": 1,
         "kind": "road",
         "time": 1508840529000,
-        "path": [{
+        "polygon": [{
             "lon": -91.571045,
             "lat": 38.022131
         },{
