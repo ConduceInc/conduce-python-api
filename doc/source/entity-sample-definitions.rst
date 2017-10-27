@@ -37,7 +37,7 @@ A point sample defines an entity as a point in space.  Point samples are best us
     {
         "id": 1,
         "kind": "ball",
-        "time": dateutil.parser.parse(1508840529000),
+        "time": datetime.datetime.now()
         "point": {
             "x": 571045,
             "y": 22131
@@ -53,7 +53,7 @@ A geopoint sample defines an entity at a point in space.  Coordinates are define
     {
         "id": 1,
         "kind": "truck",
-        "time": dateutil.parser.parse(1508840529000),
+        "time": datetime.datetime.now()
         "point": {
             "lon": -91.571045,
             "lat": 38.022131
@@ -65,7 +65,7 @@ A geographic sample could also be represented with a point sample.::
     {
         "id": 1,
         "kind": "truck",
-        "time": dateutil.parser.parse(1508840529000),
+        "time": datetime.datetime.now()
         "point": {
             "x": -91.571045,
             "y": 38.022131
@@ -84,7 +84,7 @@ A path sample describes a connected sequence of points.  A path requires at leas
     {
         "id": 1,
         "kind": "trace",
-        "time": dateutil.parser.parse(1508840529000),
+        "time": datetime.datetime.now()
         "path": [{
             "x": 571045,
             "y": 22131
@@ -106,7 +106,7 @@ A geographic path sample describes a connected sequence of points in geographic 
     {
         "id": 1,
         "kind": "road",
-        "time": dateutil.parser.parse(1508840529000),
+        "time": datetime.datetime.now()
         "path": [{
             "lon": -91.571045,
             "lat": 38.022131
@@ -129,7 +129,7 @@ A polygon sample describes a closed sequence of points.  A polygon requires at l
     {
         "id": 1,
         "kind": "trace",
-        "time": dateutil.parser.parse(1508840529000),
+        "time": datetime.datetime.now()
         "polygon": [{
             "x": 571045,
             "y": 22131
@@ -154,7 +154,7 @@ A geographic polygon sample describes a closed sequence of points in geographic 
     {
         "id": 1,
         "kind": "road",
-        "time": dateutil.parser.parse(1508840529000),
+        "time": datetime.datetime.now()
         "polygon": [{
             "lon": -91.571045,
             "lat": 38.022131
@@ -180,7 +180,7 @@ Attributes are used to define characteristics of entities not encompassed by the
     {
         "id": 1,
         "kind": "ball",
-        "time": dateutil.parser.parse(dateutil.parser.parse(1508840529000)),
+        "time": dateutil.parser.parse(dateutil.parser.parse(2017-10-27T10:23:32+05:00)),
         "point": {
             "x": 571045,
             "y": 22131
