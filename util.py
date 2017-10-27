@@ -9,6 +9,15 @@ import api
 import pytz
 
 
+def get_dataset_id(dataset_name, **kwargs):
+    datasets = api.list_datasets(**kwargs)
+    for dataset in datasets:
+        if dataset['name'] == dataset_name:
+            return dataset['id']
+
+    return None
+
+
 def walk_up_find(search_path, start_dir=os.getcwd()):
     cwd = start_dir
     while True:
@@ -27,6 +36,12 @@ def format_mac_address(mac_address):
     return re.sub('[:-]', '', mac_address).upper().strip()
 
 
+def datetime_to_timestamp_ms(dt):
+    tz_naive = dt.tzinfo is None or dt.tzinfo.utcoffset(dt) is None
+    EPOCH = parser.parse("1970-01-01T00:00:00.000+0000", ignoretz=tz_naive)
+    return int((dt - EPOCH).total_seconds() * 1000)
+
+
 def string_to_timestamp_ms(datetime_string, ignoretz=True, tz=None):
     try:
         return int(datetime_string)
@@ -42,11 +57,10 @@ def string_to_timestamp_ms(datetime_string, ignoretz=True, tz=None):
         ignoretz = False
 
     try:
-        EPOCH = parser.parse("1970-01-01T00:00:00.000+0000", ignoretz=ignoretz)
         timestamp = parser.parse(datetime_string, ignoretz=ignoretz)
         if tz is not None:
             timestamp = timestamp.replace(tzinfo=pytz.timezone(tz))
-        return int((timestamp - EPOCH).total_seconds() * 1000)
+        return datetime_to_timestamp_ms(timestamp)
     except ValueError as e:
         print 'Could not parse datetime string:', datetime_string
         raise e
@@ -208,6 +222,8 @@ def get_z_score(key, value):
     score = 0
     if key == 'z' or key == 'height' or key == 'depth' or key == 'altitude':
         score += 1000
+    if key == 'alt':
+        socre += 100
 
     try:
         float(value)
@@ -222,9 +238,9 @@ def get_default(field):
     if field == 'identity':
         return uuid.uuid4()
     elif field == 'timestamp_ms':
-        return 0
+        return -2e48 - 1
     elif field == 'endtime_ms':
-        return 0
+        return 2e48 - 1
     elif field == 'kind':
         return 'default'
     elif field == 'x':
@@ -238,10 +254,7 @@ def get_default(field):
 
 def get_field_value(raw_entity, key_map, field):
     if not key_map[field]['key']:
-        if field == 'endtime_ms':
-            return get_field_value(raw_entity, key_map, 'timestamp_ms')
-        else:
-            return get_default(field)
+        return get_default(field)
     return raw_entity[key_map[field]['key']]
 
 
@@ -268,10 +281,6 @@ def get_attributes(attribute_keys, raw_entity):
         attributes.append(build_attribute(key, raw_entity[key]))
 
     return attributes
-
-
-def csv_to_entities(infile, outfile=None, toStdout=False):
-    return dict_to_entities(csv_to_json(infile))
 
 
 def score_fields(raw_entities, keys):
@@ -316,6 +325,7 @@ def generate_entities(raw_entities, key_map, **kwargs):
             'identity': get_field_value(raw_entity, key_map, 'identity'),
             'kind': get_field_value(raw_entity, key_map, 'kind'),
             'timestamp_ms': string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'timestamp_ms')),
+            'endtime_ms': string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'endtime_ms')),
             'path': [{
                 'x': float(get_field_value(raw_entity, key_map, 'x')),
                 'y': float(get_field_value(raw_entity, key_map, 'y')),
@@ -323,8 +333,10 @@ def generate_entities(raw_entities, key_map, **kwargs):
             }],
             'attrs': get_attributes(attribute_keys, raw_entity),
         }
-        if not kwargs.get('infinite', False):
-            entity['endtime_ms'] = string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'endtime_ms'))
+
+        if kwargs.get('infinite', False):
+            entity['timestamp_ms'] = string_to_timestamp_ms(get_default('timestamp_ms')),
+            entity['endtime_ms'] = string_to_timestamp_ms(get_default('endtime_ms')),
 
         entities.append(entity)
 
@@ -342,21 +354,16 @@ def dict_to_entities(raw_entities, **kwargs):
     return {'entities': entities}
 
 
-def get_dataset_id(dataset_name, **kwargs):
-    datasets = api.list_datasets(**kwargs)
-    for dataset in datasets:
-        if dataset['name'] == dataset_name:
-            return dataset['id']
-
-    return None
+def csv_to_entities(infile, outfile=None, toStdout=False):
+    return dict_to_entities(csv_to_json(infile))
 
 
 def ingest_json(dataset_id, json_file, **kwargs):
-    api.ingest_entities(dataset_id, json.load(open(json_file)), **kwargs)
+    api._ingest_entity_set(dataset_id, dict_to_entities(json.load(open(json_file))), **kwargs)
 
 
 def ingest_csv(dataset_id, csv_file, **kwargs):
-    api.ingest_entities(dataset_id, csv_to_entities(kwargs['csv']), **kwargs)
+    api._ingest_entity_set(dataset_id, csv_to_entities(kwargs['csv']), **kwargs)
 
 
 def ingest_file(dataset_id, **kwargs):
