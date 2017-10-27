@@ -69,7 +69,7 @@ An entity sample requires four fields:
  **kind**
      the type or category of the object.
  **time**
-     The moment at which the entity state described by this sample is valid.
+     A :py:class:`datetime.datetime` at which the entity state described by this sample is valid.
 
 And one of:
  **point**
@@ -88,7 +88,7 @@ A source data record maps to a sample as follows::
     {
         "id": <ID>,
         "kind": <Method>,
-        "time": <Date> (converted to an integer milliseconds since epoch, 1970-Jan-01),
+        "time": <Date> (converted to a datetime object)
         "point": {
             "lat": <Longitude>,
             "lon": <Latitude>
@@ -102,7 +102,7 @@ Example (first record in table)::
     {
         "id": 1,
         "kind": "ground",
-        "time": 1508840529000,
+        "time": dateutil.parser.parse('2017-10-24T10:22:09+00:00'),
         "point": {
             "lon": -91.571045,
             "lat": 38.022131
@@ -111,7 +111,7 @@ Example (first record in table)::
         "Status": "delivered" 
     }
 
-In the example above you see that the ISO-8601 date time strings were converted to an integer.  This integer represents the number of milliseconds that have accumulated since epoch (``1970-01-01T00:00:00+00:00``)
+In the example above you see that the ISO-8601 date time string is converted to a :py:class:`datetime.datetime` using :py:func:`dateutil.parser.parse`.  This integer represents the number of milliseconds that have accumulated since epoch (``1970-01-01T00:00:00+00:00``)
 
 More :ref:`example sample definitions <entity-sample-definitions>`
 

@@ -390,7 +390,7 @@ def set_generic_data(dataset_id, key, data_string, **kwargs):
 
 def ingest_entities(dataset_id, data, **kwargs):
     """
-    Upload an :ref:`entity set <entity-set>` to the Conduce datastore.
+    Upload an :ref:`entity set <conduce-entities>` to the Conduce datastore.
 
     A convenience method that uploads an entity set to the Conduce datastore and waits for the job to complete. This function POSTs an entity set to Conduce and :py:func:`wait_for_job` until the ingest job completes.
 
@@ -399,7 +399,7 @@ def ingest_entities(dataset_id, data, **kwargs):
     dataset_id : string
         The UUID that identifies the dataset to modify.
     data : list
-        A list of entity dictionaries.  See :ref:`entity-set` for documentation on how to build an entity list.
+        A list of entity dictionaries.  See :ref:`conduce-entities` for documentation on how to build an entity list.
 
     **kwargs:
         See :py:func:`make_post_request`
