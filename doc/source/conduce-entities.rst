@@ -12,7 +12,7 @@ Conduce uses a concept called entity to define objects that exist in space and t
 Creating entities
 -----------------
 
-An entity is a series of samples that describe the state of and object over a period of time.  A sample is the representation of an entity's momentary state.  Samples are created from user data.  The data should describe people or things that exist in some location during some time span.  Data can be ingested from static files with thousands of records or real-time streams that provide state updates in real-time.  As an example we'll ingest the following real-time shipment data into an existing dataset named ``shipments``:
+An entity is a series of samples that describe the state of and object over a period of time.  A sample is the representation of an entity's momentary state.  Samples are created from user data.  User data should describe people or things that exist in some location during some time span.  Data can be ingested from static files with thousands of records or real-time streams that provide state updates in real-time.  As an example we'll ingest the following real-time shipment data into an existing dataset named ``shipments``:
 
 .. list-table:: Source data: real-time shipment status
    :header-rows: 1
@@ -65,7 +65,7 @@ The data in this table represents the present location of 5 shipments.  Each shi
 
 An entity sample requires four fields:
  **id**
-     a unique string that represents a specific object that exists.
+     a unique string that identifies the entity described by this sample.
  **kind**
      the type or category of the object.
  **time**
@@ -79,7 +79,7 @@ And one of:
  **polygon**
      A list of coordinates that define a closed shape in a 2D cartisian coordinate system.
 
-Each can be specified in ``(x,y)`` or ``(latitude,longitude)``. If coordinate types are mixed or multiple coordinate types are specified an error will result.  If more than one location is defined, only one will be used.  Precidence is undefined.
+Each can be specified in (x,y) or (latitude,longitude).  If coordinate types are mixed or multiple coordinate types are specified, a :py:func:`KeyError` will be raised.  If more than one location type is defined, a :py:func:`KeyError` will be raised.
 
 Optionally, a Conduce entity may contain an arbitrary list of attributes.  These may be strings, integers, or floating point numbers.
 
@@ -111,7 +111,7 @@ Example (first record in table)::
         "Status": "delivered" 
     }
 
-In the example above you see that the ISO-8601 date time string is converted to a :py:class:`datetime.datetime` using :py:func:`dateutil.parser.parse`.  This integer represents the number of milliseconds that have accumulated since epoch (``1970-01-01T00:00:00+00:00``)
+In the example above the ISO-8601 date time string is converted to a :py:class:`datetime.datetime` using :py:func:`dateutil.parser.parse`.
 
 More :ref:`example sample definitions <entity-sample-definitions>`
 
