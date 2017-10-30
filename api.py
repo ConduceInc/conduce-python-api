@@ -418,7 +418,7 @@ def convert_samples_to_entity_set(sample_list):
         coordinates = []
         if 'point' in sample:
             coordinates = [convert_coordinates(sample['point'])]
-        if 'coordinates' in sample:
+        if 'path' in sample:
             if len(coordinates) > 0:
                 raise KeyError('A sample may only contain one of point, path or polygon', sample)
             if len(sample['path']) < 2:
@@ -428,7 +428,7 @@ def convert_samples_to_entity_set(sample_list):
         if 'polygon' in sample:
             if len(coordinates) > 0:
                 raise KeyError('A sample may only contain one of point, path or polygon', sample)
-            if len(sample['path']) < 3:
+            if len(sample['polygon']) < 3:
                 raise KeyError('polygons must have at least three points')
             for point in sample['polygon']:
                 coordinates.append(convert_coordinates(point))
