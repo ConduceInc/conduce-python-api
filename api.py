@@ -390,9 +390,9 @@ def set_generic_data(dataset_id, key, data_string, **kwargs):
 
 def ingest_entities(dataset_id, data, **kwargs):
     """
-    Upload an :ref:`entity set <conduce-entities>` to the Conduce datastore.
+    Upload :ref:`entities <conduce-entities>` to the Conduce datastore.
 
-    A convenience method that uploads an entity set to the Conduce datastore and waits for the job to complete. This function POSTs an entity set to Conduce and :py:func:`wait_for_job` until the ingest job completes.
+    A convenience method that adds entities to the Conduce datastore and waits for the job to complete. This function POSTs an entity set to Conduce and :py:func:`wait_for_job` until the ingest job completes.
 
     Parameters
     ----------

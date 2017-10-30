@@ -60,7 +60,7 @@ A geopoint sample defines an entity at a point in space.  Coordinates are define
         },
     }
 
-A geographic sample could also be represented with a point sample.::
+A geographic sample may also be represented in x,y (x = longitude, y = latitude) notation.::
 
     {
         "id": 1,
@@ -72,7 +72,7 @@ A geographic sample could also be represented with a point sample.::
         },
     }
 
-This same pattern follows for the other location types.  The "geo" types provide a convenient way to specify latitude and longitude.
+This same pattern follows for the other location types.  The geographic parameters provide a convenient way to specify latitude and longitude and avoid confusion with mapping to x and y.
 
 
 --------------------
