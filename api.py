@@ -64,6 +64,28 @@ def list_templates(**kwargs):
 
 
 def wait_for_job(job_id, **kwargs):
+    """
+    Wait for a job to complete.
+
+    Block execution until the completion of an asynchronous job.
+
+    Parameters
+    ----------
+    job_id : string
+        The UUID that identifies the job to query.  The job ID is returned in the response header of the request that starts the job.
+    **kwargs:
+        See :py:func:`make_get_request`
+
+    Returns
+    -------
+    requests.Response
+        Returns the final response message when the job is no longer running.
+
+    Raises
+    ------
+    requests.HTTPError
+        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+    """
     while True:
         time.sleep(0.5)
         response = make_get_request(job_id, **kwargs)
@@ -323,8 +345,7 @@ def create_dataset(dataset_name, **kwargs):
     Returns
     -------
     requests.Response
-        The HTTP response from the server in the form of a dictionary with a single key `dataset`. It's value is the datasets unique identifier (UUID).
-
+        The HTTP response from the server in the form of a dictionary with a single key, `dataset`.  Its value is the dataset's unique identifier (UUID).
     """
 
     return create_json_resource('DATASET', dataset_name, {'backend': 'SAGE_BACKEND'}, **kwargs)
@@ -368,6 +389,32 @@ def set_generic_data(dataset_id, key, data_string, **kwargs):
 
 
 def ingest_entities(dataset_id, data, **kwargs):
+    """
+    Upload :ref:`entities <conduce-entities>` to the Conduce datastore.
+
+    A convenience method that adds entities to the Conduce datastore and waits for the job to complete. This function POSTs an entity set to Conduce and :py:func:`wait_for_job` until the ingest job completes.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to modify.
+    data : list
+        A list of entity dictionaries.  See :ref:`conduce-entities` for documentation on how to build an entity list.
+
+    **kwargs:
+        See :py:func:`make_post_request`
+
+    Returns
+    -------
+    requests.Response
+        Returns an error or the final response message when the job is no longer running.
+
+    Raises
+    ------
+    requests.HTTPError
+        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+    """
+
     if isinstance(data, list):
         data = {'entities': data}
 
@@ -661,8 +708,7 @@ def make_post_request(payload, fragment, **kwargs):
     Parameters
     ----------
     payload : dictionary
-        # more-complicated-post-requests>`_ for more information.
-        A dictionary representation of JSON content to be posted to the Conduce server.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
+        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/#more-complicated-post-requests>`_ for more information.
 
     fragment : string
         The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
@@ -735,8 +781,7 @@ def make_put_request(payload, fragment, **kwargs):
     Parameters
     ----------
     payload : dictionary
-        # more-complicated-post-requests>`_ for more information.
-        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
+        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/#more-complicated-post-requests>`_ for more information.
 
     fragment : string
         The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
@@ -809,8 +854,7 @@ def make_patch_request(payload, fragment, **kwargs):
     Parameters
     ----------
     payload : dictionary
-        # more-complicated-post-requests>`_ for more information.
-        A dictionary representation of JSON content to be patched in the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
+        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/#more-complicated-post-requests>`_ for more information.
 
     fragment : string
         The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
