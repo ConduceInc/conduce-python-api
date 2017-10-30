@@ -693,7 +693,53 @@ def create_orchestration(name, orchestration_def, **kwargs):
     return create_json_resource('ORCHESTRATION', name, orchestration_def, **kwargs)
 
 
+def list_api_keys(**kwargs):
+    """
+    Get the users's API keys. 
+
+    Send an HTTP GET request to list this user's API keys.
+
+    Parameters
+    ----------
+    **kwargs
+        See :py:func:`make_get_request`
+
+    Returns
+    -------
+    requests.Response
+        Returns a list of API key dictionaries.
+
+    Raises
+    ------
+    requests.HTTPError
+        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+    """
+
+    response = make_get_request('apikeys/list', **kwargs)
+    return json.loads(response.content)
+
+
 def create_api_key(**kwargs):
+    """
+    Add an API key to a user's account.
+
+    Send an HTTP POST request for a new API key.  The API key is added to the account of the user who made the request.
+
+    Parameters
+    ----------
+    **kwargs
+        See :py:func:`make_post_request`
+
+    Returns
+    -------
+    requests.Response
+        Returns the string representation of the new API key.
+
+    Raises
+    ------
+    requests.HTTPError
+        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+    """
     response = make_post_request(
         {"description": "Generated and used by conduce-python-api"}, 'apikeys/create', **kwargs)
     return json.loads(response.content)['apikey']

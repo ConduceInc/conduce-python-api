@@ -154,6 +154,14 @@ def clear_dataset(args):
     return api.clear_dataset(**vars(args))
 
 
+def list_api_keys(args):
+    return api.list_api_keys(**vars(args))
+
+
+def create_api_key(args):
+    return api.create_api_key(**vars(args))
+
+
 def set_api_key(args):
     if args.new == True:
         args.key = api.create_api_key(**vars(args))
@@ -319,6 +327,12 @@ def main():
     parser_config_find.add_argument('--content', help='Content to retreive: id,full,meta')
     parser_config_find.add_argument('--decode', action='store_true', help='Decode base64 and JSON for full content requests')
     parser_config_find.set_defaults(func=find_resource)
+
+    parser_list_api_keys = subparsers.add_parser('list-api-keys', parents=[api_cmd_parser], help='List API keys for your account')
+    parser_list_api_keys.set_defaults(func=list_api_keys)
+
+    parser_create_api_key = subparsers.add_parser('create-api-key', parents=[api_cmd_parser], help='Create an API key for your account')
+    parser_create_api_key.set_defaults(func=create_api_key)
 
     parser_create_dataset = subparsers.add_parser('create-dataset', parents=[api_cmd_parser], help='Create a Conduce dataset')
     parser_create_dataset.add_argument('name', help='The name to be given to the new dataset')
