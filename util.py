@@ -223,7 +223,7 @@ def get_z_score(key, value):
     if key == 'z' or key == 'height' or key == 'depth' or key == 'altitude':
         score += 1000
     if key == 'alt':
-        socre += 100
+        score += 100
 
     try:
         float(value)

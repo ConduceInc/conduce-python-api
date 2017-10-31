@@ -412,9 +412,24 @@ def convert_coordinates(point):
 def convert_samples_to_entity_set(sample_list):
     conduce_keys = ['id', 'kind', 'time', 'point', 'path', 'polygon']
     entities = []
-    for sample in sample_list:
+    for idx, sample in enumerate(sample_list):
+        if not 'id' in sample:
+            raise ValueError('Error processing sample at index {}. Samples must include an ID.'.format(idx), sample)
+        if not 'kind' in sample:
+            raise ValueError('Error processing sample at index {}. Samples must include a kind field.'.format(idx), sample)
+        if not 'time' in sample:
+            raise ValueError('Error processing sample at index {}. Samples must include a time field.'.format(idx), sample)
+
+        if 'id' is None or len(sample['id']) == 0:
+            raise ValueError('Error processing sample at index {}. Invalid ID.'.format(idx), sample)
+        if 'kind' is None or len(sample['kind']) == 0:
+            raise ValueError('Error processing sample at index {}. Invalid kind.'.format(idx), sample)
+        if 'time' is None:
+            raise ValueError('Error processing sample at index {}. Invalid time.'.format(idx), sample)
+
         if not isinstance(sample['time'], datetime):
-            raise TypeError('time must be a datetime object', sample['time'])
+            raise TypeError('Error processing sample at index {}. Time must be a datetime object.'.format(idx), sample['time'])
+
         coordinates = []
         if 'point' in sample:
             coordinates = [convert_coordinates(sample['point'])]
@@ -433,20 +448,21 @@ def convert_samples_to_entity_set(sample_list):
             for point in sample['polygon']:
                 coordinates.append(convert_coordinates(point))
 
+        if coordinates == []:
+            raise ValueError('Error processing sample at index {}.  Samples must define a location (point, path, or polygon)'.format(idx), sample)
+
         sample['_kind'] = sample['kind']
         attribute_keys = [key for key in sample.keys() if key not in conduce_keys]
         attributes = util.get_attributes(attribute_keys, sample)
 
-        entity = {
+        entities.append({
             'identity': sample['id'],
             'kind': sample['kind'],
             'timestamp_ms': util.datetime_to_timestamp_ms(sample['time']),
             'endtime_ms': util.datetime_to_timestamp_ms(sample['time']),
             'path': coordinates,
             'attrs': attributes
-        }
-
-        entities.append(entity)
+        })
 
     return {'entities': entities}
 
@@ -479,13 +495,9 @@ def ingest_samples(dataset_id, sample_list, **kwargs):
     """
 
     if not isinstance(sample_list, list):
-        sample_list = [sample_list]
+        raise ValueError('sample_list must be a list', sample_list)
 
-    if 'id' and 'time' in sample_list[0]:
-        entity_set = convert_samples_to_entity_set(sample_list)
-    else:
-        raise KeyError('invalid sample list')
-
+    entity_set = convert_samples_to_entity_set(sample_list)
     return _ingest_entity_set(dataset_id, entity_set, **kwargs)
 
 
@@ -519,13 +531,7 @@ def ingest_entities(dataset_id, data, **kwargs):
     if isinstance(data, list):
         data = {'entities': data}
 
-    response = make_post_request(
-        data, 'datasets/add-data/{}'.format(dataset_id), **kwargs)
-    if 'location' in response.headers:
-        job_id = response.headers['location']
-        response = wait_for_job(job_id, **kwargs)
-
-    return response
+    return _ingest_entity_set(dataset_id, data, **kwargs)
 
 
 def _ingest_entity_set(dataset_id, entity_set, **kwargs):
