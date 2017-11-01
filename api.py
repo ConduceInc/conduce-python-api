@@ -409,6 +409,28 @@ def convert_coordinates(point):
     return coord
 
 
+def convert_geometries(sample):
+    coordinates = []
+    if 'point' in sample:
+        coordinates = [convert_coordinates(sample['point'])]
+    if 'path' in sample:
+        if len(coordinates) > 0:
+            raise KeyError('A sample may only contain one of point, path or polygon', sample)
+        if len(sample['path']) < 2:
+            raise KeyError('paths must have at least two points')
+        for point in sample['path']:
+            coordinates.append(convert_coordinates(point))
+    if 'polygon' in sample:
+        if len(coordinates) > 0:
+            raise KeyError('A sample may only contain one of point, path or polygon', sample)
+        if len(sample['polygon']) < 3:
+            raise KeyError('polygons must have at least three points')
+        for point in sample['polygon']:
+            coordinates.append(convert_coordinates(point))
+
+    return coordinates
+
+
 def convert_samples_to_entity_set(sample_list):
     conduce_keys = ['id', 'kind', 'time', 'point', 'path', 'polygon']
     entities = []
@@ -430,24 +452,7 @@ def convert_samples_to_entity_set(sample_list):
         if not isinstance(sample['time'], datetime):
             raise TypeError('Error processing sample at index {}. Time must be a datetime object.'.format(idx), sample['time'])
 
-        coordinates = []
-        if 'point' in sample:
-            coordinates = [convert_coordinates(sample['point'])]
-        if 'path' in sample:
-            if len(coordinates) > 0:
-                raise KeyError('A sample may only contain one of point, path or polygon', sample)
-            if len(sample['path']) < 2:
-                raise KeyError('paths must have at least two points')
-            for point in sample['path']:
-                coordinates.append(convert_coordinates(point))
-        if 'polygon' in sample:
-            if len(coordinates) > 0:
-                raise KeyError('A sample may only contain one of point, path or polygon', sample)
-            if len(sample['polygon']) < 3:
-                raise KeyError('polygons must have at least three points')
-            for point in sample['polygon']:
-                coordinates.append(convert_coordinates(point))
-
+        coordinates = convert_geometries(sample)
         if coordinates == []:
             raise ValueError('Error processing sample at index {}.  Samples must define a location (point, path, or polygon)'.format(idx), sample)
 
