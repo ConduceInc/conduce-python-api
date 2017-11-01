@@ -86,3 +86,34 @@ email@example.com:
 ```
 
 and is stored at `~/.conduceconfig`
+
+## Building documentation
+
+Documentation is built with Sphinx.  To install Sphinx and Sphinx extensions run:
+
+```
+pip install -r requirements-all.txt
+```
+
+to install runtime and documentation dependencies, or:
+
+```
+pip install -r requirements-docs.txt
+```
+
+if you only need to install the documentation dependencies.  Next, build the documenation:
+
+```
+cd doc
+make html
+```
+
+The documentation will be built in:
+
+```
+doc/build/html/
+```
+
+Finally, navigate to `index.html` with a web browser to view the local copy of the documentation.
+
+Official Conduce Python API documentation can be found online at: https://conduce-conduce-python-api.readthedocs-hosted.com/en/latest/
