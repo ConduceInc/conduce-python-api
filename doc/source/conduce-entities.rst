@@ -1,5 +1,10 @@
 .. _conduce-entities:
 
+.. toctree::
+    :hidden:
+
+    entity-sample-definitions
+
 ================
 Conduce Entities
 ================

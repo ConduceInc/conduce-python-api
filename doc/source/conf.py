@@ -120,6 +120,7 @@ html_sidebars = {
     ]
 }
 
+html_logo = 'images/conduce_logo.svg'
 
 # -- Options for HTMLHelp output ------------------------------------------
 
