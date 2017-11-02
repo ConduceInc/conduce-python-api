@@ -695,7 +695,7 @@ def create_orchestration(name, orchestration_def, **kwargs):
 
 def list_api_keys(**kwargs):
     """
-    Get the users's API keys. 
+    Get this users's API keys.
 
     Send an HTTP GET request to list this user's API keys.
 
@@ -721,7 +721,7 @@ def list_api_keys(**kwargs):
 
 def create_api_key(**kwargs):
     """
-    Add an API key to a user's account.
+    Add an API key to this user's account.
 
     Send an HTTP POST request for a new API key.  The API key is added to the account of the user who made the request.
 
