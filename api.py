@@ -8,6 +8,7 @@ import re
 import urlparse
 import base64
 import warnings
+from datetime import datetime
 
 from retrying import retry
 
@@ -96,7 +97,6 @@ def wait_for_job(job_id, **kwargs):
             if 'response' in msg:
                 return response
         else:
-            print response.status_code, response.text
             return response
 
 
@@ -388,6 +388,124 @@ def set_generic_data(dataset_id, key, data_string, **kwargs):
     return ingest_entities(dataset_id, {'entities': [entity]}, **kwargs)
 
 
+def convert_coordinates(point):
+    if len(point) != 2:
+        raise KeyError('A point should only have two dimensions', point)
+    if 'lat' and 'lon' in point:
+        coord = {
+            'x': float(point['lon']),
+            'y': float(point['lat'])
+        }
+    elif 'x' and 'y' in sample['point']:
+        coord = {
+            'x': float(point['x']),
+            'y': float(point['y'])
+        }
+    else:
+        raise KeyError('invalid coordinate', point)
+
+    coord['z'] = 0
+
+    return coord
+
+
+def convert_geometries(sample):
+    coordinates = []
+    if 'point' in sample:
+        coordinates = [convert_coordinates(sample['point'])]
+    if 'path' in sample:
+        if len(coordinates) > 0:
+            raise KeyError('A sample may only contain one of point, path or polygon', sample)
+        if len(sample['path']) < 2:
+            raise KeyError('paths must have at least two points')
+        for point in sample['path']:
+            coordinates.append(convert_coordinates(point))
+    if 'polygon' in sample:
+        if len(coordinates) > 0:
+            raise KeyError('A sample may only contain one of point, path or polygon', sample)
+        if len(sample['polygon']) < 3:
+            raise KeyError('polygons must have at least three points')
+        for point in sample['polygon']:
+            coordinates.append(convert_coordinates(point))
+
+    return coordinates
+
+
+def convert_samples_to_entity_set(sample_list):
+    conduce_keys = ['id', 'kind', 'time', 'point', 'path', 'polygon']
+    entities = []
+    for idx, sample in enumerate(sample_list):
+        if not 'id' in sample:
+            raise ValueError('Error processing sample at index {}. Samples must include an ID.'.format(idx), sample)
+        if not 'kind' in sample:
+            raise ValueError('Error processing sample at index {}. Samples must include a kind field.'.format(idx), sample)
+        if not 'time' in sample:
+            raise ValueError('Error processing sample at index {}. Samples must include a time field.'.format(idx), sample)
+
+        if 'id' is None or len(sample['id']) == 0:
+            raise ValueError('Error processing sample at index {}. Invalid ID.'.format(idx), sample)
+        if 'kind' is None or len(sample['kind']) == 0:
+            raise ValueError('Error processing sample at index {}. Invalid kind.'.format(idx), sample)
+        if 'time' is None:
+            raise ValueError('Error processing sample at index {}. Invalid time.'.format(idx), sample)
+
+        if not isinstance(sample['time'], datetime):
+            raise TypeError('Error processing sample at index {}. Time must be a datetime object.'.format(idx), sample['time'])
+
+        coordinates = convert_geometries(sample)
+        if coordinates == []:
+            raise ValueError('Error processing sample at index {}.  Samples must define a location (point, path, or polygon)'.format(idx), sample)
+
+        sample['_kind'] = sample['kind']
+        attribute_keys = [key for key in sample.keys() if key not in conduce_keys]
+        attributes = util.get_attributes(attribute_keys, sample)
+
+        entities.append({
+            'identity': sample['id'],
+            'kind': sample['kind'],
+            'timestamp_ms': util.datetime_to_timestamp_ms(sample['time']),
+            'endtime_ms': util.datetime_to_timestamp_ms(sample['time']),
+            'path': coordinates,
+            'attrs': attributes
+        })
+
+    return {'entities': entities}
+
+
+def ingest_samples(dataset_id, sample_list, **kwargs):
+    """
+    Upload a :ref:`sample list <conduce-entities>` to the Conduce datastore.
+
+    A convenience method that adds an list of entity samples to the Conduce datastore and waits for the job to complete. This function POSTs a sample list to Conduce and :py:func:`wait_for_job` until the ingest job completes.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to modify.
+    sample_list : list
+        A list of entity samples.  See :ref:`conduce-entities` for documentation on how to build a sample list.
+
+    **kwargs:
+        See :py:func:`make_post_request`
+
+    Returns
+    -------
+    requests.Response
+        Returns an error or the final response message when the job is no longer running.
+
+    Raises
+    ------
+    requests.HTTPError
+        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+    """
+
+    if not isinstance(sample_list, list):
+        raise ValueError('sample_list must be a list', sample_list)
+
+    entity_set = convert_samples_to_entity_set(sample_list)
+    return _ingest_entity_set(dataset_id, entity_set, **kwargs)
+
+
 def ingest_entities(dataset_id, data, **kwargs):
     """
     Upload :ref:`entities <conduce-entities>` to the Conduce datastore.
@@ -399,7 +517,7 @@ def ingest_entities(dataset_id, data, **kwargs):
     dataset_id : string
         The UUID that identifies the dataset to modify.
     data : list
-        A list of entity dictionaries.  See :ref:`conduce-entities` for documentation on how to build an entity list.
+        A list of entities.  See :ref:`conduce-entities` for documentation on how to build an entity list.
 
     **kwargs:
         See :py:func:`make_post_request`
@@ -418,8 +536,15 @@ def ingest_entities(dataset_id, data, **kwargs):
     if isinstance(data, list):
         data = {'entities': data}
 
+    return _ingest_entity_set(dataset_id, data, **kwargs)
+
+
+def _ingest_entity_set(dataset_id, entity_set, **kwargs):
+    if 'entities' not in entity_set:
+        raise ValueError('parameter entity_set is not an \'entities\' dict')
+
     response = make_post_request(
-        data, 'datasets/add-data/{}'.format(dataset_id), **kwargs)
+        entity_set, 'datasets/add-data/{}'.format(dataset_id), **kwargs)
     if 'location' in response.headers:
         job_id = response.headers['location']
         response = wait_for_job(job_id, **kwargs)
