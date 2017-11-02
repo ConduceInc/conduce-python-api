@@ -63,10 +63,10 @@ If you provide an API key for your default user and host you will never have to 
 
 The CLI provides many high level functions.  These include:
 
+- Creating API keys
 - Adding and removing datasets
 - Creating a dataset from a CSV or JSON file
-- Adding generic data to a dataset entity
-- Listing datasets and orchestrations
+- Listing datasets and other resources
 
 All CLI functionality is available through `conduce/api.py` and all API functionality should be usable with or without a `.conduceconfig` file.
 
