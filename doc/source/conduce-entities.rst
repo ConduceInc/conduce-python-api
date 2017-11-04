@@ -78,11 +78,11 @@ An entity sample requires four fields:
 
 And one of:
  **point**
-     A coordinate pair that defines a location in a 2D cartisian coordinate system.
+     A coordinate pair that defines a location in a 2D Cartesian coordinate system.
  **path**
-     A list of coordinates that define a series of connected line segments in a 2D cartisian coordinate system.
+     A list of coordinates that define a series of connected line segments in a 2D Cartisian coordinate system.
  **polygon**
-     A list of coordinates that define a closed shape in a 2D cartisian coordinate system.
+     A list of coordinates that define a closed shape in a 2D Cartisian coordinate system.
 
 Each can be specified in (x,y) or (latitude,longitude).  If coordinate types are mixed or multiple coordinate types are specified, a :py:func:`KeyError` will be raised.  If more than one location type is defined, a :py:func:`KeyError` will be raised.
 
