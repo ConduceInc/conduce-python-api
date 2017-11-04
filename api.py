@@ -45,22 +45,66 @@ def _deprecated(func):
 
 @_deprecated
 def list_object(object_to_list, **kwargs):
+    """
+    This function is deprecated.  Call :py:func:`list_resources` instead.
+    """
     return list_resources(object_to_list.upper().rstrip('S'), **kwargs)
 
 
 def list_resources(resource_type, **kwargs):
+    """
+    List all resources of the given type.
+
+    A convenience method that calls :py:func:`find_resource`.  This function, however, requires the user to specify a resource type.
+
+    Parameters
+    ----------
+    resource_type : string
+        Resource type to fetch.  One of: SUBSTRATE, DATASET, ASSET, LENS_TEMPLATE, ORCHESTRATION.
+    kwargs : key-value
+        host : string
+            The Conduce server's hostname (ex. app.conduce.com)
+        api_key : string
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precedent.
+        user : string
+            The user's email address.  Used to look up an API key from the Conduce configuration or, if not found, authenticate via password.  Ignored if `api_key` is provided.
+
+
+    See :py:func:`find_resource` for information on return type.
+    """
     return find_resource(type=resource_type, **kwargs)
 
 
 def list_datasets(**kwargs):
+    """
+    List all accessible datasets.
+
+    A convenience method that calls :py:func:`list_resources` with the ``type`` field set to "DATASET."
+
+    See :py:func:`find_resource` for information on return type.
+    """
     return list_resources('DATASET', **kwargs)
 
 
 def list_substrates(**kwargs):
+    """
+    List all accessible substrates.
+
+    A convenience method that calls :py:func:`list_resources` with the ``type`` field set to "SUBSTRATE."
+
+    See :py:func:`find_resource` for information on return type.
+    """
     return list_resources('SUBSTRATE', **kwargs)
 
 
 def list_templates(**kwargs):
+    """
+    List all accessible lens templates.
+
+    A convenience method that calls :py:func:`list_resources` with the ``type`` field set to "LENS_TEMPLATE."
+
+    See :py:func:`find_resource` for information on return type.
+    """
     return list_resources('LENS_TEMPLATE', **kwargs)
 
 
@@ -163,9 +207,9 @@ def make_delete_request(fragment, **kwargs):
         host : string
             The Conduce server's hostname (ex. app.conduce.com)
         api_key : string
-            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precident.
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precedent.
         user : string
-            The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
+            The user's email address.  Used to look up an API key from the Conduce configuration or, if not found, authenticate via password.  Ignored if `api_key` is provided.
 
     Returns
     -------
@@ -198,7 +242,7 @@ def make_get_request(fragment, **kwargs):
         host : string
             The Conduce server's hostname (ex. app.conduce.com)
         api_key : string
-            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precident.
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precedent.
         user : string
             The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
 
@@ -332,7 +376,7 @@ def create_dataset(dataset_name, **kwargs):
     """
     Create a new user owned dataset.
 
-    Creates a dataset with the specified name.  The dataset will be owned by the user who authorized the requested.
+    Creates a dataset with the specified name.  The dataset will be owned by the user who authorized the requested.  :py:func:`create_dataset` is a convenience wrapper that calls :py:func:`create_json_resource`, which in turn calls :py:func:`create_resource`.  For general information about creating resources see :py:func:`create_resource`.
 
     Parameters
     ----------
@@ -340,12 +384,24 @@ def create_dataset(dataset_name, **kwargs):
         A string used to help identify a dataset
 
     **kwargs
-        See :py:func:`make_post_request`
+        See :py:func:`create_resource`
 
     Returns
     -------
-    requests.Response
-        The HTTP response from the server in the form of a dictionary with a single key, `dataset`.  Its value is the dataset's unique identifier (UUID).
+    dictionary
+        Returns information about newly created dataset, here's an example::
+
+           {
+               'name': 'some_dataset',
+               'tags': [], 'encoded_size': 26,
+               'create_time': 1509762757760,
+               'mime': 'application/json',
+               'modify_time': 1509762757760,
+               'revision': 1,
+               'type': 'DATASET',
+               'id': '19311131-b6d5-4e72-9994-343b9cff80a0',
+               'size': 2
+           }
     """
 
     return create_json_resource('DATASET', dataset_name, {'backend': 'SAGE_BACKEND'}, **kwargs)
@@ -388,7 +444,7 @@ def set_generic_data(dataset_id, key, data_string, **kwargs):
     return ingest_entities(dataset_id, {'entities': [entity]}, **kwargs)
 
 
-def convert_coordinates(point):
+def _convert_coordinates(point):
     if len(point) != 2:
         raise KeyError('A point should only have two dimensions', point)
     if 'lat' and 'lon' in point:
@@ -409,29 +465,29 @@ def convert_coordinates(point):
     return coord
 
 
-def convert_geometries(sample):
+def _convert_geometries(sample):
     coordinates = []
     if 'point' in sample:
-        coordinates = [convert_coordinates(sample['point'])]
+        coordinates = [_convert_coordinates(sample['point'])]
     if 'path' in sample:
         if len(coordinates) > 0:
             raise KeyError('A sample may only contain one of point, path or polygon', sample)
         if len(sample['path']) < 2:
             raise KeyError('paths must have at least two points')
         for point in sample['path']:
-            coordinates.append(convert_coordinates(point))
+            coordinates.append(_convert_coordinates(point))
     if 'polygon' in sample:
         if len(coordinates) > 0:
             raise KeyError('A sample may only contain one of point, path or polygon', sample)
         if len(sample['polygon']) < 3:
             raise KeyError('polygons must have at least three points')
         for point in sample['polygon']:
-            coordinates.append(convert_coordinates(point))
+            coordinates.append(_convert_coordinates(point))
 
     return coordinates
 
 
-def convert_samples_to_entity_set(sample_list):
+def _convert_samples_to_entity_set(sample_list):
     conduce_keys = ['id', 'kind', 'time', 'point', 'path', 'polygon']
     entities = []
     for idx, sample in enumerate(sample_list):
@@ -452,7 +508,7 @@ def convert_samples_to_entity_set(sample_list):
         if not isinstance(sample['time'], datetime):
             raise TypeError('Error processing sample at index {}. Time must be a datetime object.'.format(idx), sample['time'])
 
-        coordinates = convert_geometries(sample)
+        coordinates = _convert_geometries(sample)
         if coordinates == []:
             raise ValueError('Error processing sample at index {}.  Samples must define a location (point, path, or polygon)'.format(idx), sample)
 
@@ -502,7 +558,7 @@ def ingest_samples(dataset_id, sample_list, **kwargs):
     if not isinstance(sample_list, list):
         raise ValueError('sample_list must be a list', sample_list)
 
-    entity_set = convert_samples_to_entity_set(sample_list)
+    entity_set = _convert_samples_to_entity_set(sample_list)
     return _ingest_entity_set(dataset_id, entity_set, **kwargs)
 
 
@@ -606,6 +662,61 @@ def clear_dataset(**kwargs):
 
 
 def find_resource(**kwargs):
+    """
+    Get resources that match a search query.
+
+    Sends an HTTP POST to fetch a list of resources that match the given search query.  If no search query parameters are passed, all resources are returned.
+
+    Parameters
+    ----------
+
+    **kwargs : key-value
+        Target host and user authorization parameters used to make the request.
+
+        id : string
+            The ID of the resource to fetch.  If this parameter is passed, at most, one resource will be returned.
+        type : string
+            Resource type to fetch.  One of: SUBSTRATE, DATASET, ASSET, LENS_TEMPLATE, ORCHESTRATION.  If this parameter is set, only resources of the specified type will be returned.
+        name : string
+            Resource name to fetch.  Resource names are not unique.  Multiple resources may be returned.
+        regex : string
+            Regular expression for filtering search results.  The result names are filtered by the regular expression before being returned.
+        mime : string
+            Mime type of resources to fetch.  Finds all resources of the specified mime type.
+        tags : string
+            Finds all resources that contain the specified tags.  Resources are only returned if they contain all specified tags.
+        host : string
+            The Conduce server's hostname (ex. app.conduce.com)
+        api_key : string
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precedent.
+        user : string
+            The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
+
+    Returns
+    -------
+    list
+        A list of resources matching the search query.  Each resource is a dictionary matching the following format::
+
+            {
+               "name": "US Cities",
+               "tags": [],
+               "create_time": 1506544998452,
+               "version": 0,
+               "mime": "application/json",
+               "modify_time": 1508869186664,
+               "revision": 4,
+               "type": "DATASET",
+               "id": "a262342b-22d2-4368-4698-cf75b62b7cb3",
+               "size": 2
+             }
+
+
+    Raises
+    ------
+    requests.HTTPError
+        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+
+    """
     return_message = None
 
     search_uri = 'conduce/api/v2/resources/searches'
@@ -713,22 +824,57 @@ def create_substrate(name, substrate_def, **kwargs):
 
 
 def find_orchestration(**kwargs):
+    """
+    Find orchestrations matching the given parameters.
+
+    A convenience methond that calls :py:func:`find_resource` with the ``type`` argument set to "ORCHESTRATION."
+
+    See :py:func:`find_resource` for more information on the other query parameters.
+    """
     return find_resource(type='ORCHESTRATION', **kwargs)
 
 
 def find_asset(**kwargs):
+    """
+    Find assets matching the given parameters.
+
+    A convenience methond that calls :py:func:`find_resource` with the ``type`` argument set to "ASSET."
+
+    See :py:func:`find_resource` for more information on the other query parameters.
+    """
     return find_resource(type='ASSET', **kwargs)
 
 
 def find_substrate(**kwargs):
+    """
+    Find substrates matching the given parameters.
+
+    A convenience methond that calls :py:func:`find_resource` with the ``type`` argument set to "SUBSTRATE."
+
+    See :py:func:`find_resource` for more information on the other query parameters.
+    """
     return find_resource(type='SUBSTRATE', **kwargs)
 
 
 def find_template(**kwargs):
+    """
+    Find lens templates matching the given parameters.
+
+    A convenience methond that calls :py:func:`find_resource` with the ``type`` argument set to "LENS_TEMPLATE."
+
+    See :py:func:`find_resource` for more information on the other query parameters.
+    """
     return find_resource(type='LENS_TEMPLATE', **kwargs)
 
 
 def find_dataset(**kwargs):
+    """
+    Find datasets matching the given parameters.
+
+    A convenience methond that calls :py:func:`find_resource` with the ``type`` argument set to "DATASET."
+
+    See :py:func:`find_resource` for more information on the other query parameters.
+    """
     return find_resource(type='DATASET', **kwargs)
 
 
@@ -801,6 +947,37 @@ def is_base64_encoded(string):
 
 
 def create_resource(resource_type, resource_name, content, mime_type, **kwargs):
+    """
+    Create a resource.
+
+    Send a POST request to Conduce to create a new resource.  Resources, like datasets, lenses and assets are the objects used to build Conduce visualizations
+
+    Parameters
+    ----------
+    resource_type : string
+        The type of Conduce resource being created.  Valid JSON resources are: ASSET, DATASET, LENS_TEMPLATE, SUBSTRATE, and ORCHESTRATION.
+    resource_name : string
+        A string that helps identify the resource
+    content : string
+        A string representation of the resource.  JSON resources should be passed as a JSON encoded string.  For text and JSON mime types, the string is passed directly as the resource content.  For other types the content string is base64 encoded.
+    mime : string
+        The mime type of the resource content.
+    kwargs : key-value
+        **tags**
+            A list of strings that help identify the resource.
+
+        See :py:func:`make_post_request` for more information
+
+    Returns
+    -------
+    dictionary
+       Metadata describing the new resource.
+
+    Raises
+    ------
+    requests.HTTPError
+        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+    """
     if not (mime_type.startswith('text/') or mime_type == 'application/json'):
         if not is_base64_encoded(content):
             print "base64 encoding content for {}".format(resource_name)
@@ -818,6 +995,36 @@ def create_resource(resource_type, resource_name, content, mime_type, **kwargs):
 
 
 def create_json_resource(resource_type, resource_name, content, **kwargs):
+    """
+    Create a JSON resource.
+
+    A convenience method for creating JSON resources.  Calls :py:func:`create_resource` with ``mime_type`` set to ``"application/json"``.
+
+    Parameters
+    ----------
+    resource_type : string
+        The type of Conduce resource being created.  Valid JSON resources are: DATASET, LENS_TEMPLATE, SUBSTRATE, and ORCHESTRATION.
+    resource_name : string
+        A string that helps identify the resource
+    content : dictionary
+        A dictionary representation of the JSON blob that describes the resource content.  The dictionary is converted to a JSON encoded string prior to resource creation.
+    kwargs : key-value
+        **tags**
+            A list of strings that help identify the resource.
+
+        See :py:func:`make_post_request` for more information
+
+    Returns
+    -------
+    dictionary
+       Metadata describing the new resource.
+
+    Raises
+    ------
+    requests.HTTPError
+        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+    """
+
     return create_resource(
         resource_type,
         resource_name,
@@ -832,7 +1039,7 @@ def create_orchestration(name, orchestration_def, **kwargs):
 
 def list_api_keys(**kwargs):
     """
-    Get this users's API keys.
+    Get this user's API keys.
 
     Send an HTTP GET request to list this user's API keys.
 
@@ -929,7 +1136,7 @@ def make_post_request(payload, fragment, **kwargs):
         host : string
             The Conduce server's hostname (ex. app.conduce.com)
         api_key : string
-            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precident.
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precedent.
         user : string
             The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
 
@@ -1002,7 +1209,7 @@ def make_put_request(payload, fragment, **kwargs):
         host : string
             The Conduce server's hostname (ex. app.conduce.com)
         api_key : string
-            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precident.
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precedent.
         user : string
             The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
 
@@ -1075,9 +1282,9 @@ def make_patch_request(payload, fragment, **kwargs):
         host : string
             The Conduce server's hostname (ex. app.conduce.com)
         api_key : string
-            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precident.
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precedent.
         user : string
-            The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
+            The user's email address.  Used to look up an API key from the Conduce configuration or, if not found, authenticate via password.  Ignored if `api_key` is provided.
 
     Returns
     -------

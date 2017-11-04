@@ -12,6 +12,7 @@
    conduce-entities
    api-key-creation
    api-ref
+   data-ingest
 
 
 .. |wordmark| image:: /images/conduce_logo.svg
