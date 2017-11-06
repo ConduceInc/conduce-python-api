@@ -335,8 +335,8 @@ def generate_entities(raw_entities, key_map, **kwargs):
         }
 
         if kwargs.get('infinite', False):
-            entity['timestamp_ms'] = string_to_timestamp_ms(get_default('timestamp_ms')),
-            entity['endtime_ms'] = string_to_timestamp_ms(get_default('endtime_ms')),
+            entity['timestamp_ms'] = string_to_timestamp_ms(get_default('timestamp_ms'))
+            entity['endtime_ms'] = string_to_timestamp_ms(get_default('endtime_ms'))
 
         entities.append(entity)
 
