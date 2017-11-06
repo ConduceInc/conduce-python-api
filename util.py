@@ -238,11 +238,13 @@ def get_default(field):
     if field == 'identity':
         return uuid.uuid4()
     elif field == 'timestamp_ms':
-        #sys.maxint is not consistent, so hardcode min int64 value
-        return -0x8000000000000000
+        #this int64 field will be a float64 sometimes too (such as in the VBO
+        #that is rendered in the frontend) and we want to keep the sub-second
+        #precision. There are 52 bits in the mantissa, so under that by some margin
+        return -2**48 - 1
     elif field == 'endtime_ms':
-        #sys.maxint is not consistent, so hardcode max int64 value
-        return 0x7FFFFFFFFFFFFFFF
+        #See timestamp_ms notes about float64
+        return 2**48
     elif field == 'kind':
         return 'default'
     elif field == 'x':
