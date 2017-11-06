@@ -461,7 +461,7 @@ def convert_samples_to_entity_set(sample_list):
         attributes = util.get_attributes(attribute_keys, sample)
 
         entities.append({
-            'identity': sample['id'],
+            'identity': str(sample['id']),
             'kind': sample['kind'],
             'timestamp_ms': util.datetime_to_timestamp_ms(sample['time']),
             'endtime_ms': util.datetime_to_timestamp_ms(sample['time']),
