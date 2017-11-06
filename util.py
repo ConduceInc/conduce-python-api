@@ -238,9 +238,11 @@ def get_default(field):
     if field == 'identity':
         return uuid.uuid4()
     elif field == 'timestamp_ms':
-        return -2e48 - 1
+        #sys.maxint is not consistent, so hardcode min int64 value
+        return -0x8000000000000000
     elif field == 'endtime_ms':
-        return 2e48 - 1
+        #sys.maxint is not consistent, so hardcode max int64 value
+        return 0x7FFFFFFFFFFFFFFF
     elif field == 'kind':
         return 'default'
     elif field == 'x':
