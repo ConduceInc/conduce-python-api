@@ -442,7 +442,7 @@ def convert_samples_to_entity_set(sample_list):
         if not 'time' in sample:
             raise ValueError('Error processing sample at index {}. Samples must include a time field.'.format(idx), sample)
 
-        if 'id' is None or len(sample['id']) == 0:
+        if 'id' is None or len(str(sample['id'])) == 0:
             raise ValueError('Error processing sample at index {}. Invalid ID.'.format(idx), sample)
         if 'kind' is None or len(sample['kind']) == 0:
             raise ValueError('Error processing sample at index {}. Invalid kind.'.format(idx), sample)
