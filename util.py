@@ -238,9 +238,9 @@ def get_default(field):
     if field == 'identity':
         return uuid.uuid4()
     elif field == 'timestamp_ms':
-        return -2e48 - 1
+        return -(2**48 - 1)
     elif field == 'endtime_ms':
-        return 2e48 - 1
+        return 2**48 - 1
     elif field == 'kind':
         return 'default'
     elif field == 'x':
@@ -335,8 +335,8 @@ def generate_entities(raw_entities, key_map, **kwargs):
         }
 
         if kwargs.get('infinite', False):
-            entity['timestamp_ms'] = string_to_timestamp_ms(get_default('timestamp_ms')),
-            entity['endtime_ms'] = string_to_timestamp_ms(get_default('endtime_ms')),
+            entity['timestamp_ms'] = string_to_timestamp_ms(get_default('timestamp_ms'))
+            entity['endtime_ms'] = string_to_timestamp_ms(get_default('endtime_ms'))
 
         entities.append(entity)
 
