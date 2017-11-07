@@ -870,6 +870,35 @@ def create_api_key(**kwargs):
     return json.loads(response.content)['apikey']
 
 
+def delete_api_key(key, **kwargs):
+    """
+    Delete an API key from this user's account.
+
+    Send an HTTP POST request to delete the given API key.  The key in question may not be used for authentication of the request.
+
+    Parameters
+    ----------
+    key
+        The string representation of the API key to delete
+    **kwargs
+        See :py:func:`make_post_request`
+
+    Returns
+    -------
+    Nothing
+
+    Raises
+    ------
+    requests.HTTPError
+        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+    """
+    if key == kwargs.get('api_key'):
+        raise ValueError("Can't delete the API key used to authenticate the deletion request")
+    response = make_post_request(
+        {"apikey": key}, 'apikeys/delete', **kwargs)
+    response.raise_for_status()
+
+
 def make_post_request(payload, fragment, **kwargs):
     """
     Send an HTTP POST request to a Conduce server.

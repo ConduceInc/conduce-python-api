@@ -58,3 +58,21 @@ or::
     conduce.api.list_api_keys(api_key="<your-api-key>" host="app.conduce.com")
 
 API keys can be used in place of email addresses for all Conduce API requests.    
+
+-------------------
+Destroying API keys
+-------------------
+
+You may, from time to time, need to delete an API key (for example, if the key was shared with someone you no longer wish to have access).  When deleting an API key, you cannot use the key you are deleting as the authentication key.  You can either provide a username and password or an alternate key for the same account that owns the key you wish to delete.  You can delete an API key with the following command::
+
+    conduce-api delete-api-key <the-api-key-to-delete> --api-key=<valid-api-key> --host=app.conduce.com
+
+or::
+
+    conduce-api delete-api-key <the-api-key-to-delete> --user=<email_address> --host=app.conduce.com
+
+or::
+
+    import conduce
+    conduce.api.delete_api_key("<the-api-key-to-delete>", api_key="<valid-api-key>", host="app.conduce.com")
+
