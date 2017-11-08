@@ -412,8 +412,8 @@ def create_dataset(dataset_name, **kwargs):
 
 
 def set_generic_data(dataset_id, key, data_string, **kwargs):
-    timestamp = datetime(1970,1,1)
-    point = { "x": 0, "y": 0 }
+    timestamp = datetime(1970, 1, 1)
+    point = {"x": 0, "y": 0}
 
     remove_entity = {
         "id": key,
@@ -522,7 +522,7 @@ def _convert_samples_to_entity_set(sample_list):
 
 def ingest_samples(dataset_id, sample_list, **kwargs):
     """
-    Upload a :ref:`sample list <conduce-entities>` to the Conduce datastore.
+    Upload a :doc:`sample list <conduce-entities>` to the Conduce datastore.
 
     A convenience method that adds an list of entity samples to the Conduce datastore and waits for the job to complete. This function POSTs a sample list to Conduce and :py:func:`wait_for_job` until the ingest job completes.
 
@@ -531,7 +531,7 @@ def ingest_samples(dataset_id, sample_list, **kwargs):
     dataset_id : string
         The UUID that identifies the dataset to modify.
     sample_list : list
-        A list of entity samples.  See :ref:`conduce-entities` for documentation on how to build a sample list.
+        A list of entity samples.  See :doc:`conduce-entities` for documentation on how to build a sample list.
 
     **kwargs:
         See :py:func:`make_post_request`
@@ -596,7 +596,7 @@ def convert_entities_to_entity_set(entity_list):
 
 def ingest_entities(dataset_id, entity_list, **kwargs):
     """
-    Upload :ref:`entities <conduce-entities>` to the Conduce datastore.
+    Upload :doc:`entities <conduce-entities>` to the Conduce datastore.
 
     A convenience method that adds entities to the Conduce datastore and waits for the job to complete. This function POSTs an entity set to Conduce and :py:func:`wait_for_job` until the ingest job completes.
 
@@ -621,7 +621,6 @@ def ingest_entities(dataset_id, entity_list, **kwargs):
         The UUID that identifies the dataset to modify.
     entity_list : list
         A list of entities.  See :doc:`data-ingest` for documentation on how to build an entity list.
-
     **kwargs:
         See :py:func:`make_post_request`
 
