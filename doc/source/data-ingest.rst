@@ -30,8 +30,7 @@ Datasets are the containers that hold entities.  A dataset may be thought of as 
 
 :py:func:`api.create_dataset`::
 
-    my_dataset_id = conduce.api.create_dataset('my dataset name', host='app.conduce.com', api-key='00000000-0000-0000-0000-000000000000')
-
+    world_cities_dataset_id = conduce.api.create_dataset('world cities', host='app.conduce.com', api-key='00000000-0000-0000-0000-000000000000')
 
 The dataset ID returned is a UUID.  It will be passed as a function parameter to the :py:func:`api.ingest_samples` function.
 
@@ -58,38 +57,84 @@ This call returns a list of dictionaries, each contains information about a part
 
 This dataset object contains information to help identify a dataset.  The fields ``name`` and ``tags``, along with ``create_time`` and ``modify_time`` are particularly useful for identifying datasets.  The :py:func:`api.find_datasets` function can be used to list only datasets that match certain search criteria.
 
-------------------
-Ingesting entities
-------------------
+-------------------
+Populating datasets
+-------------------
 
-In order to ingest our source data we must first convert each record into an entity sample as described above.  Once converted, the samples are added to a list.  The list may contain samples for multiple entities.  Once we have created our sample list we call :py:func:`api.ingest_samples`::
+Once a dataset has been created, it needs to be populated before it can be visualized.  Datasets are populated by making API calls to create entities.  An entity is a person, place, or thing that exists in space and time.  See :doc:`conduce-entities` for detailed information on creating entities.
 
-    conduce.api.ingest_samples(dataset_id, sample_list, host=app.conduce.com, api-key=00000000-0000-0000-0000-000000000000)
+For the purposes of this primer you will focus on a simple example, ingesting a static dataset of static entities.  simplemaps.com provides a free list of world cities.  Follow `this link <https://simplemaps.com/data/world-cities>`_ to download this data.  Conduce also provides a version of this list in the ``samples`` directory.
 
-This function takes a dataset ID as the first argument.  A dataset must exist before samples can be ingested.
+Once you have the data downloaded you must decide how the data should be represented in Conduce.  Each record is described by the following fields:
 
------------------
-Updating entities
------------------
+- city
+- city_ascii
+- lat
+- lng
+- pop
+- country
+- iso2
+- iso3
+- province
 
-Stuff about updating the state of an entity (append API)
+These fields are described in detail on the page from which the data is downloaded.  For this example you'll work with all the fields.  However the only fields that are required are ``lat`` and ``lng``.
 
-.. list-table:: Data update: shipment 1
-   :header-rows: 1
-   :widths: auto
+An entity requires the following fields in order to be ingested: ID, location, and kind.  Kind is a field that describes the type of thing the entity represents.  you'll be ingesting this data as static entities, so a timestamp is not required.  you'll map the source data to Conduce entities as follows::
 
-   * - ID
-     - Method
-     - Date
-     - Latitude
-     - Longitude
-     - Value
-     - State
-   * - 1
-     - ground
-     - 2017-10-24T10:23:14+00:00
-     - 38.022131
-     - -91.571045
-     - $102,325.26
-     - delivered
+    {
+        "id": <UUID you will generate>,
+        "kind": "city",
+        "point": {
+            "lat": <lat>,
+            "lon": <lng>
+        },
+        "name": <city>,
+        "long_name": <city_ascii>,
+        "population": <pop>,
+        "province": <province>,
+        "country": <country>,
+        "iso2": <iso2>,
+        "iso3": <iso3>,
+    }
 
+Notice that two of the fields ``id`` and ``kind`` are not derived from the data.  you will generate a unique ID just in case any of the city names are the same.  you will hardcode ``kind`` to city in case you want to ingest other types of data into this dataset in the future.  If you wanted to do something more sophisticated you could categorize the cities by population and set ``kind`` to something like "small_city," "medium_city," and "large_city."
+
+Following this pattern the first city in the dataset takes the following form::
+
+    {
+        "id": str(uuid.uuid4()),
+        "kind": "city",
+        "point": {
+            "lat": 34.9830001,
+            "lon": 63.13329964
+        },
+        "name": "Qal eh-ye",
+        "long_name": "Qal eh-ye Now",
+        "population": 2997,
+        "province": "Badghis",
+        "country": "Afghanistan",
+        "iso2": "AF",
+        "iso3": "AFG",
+    }
+
+Writing the code to iterate over the CSV file and convert each record to a Conduce entity is left to the reader.  However there are utilities included with the Conduce Python API that provide example implementations.
+
+The resulting entities should be compiled into a list.  Once you have generated the entity list it is time to ingest the data to Conduce.
+
+++++++
+Ingest
+++++++
+
+Datasets are populated through a process called ingest.  If creating or updating static entities call :py:func:`api.ingest_entities`.  If you are creating or updating dynamic entities call :py:func:`api.ingest_samples`.
+
+For our example, you are ingesting entities and will use :py:func:`api.ingest_entities`.  The list of entities you generated was written to a variable named ``entity_list``.  All that's left is to call the API function using the dataset ID you created earlier and the API key you generated::
+
+    conduce.api.ingest_samples(world_cities_dataset_id, entity_list, host=app.conduce.com, api-key=00000000-0000-0000-0000-000000000000)
+
+After this function returns the dataset will be populated with the entities derived from the spreadsheet.
+
+----------
+Next steps
+----------
+
+Once you have constructed a dataset, you are ready to attach it to a visualization.  Documentation for building visualizations is a work in progress.  For assistance creating visualizations contact support@conduce.com.

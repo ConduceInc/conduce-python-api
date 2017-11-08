@@ -9,9 +9,22 @@
 Conduce Entities
 ================
 
-.. note:: WIP
 
-Conduce uses a concept called entity to define objects that exist in space and time.  An entity can exist for an instant or across a time span.  It can describe a point in space, a path (sequence of points), or a region (polygon).  An entity is defined by a series of samples that describe it's location in space over a period of time.  An entity also has attributes that describe it's characteristics. An entity's attributes can change over time.
+------------------
+What is an entity?
+------------------
+
+Conduce uses a concept called entity to define a person, place, or thing that exist in space and time.  An entity can exist for an instant or across a time span.  It can describe a point in space, a path (sequence of points), or a region (polygon).  An entity is defined by a series of samples that describe it's location in space over a period of time.  An entity also has attributes that describe it's characteristics. An entity's attributes can change over time.  Entities can be static or dynamic.  To understand the difference between the two, it is helpful to understand dynamic entities first.
+
+++++++++++++++++
+Dynamic entities
+++++++++++++++++
+Dynamic entities are composed of a sequence of samples.  The term sample is taken from the `signal processing domain <https://en.wikipedia.org/wiki/Sampling_(signal_processing)>`_ and describes the state of an entity at a discrete moment in time.  A sample describes an entity's location in space and other attributes.  These qualities can change from sample to sample so that when a visualization is constructed, these state changes can be visualized.  A sequence of samples that share the same ID define the entity, and so, an entity is a sequence of samples.  Entities defined this way are said to be `dynamic`.  Conduce does not require that an entity's sampling interval be regular.  This allows users to update entities based on events (state changes) rather than period (time changes).  However, it should be considered that some types of entities should be sampled regularly in order generate an accurate visual representations.
+
++++++++++++++++
+Static entities
++++++++++++++++
+A static entity is one that does not change over time.  If an entity has a state that does not change, it may be ingested with a single message that does not have a time field.  As such the entity is a sequence with one element that defines the entity for all time.  Entities defined by a single state are considered `static`.  This document focuses on dynamic entities.  However the same basic principles apply for ingest static entities, with the exception that static entities do not have ``time`` fields and, because the entity exists across all time, only one instance of the entity can exist in the dataset.  See :doc:`data-ingest` for an example of ingesting static entities.
 
 -----------------
 Creating entities
@@ -29,7 +42,7 @@ An entity is a series of samples that describe the state of and object over a pe
      - Latitude
      - Longitude
      - Value
-     - Status 
+     - Status
    * - 1
      - ground
      - 2017-10-24T10:22:09+00:00
@@ -113,7 +126,7 @@ Example (first record in table)::
             "lat": 38.022131
         },
         "Value": 102325.26,
-        "Status": "delivered" 
+        "Status": "delivered"
     }
 
 In the example above the ISO-8601 date time string is converted to a :py:class:`datetime.datetime` using :py:func:`dateutil.parser.parse`.
@@ -146,19 +159,19 @@ Stuff about updating the state of an entity (append API)
      - Latitude
      - Longitude
      - Value
-     - State  
+     - State
    * - 1
      - ground
      - 2017-10-24T10:23:14+00:00
      - 38.022131
      - -91.571045
      - $102,325.26
-     - delivered 
+     - delivered
 
 -----------
 Particulars
 -----------
 
 + The kind of an entity may change.
-+ Conduce will not allow an entity to exist in two different states at the same time.  That is to say that two samples describing the same entity cannot have the same timestamp. 
++ Conduce will not allow an entity to exist in two different states at the same time.  That is to say that two samples describing the same entity cannot have the same timestamp.
 
