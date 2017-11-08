@@ -4,7 +4,7 @@
 API Key Creation
 ====================
 
-API keys provide a flexible mechanism for granting access to your account and are used to authenticate requests made using the Conduce REST API.  You may create as many API keys as you need, and may wish to use different API keys for performing specific API operations.  API keys can also be used to grant others users temporary access to your account.
+API keys provide a flexible mechanism for granting access to your account and are used to authenticate requests made using the Conduce REST API.  They can be used in place of username/password authentication.  You may create as many API keys as you need, and may wish to use different API keys for performing specific API operations.  API keys can also be used to grant others users temporary access to your account.
 
 Generally, there are three methods used to authenticate Conduce REST requests:
 
@@ -38,7 +38,7 @@ Again, you will be prompted for your password.  Upon submission, the new API key
 Retreiving API keys
 -------------------
 
-API keys you have created may be retreived using the following command::
+API keys you have created may be retrieved using the following command::
 
     conduce-api list-api-keys --user=<email_address> host=app.conduce.com
 
@@ -57,7 +57,7 @@ or::
     import conduce
     conduce.api.list_api_keys(api_key="<your-api-key>" host="app.conduce.com")
 
-API keys can be used in place of email addresses for all Conduce API requests.
+API keys can be used as an alternative to email addresses for all Conduce API requests.  You will not be prompted for a password when authenticating via API key.
 
 -------------------
 Revoking API keys
