@@ -509,6 +509,7 @@ def ingest_samples(dataset_id, sample_list, **kwargs):
 def convert_entities_to_entity_set(entity_list):
     conduce_keys = ['id', 'kind', 'point', 'path', 'polygon']
     entities = []
+    ids = set()
     for idx, ent in enumerate(entity_list):
         if not 'id' in ent:
             raise ValueError('Error processing entity at index {}. Entities must include an ID.'.format(idx), ent)
@@ -517,6 +518,8 @@ def convert_entities_to_entity_set(entity_list):
 
         if ent['id'] is None or len(str(ent['id'])) == 0:
             raise ValueError('Error processing entity at index {}. Invalid ID.'.format(idx), ent)
+        if ent['id'] in ids:
+            raise ValueError('Error processing entity at index{}. Non-Unique ID'.format(idx), ent)
         if ent['kind'] is None or len(ent['kind']) == 0:
             raise ValueError('Error processing entity at index {}. Invalid kind.'.format(idx), ent)
 
@@ -524,6 +527,7 @@ def convert_entities_to_entity_set(entity_list):
         if coordinates == []:
             raise ValueError('Error processing entity at index {}.  Entities must define a location (point, path, or polygon)'.format(idx), ent)
 
+        ids.add(ent['id'])
         ent['_kind'] = ent['kind']
         attribute_keys = [key for key in ent.keys() if key not in conduce_keys]
         attributes = util.get_attributes(attribute_keys, ent)
