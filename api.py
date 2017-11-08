@@ -892,8 +892,6 @@ def remove_api_key(key, **kwargs):
     requests.HTTPError
         Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
     """
-    if key == kwargs.get('api_key'):
-        raise ValueError("Can't delete the API key used to authenticate the deletion request")
     response = make_post_request(
         {"apikey": key}, 'apikeys/delete', **kwargs)
     response.raise_for_status()
