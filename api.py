@@ -530,7 +530,7 @@ def _convert_samples_to_entity_set(sample_list):
 
 def ingest_samples(dataset_id, sample_list, **kwargs):
     """
-    Upload a :ref:`sample list <conduce-entities>` to the Conduce datastore.
+    Upload a :doc:`sample list <conduce-entities>` to the Conduce datastore.
 
     A convenience method that adds an list of entity samples to the Conduce datastore and waits for the job to complete. This function POSTs a sample list to Conduce and :py:func:`wait_for_job` until the ingest job completes.
 
@@ -539,7 +539,7 @@ def ingest_samples(dataset_id, sample_list, **kwargs):
     dataset_id : string
         The UUID that identifies the dataset to modify.
     sample_list : list
-        A list of entity samples.  See :ref:`conduce-entities` for documentation on how to build a sample list.
+        A list of entity samples.  See :doc:`conduce-entities` for documentation on how to build a sample list.
 
     **kwargs:
         See :py:func:`make_post_request`
@@ -564,7 +564,7 @@ def ingest_samples(dataset_id, sample_list, **kwargs):
 
 def ingest_entities(dataset_id, data, **kwargs):
     """
-    Upload :ref:`entities <conduce-entities>` to the Conduce datastore.
+    Upload :doc:`entities <conduce-entities>` to the Conduce datastore.
 
     A convenience method that adds entities to the Conduce datastore and waits for the job to complete. This function POSTs an entity set to Conduce and :py:func:`wait_for_job` until the ingest job completes.
 
@@ -573,7 +573,7 @@ def ingest_entities(dataset_id, data, **kwargs):
     dataset_id : string
         The UUID that identifies the dataset to modify.
     data : list
-        A list of entities.  See :ref:`conduce-entities` for documentation on how to build an entity list.
+        A list of entities.  See :doc:`conduce-entities` for documentation on how to build an entity list.
 
     **kwargs:
         See :py:func:`make_post_request`
