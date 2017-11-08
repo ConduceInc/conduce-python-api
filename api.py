@@ -870,7 +870,7 @@ def create_api_key(**kwargs):
     return json.loads(response.content)['apikey']
 
 
-def delete_api_key(key, **kwargs):
+def remove_api_key(key, **kwargs):
     """
     Delete an API key from this user's account.
 

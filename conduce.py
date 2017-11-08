@@ -162,10 +162,10 @@ def create_api_key(args):
     return api.create_api_key(**vars(args))
 
 
-def delete_api_key(args):
+def remove_api_key(args):
     key = args.key
     del vars(args)['key']
-    return api.delete_api_key(key, **vars(args))
+    return api.remove_api_key(key, **vars(args))
 
 
 def set_api_key(args):
@@ -340,9 +340,9 @@ def main():
     parser_create_api_key = subparsers.add_parser('create-api-key', parents=[api_cmd_parser], help='Create an API key for your account')
     parser_create_api_key.set_defaults(func=create_api_key)
 
-    parser_delete_api_key = subparsers.add_parser('delete-api-key', parents=[api_cmd_parser], help='Delete an API key')
-    parser_delete_api_key.add_argument('key', help='The key to delete')
-    parser_delete_api_key.set_defaults(func=delete_api_key)
+    parser_remove_api_key = subparsers.add_parser('remove-api-key', parents=[api_cmd_parser], help='Delete an API key')
+    parser_remove_api_key.add_argument('key', help='The key to delete')
+    parser_remove_api_key.set_defaults(func=remove_api_key)
 
     parser_create_dataset = subparsers.add_parser('create-dataset', parents=[api_cmd_parser], help='Create a Conduce dataset')
     parser_create_dataset.add_argument('name', help='The name to be given to the new dataset')
