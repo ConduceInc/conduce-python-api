@@ -874,7 +874,7 @@ def remove_api_key(key, **kwargs):
     """
     Delete an API key from this user's account.
 
-    Send an HTTP POST request to delete the given API key.  The key in question may not be used for authentication of the request.
+    Send an HTTP POST request to delete the given API key.  The key in question may no longer be used for authenticating requests.
 
     Parameters
     ----------
