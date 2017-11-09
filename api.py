@@ -550,12 +550,27 @@ def ingest_entities(dataset_id, entity_list, **kwargs):
 
     A convenience method that adds entities to the Conduce datastore and waits for the job to complete. This function POSTs an entity set to Conduce and :py:func:`wait_for_job` until the ingest job completes.
 
+    Each element of ``entity_list`` must have the following structure::
+
+        {
+            "id": <string>,
+            "kind": <string>,
+            "point": {
+                "lat": <float>,
+                "lon": <float>
+            }
+        }
+
+    It may also contain additional fields with arbitrary keys.
+
+    Since entities do not have timestamps they exists across all time.  Entities must be unique, that means each element in ``entity_list`` must have a unique ID.  Because entities do not have timestamps, ID is the only field that makes them unique.
+
     Parameters
     ----------
     dataset_id : string
         The UUID that identifies the dataset to modify.
     entity_list : list
-        A list of entities.  See :ref:`conduce-entities` for documentation on how to build an entity list.
+        A list of entities.  See :doc:`data-ingest` for documentation on how to build an entity list.
 
     **kwargs:
         See :py:func:`make_post_request`
