@@ -522,6 +522,8 @@ def convert_entities_to_entity_set(entity_list):
             raise ValueError('Error processing entity at index{}. Non-Unique ID'.format(idx), ent)
         if ent['kind'] is None or len(ent['kind']) == 0:
             raise ValueError('Error processing entity at index {}. Invalid kind.'.format(idx), ent)
+        if ent.get('time') is not None:
+            raise KeyError('Error processing entity at index {}. Timeless entities should not set time.'.format(idx), ent)
 
         coordinates = convert_geometries(ent)
         if coordinates == []:
