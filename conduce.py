@@ -276,8 +276,10 @@ def get_entity(args):
 
 def main():
     import argparse
+    import pkg_resources
+    version = pkg_resources.require("conduce")[0].version
 
-    arg_parser = argparse.ArgumentParser(description='Conduce command line utility')
+    arg_parser = argparse.ArgumentParser(description='Conduce command line utility\nv{}'.format(version), formatter_class=argparse.RawTextHelpFormatter)
     api_cmd_parser = argparse.ArgumentParser(add_help=False)
     api_cmd_parser.add_argument('--user', help='The user whose is making the request')
     api_cmd_parser.add_argument('--host', help='The server on which the command will run')
