@@ -85,7 +85,7 @@ def wait_for_job(job_id, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
     """
     while True:
         time.sleep(0.5)
@@ -175,7 +175,7 @@ def make_delete_request(fragment, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
 
     """
     return _make_delete_request(compose_uri(fragment), **kwargs)
@@ -210,7 +210,7 @@ def make_get_request(fragment, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
 
     """
     return _make_get_request(compose_uri(fragment), **kwargs)
@@ -496,7 +496,7 @@ def ingest_samples(dataset_id, sample_list, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
     """
 
     if not isinstance(sample_list, list):
@@ -530,7 +530,7 @@ def ingest_entities(dataset_id, data, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
     """
 
     if isinstance(data, list):
@@ -837,7 +837,7 @@ def list_api_keys(**kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
     """
 
     response = make_get_request('apikeys/list', **kwargs)
@@ -863,7 +863,7 @@ def create_api_key(**kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
     """
     response = make_post_request(
         {"description": "Generated and used by conduce-python-api"}, 'apikeys/create', **kwargs)
@@ -890,7 +890,7 @@ def remove_api_key(key, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
     """
     response = make_post_request(
         {"apikey": key}, 'apikeys/delete', **kwargs)
@@ -929,7 +929,7 @@ def make_post_request(payload, fragment, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
 
     """
     return _make_post_request(payload, compose_uri(fragment), **kwargs)
@@ -1002,7 +1002,7 @@ def make_put_request(payload, fragment, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
 
     """
     return _make_put_request(payload, compose_uri(fragment), **kwargs)
@@ -1075,7 +1075,7 @@ def make_patch_request(payload, fragment, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
 
     """
     return _make_patch_request(payload, compose_uri(fragment), **kwargs)
