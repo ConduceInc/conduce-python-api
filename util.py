@@ -7,6 +7,7 @@ from dateutil import parser
 import copy
 import api
 import pytz
+import sys
 
 
 def get_dataset_id(dataset_name, **kwargs):
@@ -126,7 +127,7 @@ def get_id_score(key, value):
         score += 500
     except:
         pass
-    if re.match("[0-9a-f]{2}([-:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", value.lower()):
+    if re.match("[0-9a-f]{2}([-:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", unicode(value.lower())):
         score += 400
 
     return score
@@ -236,7 +237,7 @@ def get_z_score(key, value):
 
 def get_default(field):
     if field == 'identity':
-        return uuid.uuid4()
+        return str(uuid.uuid4())
     elif field == 'timestamp_ms':
         return -(2**48 - 1)
     elif field == 'endtime_ms':
@@ -253,15 +254,21 @@ def get_default(field):
 
 
 def get_field_value(raw_entity, key_map, field):
-    if not key_map[field]['key']:
+    if key_map[field].get('override_value') is not None:
+        return key_map[field].get('override_value')
+
+    if not key_map[field].get('key'):
         return get_default(field)
-    return raw_entity[key_map[field]['key']]
+
+    return raw_entity[key_map[field].get('key')]
 
 
 def build_attribute(key, value):
     attribute = {'key': key}
     try:
         float_val = float(value)
+        if float_val.isinf() or float_val.isnan():
+            raise RuntimeError('This value should be parsed as a string')
         if float.is_integer(float_val):
             attribute['type'] = 'INT64'
             attribute['int64_value'] = int(float_val)
@@ -270,7 +277,7 @@ def build_attribute(key, value):
             attribute['double_value'] = float_val
     except:
         attribute['type'] = 'STRING'
-        attribute['str_value'] = str(value)
+        attribute['str_value'] = unicode(value)
 
     return attribute
 
@@ -283,12 +290,15 @@ def get_attributes(attribute_keys, raw_entity):
     return attributes
 
 
-def score_fields(raw_entities, keys):
+def score_fields(raw_entities, keys, **kwargs):
     # TODO: Use up to 100 values to score fields
     key_scores = {}
     for key in keys:
         key_scores[key] = {}
-        key_scores[key]['identity_score'] = get_id_score(key, raw_entities[0][key])
+        if kwargs.get('generate_ids', False):
+            key_scores[key]['identity_score'] = 0
+        else:
+            key_scores[key]['identity_score'] = get_id_score(key, raw_entities[0][key])
         key_scores[key]['kind_score'] = get_kind_score(key, raw_entities[0][key])
         key_scores[key]['timestamp_ms_score'] = get_timestamp_score(key, raw_entities[0][key])
         key_scores[key]['endtime_ms_score'] = get_endtime_score(key, raw_entities[0][key])
@@ -347,15 +357,23 @@ def dict_to_entities(raw_entities, **kwargs):
     keys = raw_entities[0].keys()
     fields = ['identity', 'kind', 'x', 'y', 'z', 'timestamp_ms', 'endtime_ms']
 
-    key_scores = score_fields(raw_entities, keys)
+    key_scores = score_fields(raw_entities, keys, **kwargs)
     key_map = map_keys(key_scores, keys)
+    if kwargs.get('kind'):
+        key_map['kind'].update({'override_value': kwargs.get('kind')})
+    if not kwargs.get('answer_yes'):
+        print json.dumps(key_map, indent=2)
+        answer = raw_input("Continue with this mapping? [Y/n]: ")
+        if 'y' not in answer.lower():
+            sys.exit()
+
     entities = generate_entities(raw_entities, key_map, **kwargs)
 
     return {'entities': entities}
 
 
-def csv_to_entities(infile, outfile=None, toStdout=False):
-    return dict_to_entities(csv_to_json(infile))
+def csv_to_entities(infile, **kwargs):
+    return dict_to_entities(csv_to_json(infile), **kwargs)
 
 
 def ingest_json(dataset_id, json_file, **kwargs):
@@ -363,7 +381,7 @@ def ingest_json(dataset_id, json_file, **kwargs):
 
 
 def ingest_csv(dataset_id, csv_file, **kwargs):
-    api._ingest_entity_set(dataset_id, csv_to_entities(kwargs['csv']), **kwargs)
+    api._ingest_entity_set(dataset_id, csv_to_entities(kwargs['csv'], **kwargs), **kwargs)
 
 
 def ingest_file(dataset_id, **kwargs):
@@ -384,9 +402,13 @@ if __name__ == '__main__':
     arg_parser.add_argument('-f', '--field', help='The field to sort on', default='Date Completed')
     arg_parser.add_argument('-o', '--outfile', help='The file to be saved')
     arg_parser.add_argument('-p', '--stdout', help='Dump output to stdout', action='store_true')
+    arg_parser.add_argument('-y', '--answer-yes', help='Skip prompt to verify key mapping', action='store_true')
+    arg_parser.add_argument('--generate-ids', help='Set this flag if the data does not contain an ID field', action='store_true')
+    arg_parser.add_argument('--kind', help='Use this value as the kind for all entities')
 
     args = arg_parser.parse_args()
 
+    """
     if args.stdout is None:
         outfile = os.path.splitext(args.filename)[0] + '.js'
     else:
@@ -394,6 +416,8 @@ if __name__ == '__main__':
 
     if outfile is None:
         args.stdout = True
+    """
 
-    entities = csv_to_entities(args.filename, outfile, args.stdout)
+    entities = csv_to_entities(args.filename, **vars(args))
     print json.dumps(entities, indent=2)
+    print len(json.dumps(entities))

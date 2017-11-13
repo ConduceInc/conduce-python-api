@@ -543,6 +543,18 @@ def _ingest_entity_set(dataset_id, entity_set, **kwargs):
     if 'entities' not in entity_set:
         raise ValueError('parameter entity_set is not an \'entities\' dict')
 
+    if kwargs.get('debug'):
+        print "Debug ingest"
+        responses = []
+        for idx, entity in enumerate(entity_set['entities'], start=1):
+
+            single_entity = {'entities': [entity]}
+            print single_entity
+            kwargs['debug'] = False
+            _ingest_entity_set(dataset_id, single_entity, **kwargs)
+            print "{} / {} ingested".format(idx, entity_set['entities'])
+        return responses
+
     response = make_post_request(
         entity_set, 'datasets/add-data/{}'.format(dataset_id), **kwargs)
     if 'location' in response.headers:
