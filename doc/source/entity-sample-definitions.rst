@@ -4,7 +4,7 @@
 Example entity samples
 ======================
 
-A sample represents an entity at a given point in time.  There are a few different ways to define an entity using the following fields: 
+A sample represents an entity at a given point in time.  There are a few different ways to define an entity using the following fields:
  **id**
      a unique string that represents a specific object that exists.
  **kind**
@@ -21,6 +21,8 @@ And one of the following location fields:
      A list of coordinates that define a closed shape in a 2D cartisian coordinate system.
 
 These options provide the user with the means to define entities with three different spatial representations and convenient structures for defining geographic coordinates.
+
+.. tip:: Entities that do not have a time component are considered infinite and exist across all time.  Excluding ``time`` from any of the following structures will produce an entity object (as opposed to a sample) that can be ingested with :py:func:`api.ingest_entities` rather than :py:func:`api.ingest_samples`.
 
 ++++++++++++++++++++
 Locations

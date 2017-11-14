@@ -442,11 +442,11 @@ def convert_samples_to_entity_set(sample_list):
         if not 'time' in sample:
             raise ValueError('Error processing sample at index {}. Samples must include a time field.'.format(idx), sample)
 
-        if 'id' is None or len(str(sample['id'])) == 0:
+        if sample['id'] is None or len(str(sample['id'])) == 0:
             raise ValueError('Error processing sample at index {}. Invalid ID.'.format(idx), sample)
-        if 'kind' is None or len(sample['kind']) == 0:
+        if sample['kind'] is None or len(sample['kind']) == 0:
             raise ValueError('Error processing sample at index {}. Invalid kind.'.format(idx), sample)
-        if 'time' is None:
+        if sample['time'] is None:
             raise ValueError('Error processing sample at index {}. Invalid time.'.format(idx), sample)
 
         if not isinstance(sample['time'], datetime):
@@ -506,18 +506,73 @@ def ingest_samples(dataset_id, sample_list, **kwargs):
     return _ingest_entity_set(dataset_id, entity_set, **kwargs)
 
 
-def ingest_entities(dataset_id, data, **kwargs):
+def convert_entities_to_entity_set(entity_list):
+    conduce_keys = ['id', 'kind', 'point', 'path', 'polygon']
+    entities = []
+    ids = set()
+    for idx, ent in enumerate(entity_list):
+        if not 'id' in ent:
+            raise ValueError('Error processing entity at index {}. Entities must include an ID.'.format(idx), ent)
+        if not 'kind' in ent:
+            raise ValueError('Error processing entity at index {}. Entities must include a kind field.'.format(idx), ent)
+
+        if ent['id'] is None or len(str(ent['id'])) == 0:
+            raise ValueError('Error processing entity at index {}. Invalid ID.'.format(idx), ent)
+        if ent['id'] in ids:
+            raise ValueError('Error processing entity at index{}. Non-Unique ID'.format(idx), ent)
+        if ent['kind'] is None or len(ent['kind']) == 0:
+            raise ValueError('Error processing entity at index {}. Invalid kind.'.format(idx), ent)
+        if ent.get('time') is not None:
+            raise KeyError('Error processing entity at index {}. Timeless entities should not set time.'.format(idx), ent)
+
+        coordinates = convert_geometries(ent)
+        if coordinates == []:
+            raise ValueError('Error processing entity at index {}.  Entities must define a location (point, path, or polygon)'.format(idx), ent)
+
+        ids.add(ent['id'])
+        ent['_kind'] = ent['kind']
+        attribute_keys = [key for key in ent.keys() if key not in conduce_keys]
+        attributes = util.get_attributes(attribute_keys, ent)
+
+        entities.append({
+            'identity': str(ent['id']),
+            'kind': ent['kind'],
+            'timestamp_ms': util.get_default('timestamp_ms'),
+            'endtime_ms': util.get_default('endtime_ms'),
+            'path': coordinates,
+            'attrs': attributes
+        })
+
+    return {'entities': entities}
+
+
+def ingest_entities(dataset_id, entity_list, **kwargs):
     """
     Upload :ref:`entities <conduce-entities>` to the Conduce datastore.
 
     A convenience method that adds entities to the Conduce datastore and waits for the job to complete. This function POSTs an entity set to Conduce and :py:func:`wait_for_job` until the ingest job completes.
 
+    Each element of ``entity_list`` be a valid :ref:`entity structure <entity-sample-definitions>`.  Here is a simple valid structure::
+
+        {
+            "id": <string>,
+            "kind": <string>,
+            "point": {
+                "lat": <float>,
+                "lon": <float>
+            }
+        }
+
+    It may also contain additional fields with arbitrary keys.
+
+    Since entities do not have timestamps they exists across all time.  Entities must be unique, that means each element in ``entity_list`` must have a unique ID.  Because entities do not have timestamps, ID is the only field that makes them unique.
+
     Parameters
     ----------
     dataset_id : string
         The UUID that identifies the dataset to modify.
-    data : list
-        A list of entities.  See :ref:`conduce-entities` for documentation on how to build an entity list.
+    entity_list : list
+        A list of entities.  See :doc:`data-ingest` for documentation on how to build an entity list.
 
     **kwargs:
         See :py:func:`make_post_request`
@@ -533,10 +588,9 @@ def ingest_entities(dataset_id, data, **kwargs):
         Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
     """
 
-    if isinstance(data, list):
-        data = {'entities': data}
+    entity_set = convert_entities_to_entity_set(entity_list)
 
-    return _ingest_entity_set(dataset_id, data, **kwargs)
+    return _ingest_entity_set(dataset_id, entity_set, **kwargs)
 
 
 def _ingest_entity_set(dataset_id, entity_set, **kwargs):
