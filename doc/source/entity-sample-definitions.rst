@@ -4,7 +4,7 @@
 Example entity samples
 ======================
 
-A sample represents an entity at a given point in time.  There are a few different ways to define an entity using the following fields: 
+A sample represents an entity at a given point in time.  There are a few different ways to define an entity using the following fields:
  **id**
      a unique string that represents a specific object that exists.
  **kind**
@@ -14,11 +14,11 @@ A sample represents an entity at a given point in time.  There are a few differe
 
 And one of the following location fields:
  **point**
-     A coordinate pair that defines a location in a 2D cartisian coordinate system.
+     A coordinate pair that defines a location in a 2D Cartesian coordinate system.
  **path**
-     A list of coordinates that define a series of connected line segments in a 2D cartisian coordinate system.
+     A list of coordinates that define a series of connected line segments in a 2D Cartesian coordinate system.
  **polygon**
-     A list of coordinates that define a closed shape in a 2D cartisian coordinate system.
+     A list of coordinates that define a closed shape in a 2D Cartesian coordinate system.
 
 These options provide the user with the means to define entities with three different spatial representations and convenient structures for defining geographic coordinates.
 
