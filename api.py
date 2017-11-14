@@ -400,7 +400,7 @@ def convert_coordinates(point):
             'x': float(point['lon']),
             'y': float(point['lat'])
         }
-    elif 'x' and 'y' in sample['point']:
+    elif 'x' and 'y' in point:
         coord = {
             'x': float(point['x']),
             'y': float(point['y'])
