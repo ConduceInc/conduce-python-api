@@ -9,14 +9,14 @@
 Intro to Data Ingest
 ====================
 
-Visualizing your data in Conduce begins with ingest.  Ingest is the process translating your data into a format that Conduce understands.  Conduce uses entities to define unique objects.  Entities are ingested into datasets.  Datasets hold collections of related entities and provide the interface a user needs to connect their data to a visualization renderer.
+Visualizing your data in Conduce begins with ingest.  Ingest is the process of translating your data into a format that Conduce understands.  Conduce uses entities to define unique objects.  Entities are ingested into datasets.  Datasets hold collections of related entities and provide the interface a user needs to connect their data to a visualization renderer.
 
 Conduce needs a few key pieces of information in order to visualize your data in space and time, those are:
 
 **Identity**
-   Identities distinguish one entity from another.  An entity exists in Conduce as one more more samples.  All samples that describe the same entity share an identity.
+   Identities distinguish one entity from another.  An entity exists in Conduce as one or more samples.  All samples that describe the same entity share an identity.
 **Location**
-   An entities location describes where in space the entity exists.  Locations are defined in units according to the coordinate system in which they are displayed. (Latitude and Longitude on a world map.)
+   An entity's location describes where in space the entity exists.  Locations are defined in units according to the coordinate system in which they are displayed. (Latitude and Longitude on a world map.)
 **Time**
    Time defines the moment in time at which the rest of the information describing an entity is valid.
 
@@ -26,7 +26,9 @@ With this information Conduce can build a representation of an object that exist
 Datasets
 --------
 
-Datasets are the containers that hold entities.  A dataset may be thought of as a table.  Each entity in a dataset is similar in nature, but has unique properties.  In order to represent and entity in Conduce, its sample data must be ingested into a dataset.  In order to perform any API operations it is recommended that you generate an API key.  (See :doc:`api-key-creation` for more information.)  The first step in ingesting data is acquiring a dataset ID.  If you are ingesting data into a new dataset you'll need to create the dataset  before entities can be ingested.
+.. tip:: Use of an API key is recommended.  See :doc:`api-key-creation` for more information.
+
+Datasets are the containers that hold entities.  A dataset may be thought of as a table.  Each entity in a dataset is similar in nature, but has unique properties.  In order to represent an entity in Conduce, its sample data must be ingested into a dataset.  The first step in ingesting data is acquiring a dataset ID.  If you are ingesting data into a new dataset you'll need to create the dataset before entities can be ingested.
 
 :py:func:`api.create_dataset`::
 
