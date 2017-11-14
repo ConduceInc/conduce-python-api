@@ -112,7 +112,11 @@ def compose_uri(fragment):
 
 def get_generic_data(dataset_id, entity_id, **kwargs):
     entity = get_entity(dataset_id, entity_id, **kwargs)
-    return json.loads(json.loads(entity.content)[0]['attrs'][0]['str_value'])
+    attrs = json.loads(entity.content)[0]['attrs']
+    for attr in attrs:
+        if attr["key"] == "json_data":
+            return json.loads(attr["str_value"])
+    raise ValueError("No generic data found")
 
 
 def get_entity(dataset_id, entity_id, **kwargs):
