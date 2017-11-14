@@ -112,7 +112,11 @@ def compose_uri(fragment):
 
 def get_generic_data(dataset_id, entity_id, **kwargs):
     entity = get_entity(dataset_id, entity_id, **kwargs)
-    return json.loads(json.loads(entity.content)[0]['attrs'][0]['str_value'])
+    attrs = json.loads(entity.content)[0]['attrs']
+    for attr in attrs:
+        if attr["key"] == "json_data":
+            return json.loads(attr["str_value"])
+    raise ValueError("No generic data found")
 
 
 def get_entity(dataset_id, entity_id, **kwargs):
@@ -352,40 +356,28 @@ def create_dataset(dataset_name, **kwargs):
 
 
 def set_generic_data(dataset_id, key, data_string, **kwargs):
-    timestamp = 0
-    location = {}
-    location["x"] = 0
-    location["y"] = 0
-    location["z"] = 0
-
-    attributes = [{
-        "key": "json_data",
-        "type": "STRING",
-        #"str_value": base64.b64encode(data),
-        "str_value": data_string,
-    }]
+    timestamp = datetime(1970,1,1)
+    point = { "x": 0, "y": 0 }
 
     remove_entity = {
-        "identity": key,
+        "id": key,
         "kind": 'raw_data',
-        "timestamp_ms": timestamp,
-        "endtime_ms": timestamp,
-        "path": [location],
+        "time": timestamp,
+        "point": point,
         "removed": True,
     }
 
-    ingest_entities(dataset_id, {'entities': [remove_entity]}, **kwargs)
+    ingest_samples(dataset_id, [remove_entity], **kwargs)
 
     entity = {
-        "identity": key,
+        "id": key,
         "kind": 'raw_data',
-        "timestamp_ms": timestamp,
-        "endtime_ms": timestamp,
-        "path": [location],
-        "attrs": attributes,
+        "time": timestamp,
+        "point": point,
+        "json_data": data_string,
     }
 
-    return ingest_entities(dataset_id, {'entities': [entity]}, **kwargs)
+    return ingest_samples(dataset_id, [entity], **kwargs)
 
 
 def convert_coordinates(point):
@@ -396,7 +388,7 @@ def convert_coordinates(point):
             'x': float(point['lon']),
             'y': float(point['lat'])
         }
-    elif 'x' and 'y' in sample['point']:
+    elif 'x' and 'y' in point:
         coord = {
             'x': float(point['x']),
             'y': float(point['y'])
