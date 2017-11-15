@@ -356,8 +356,8 @@ def create_dataset(dataset_name, **kwargs):
 
 
 def set_generic_data(dataset_id, key, data_string, **kwargs):
-    timestamp = datetime(1970,1,1)
-    point = { "x": 0, "y": 0 }
+    timestamp = datetime(1970, 1, 1)
+    point = {"x": 0, "y": 0}
 
     remove_entity = {
         "id": key,
@@ -544,7 +544,7 @@ def ingest_entities(dataset_id, entity_list, **kwargs):
 
     A convenience method that adds entities to the Conduce datastore and waits for the job to complete. This function POSTs an entity set to Conduce and :py:func:`wait_for_job` until the ingest job completes.
 
-    Each element of ``entity_list`` be a valid :ref:`entity structure <entity-sample-definitions>`.  Here is a simple valid structure::
+    Each element of ``entity_list`` must be a valid :ref:`entity structure <entity-sample-definitions>`.  Here is a simple valid structure::
 
         {
             "id": <string>,
