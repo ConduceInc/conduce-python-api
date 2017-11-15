@@ -9,8 +9,9 @@
    :hidden:
 
    getting-started
-   conduce-entities
+   data-ingest
    api-key-creation
+   conduce-entities
    api-ref
 
 
@@ -29,22 +30,22 @@ Conduce is a data visualization platform designed to enable users to integrate d
 -----------
 User Guides
 -----------
-These documents descibe how to start using the Conduce Python API.  They provide step-by-step instructions for installation and some of the most common API tasks.
+These documents describe how to start using the Conduce Python API.  They provide step-by-step instructions for installation and some of the most common API tasks.
 
 ++++++++++++++++++++++
 :doc:`getting-started`
 ++++++++++++++++++++++
 The :doc:`getting-started` guide helps users install the Python package and download the source code.  It also gives some explanation on how to use the command line utility.
 
+++++++++++++++++++++++
+:doc:`data-ingest`
+++++++++++++++++++++++
+:doc:`data-ingest` guides users through the process of sending data to Conduce for the first time.  Once data is ingested, it can be used to build visualizations.
+
 +++++++++++++++++++++++
 :doc:`api-key-creation`
 +++++++++++++++++++++++
 API users typically authenticate requests using API keys.  :doc:`api-key-creation` discusses Conduce authentication walks the user through the API key creation process.
-
-+++++++++++++++++++++++
-:doc:`conduce-entities`
-+++++++++++++++++++++++
-In order to build visualizations in Conduce, users must ingest data.  :doc:`conduce-entities` explains the concepts behind Conduce entities, how to build data structures for ingestion and how to make API calls to ingest those structures.
 
 ------------
 Details
@@ -54,6 +55,11 @@ Details
 :doc:`api-ref`
 +++++++++++++++++++++++
 The :doc:`api-ref` provides detailed specifications of API functions and their arguments.
+
++++++++++++++++++++++++
+:doc:`conduce-entities`
++++++++++++++++++++++++
+In order to build visualizations in Conduce, users must ingest data.  :doc:`conduce-entities` explains the concepts behind Conduce entities, how to build data structures for ingestion and how to make API calls to ingest those structures.
 
 ++++++++++++++++++++++++++++++++
 :doc:`entity-sample-definitions`

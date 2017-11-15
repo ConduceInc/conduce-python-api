@@ -4,19 +4,41 @@ This library implements the most commonly used Conduce API endpoints.  It can be
 
 `api.py` is the majority of the implementation.  `conduce.py` is a command line utility for invoking the API.  It also servers as a representative implementation of the library.
 
+# Prerequisites
+
+Conduce Python API requires that you have installed the following:
+
+- Python 2.7: https://www.python.org/downloads/
+- pip: https://pip.pypa.io/en/stable/installing/
+
 # Installation
 
 To install using pip:
-
 ```
 pip install git+git://github.com/ConduceInc/conduce-python-api
 ```
-
 or clone the repository and run:
+```
+pip install .
+```
+from the installed directory.
 
+# Using the API
+
+Once you have installed the API, you may use it in a python script by importing the `conduce` module:
 ```
-python setup.py install
+import conduce
 ```
+Then you may use API functions, like `create_dataset` as follows:
+```
+conduce.api.create_dataset('my-dataset-name', host='app.condcuce.com', user='email@example.com')
+```
+However, this requires that the user authenticate with their password when the script is executed.  To avoid this, provide an `api-key` argument instead of `user`.  If you would like to learn more about API key creation, take a look at [API Key Creation](https://conduce-conduce-python-api.readthedocs-hosted.com/en/latest/api-key-creation.html).
+
+The most common use for the python API is data ingest.  Data ingest is too large a topic to be covered here, if you'd like to learn more check out [Intro to Data Ingest](https://conduce-conduce-python-api.readthedocs-hosted.com/en/latest/data-ingest.html)
+
+Other API features are documented in the [API Reference](https://conduce-conduce-python-api.readthedocs-hosted.com/en/latest/api-ref.html).
+
 
 # Conduce Command Line Utilities
 
@@ -24,14 +46,15 @@ python setup.py install
 
 If you want to use the CLI without any setup you may fully specify your requests on the command line.
 
-To list all datasets just:
+As an example, you may list existing datasets with the following command:
 
 ```
 conduce-api list datasets --host=app.conduce.com --user=email@example.com
 ```
 
-Otherwise you'll want to setup a configuration, either by adding `~/.conduceconfig` and entering the configuration data, or by using the `config` subcommand:
+## Setup
 
+You may omit the `host` and `user` arguments if you setup a configuration file.  You may do this by creating your own `~/.conduceconfig` and entering the configuration data, or by using the `config` subcommand:
 
 To list configuration options and syntax:
 
@@ -101,7 +124,7 @@ to install runtime and documentation dependencies, or:
 pip install -r requirements-docs.txt
 ```
 
-if you only need to install the documentation dependencies.  Next, build the documenation:
+if you only need to install the documentation dependencies.  Next, build the documentation:
 
 ```
 cd doc
