@@ -274,6 +274,12 @@ def get_entity(args):
     return entities
 
 
+def dump_data(args):
+    uri = 'datasets/raw-lens/{}/{}/{}/{}/{}/{}/{}/{}/{}'.format(
+        args.dataset_id, args.x_min, args.x_max, args.y_min, args.y_max, args.z_min, args.z_max, args.t_min, args.t_max)
+    return api.make_get_request(uri, **vars(args))
+
+
 def main():
     import argparse
     import pkg_resources
@@ -328,7 +334,7 @@ def main():
     parser_config_list.set_defaults(func=list_from_args)
 
     parser_config_find = subparsers.add_parser('find',  parents=[api_cmd_parser], help='Find resources that match the given parameters')
-    parser_config_find.add_argument('--type', help='Conduce reourse type to find')
+    parser_config_find.add_argument('--type', help='Conduce resource type to find')
     parser_config_find.add_argument('--name', help='The name of the dataset to query')
     parser_config_find.add_argument('--id', help='The ID of the dataset to query')
     parser_config_find.add_argument('--regex', help='An expression to match datasets and query')
@@ -365,6 +371,18 @@ def main():
     parser_ingest_data.add_argument('--answer-yes', help='Set this flag to answer yes at all prompts', action='store_true')
     parser_ingest_data.add_argument('--debug', help='Get better information about errors', action='store_true')
     parser_ingest_data.set_defaults(func=ingest_data)
+
+    parser_dump_data = subparsers.add_parser('dump-data', parents=[api_cmd_parser], help='dump all data from a Conduce dataset')
+    parser_dump_data.add_argument('dataset_id', help='The ID of the dataset to dump')
+    parser_dump_data.add_argument('--x-min', help='Optional', default=-180)
+    parser_dump_data.add_argument('--x-max', help='Optional', default=180)
+    parser_dump_data.add_argument('--y-min', help='Optional', default=-90)
+    parser_dump_data.add_argument('--y-max', help='Optional', default=90)
+    parser_dump_data.add_argument('--z-min', help='Optional', default=-1)
+    parser_dump_data.add_argument('--z-max', help='Optional', default=1)
+    parser_dump_data.add_argument('--t-min', help='Optional', default=-281474976710655)
+    parser_dump_data.add_argument('--t-max', help='Optional', default=281474976710655)
+    parser_dump_data.set_defaults(func=dump_data)
 
     parser_get_entity = subparsers.add_parser('get-entity', parents=[api_cmd_parser], help='Get the latest state of a Conduce entity')
     parser_get_entity.add_argument('entity_id', help='The ID of the entity to retrieve')
