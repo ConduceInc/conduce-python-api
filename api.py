@@ -573,7 +573,7 @@ def convert_entities_to_entity_set(entity_list):
         if ent.get('time') is not None:
             raise KeyError('Error processing entity at index {}. Timeless entities should not set time.'.format(idx), ent)
 
-        coordinates = convert_geometries(ent)
+        coordinates = _convert_geometries(ent)
         if coordinates == []:
             raise ValueError('Error processing entity at index {}.  Entities must define a location (point, path, or polygon)'.format(idx), ent)
 
