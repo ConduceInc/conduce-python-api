@@ -1,9 +1,5 @@
 .. _data-ingest:
 
-.. toctree::
-    :hidden:
-
-    conduce-entities
 
 ====================
 Intro to Data Ingest
@@ -14,7 +10,7 @@ Visualizing your data in Conduce begins with data ingest.  Ingest is the process
 - a series of discrete samples
 - a constant continuous function (constant entity)
 
-Entries are ingested into datasets.  Entries that shared a common ID field describe the same entity.  Conduce needs a few key pieces of information in order to visualize your data in space and time, those are:
+Entries are ingested into datasets.  Entries that share a common ID field describe the same entity.  Conduce needs a few key pieces of information in order to visualize your data in space and time, those are:
 
 **Identity**
    Identities distinguish one entity from another.  For constant entities, each constant has a unique identity.  For other entities, all samples that describe the same entity share an identity.
@@ -39,7 +35,7 @@ Datasets hold collections of related entities and provide the interface a user n
 
 The dataset ID returned is a UUID.  It will be passed as a function parameter to the :py:func:`api.ingest_entities` function.
 
-If you want to ingest data into an existing dataset you will need to acquire its dataset ID.  Datasets are Conduce resources.  All resources have an ID and can be queried with the resource API.  The Conduce Python API provides a convenience method (:py:func:`api.list_datasets`) for listing datasets::
+If you want to ingest data into an existing dataset you will need to acquire its dataset ID.  Datasets are Conduce resources.  All resources have an ID and can be queried with the REST API.  The Conduce Python API provides a convenience method (:py:func:`api.list_datasets`) for listing datasets::
 
 
     datasets = conduce.api.list_datasets(host='app.conduce.com', api-key='00000000-0000-0000-0000-000000000000')
@@ -67,7 +63,7 @@ Populating datasets
 
 Once a dataset has been created, it needs to be populated before it can be visualized.  A dataset is populated by creating entries and making API calls to add them to the dataset.  See :doc:`conduce-entities` for detailed information on creating entities.
 
-For the purposes of this primer you will focus on a simple example, ingesting constant entities from a data file.  simplemaps.com provides a free list of world cities.  Follow `this link <https://simplemaps.com/data/world-cities>`_ to download this data.  Conduce also provides a version of this list in the ``samples`` directory.
+In this primer you will focus on a simple example, ingesting constant entities from a data file.  simplemaps.com provides a free list of world cities.  Follow `this link <https://simplemaps.com/data/world-cities>`_ to download this data.  Conduce also provides a version of this list in the ``samples`` directory.
 
 Once you have the data downloaded you must decide how the data should be represented in Conduce.  Each record is described by the following fields:
 
@@ -103,7 +99,7 @@ A dataset entry requires the following fields in order to be ingested: ID, locat
 
 Notice that two of the fields ``id`` and ``kind`` are not derived from the data.  You will generate a unique ID just in case any of the city names are the same.  You will hard code ``kind`` to city in case you want to ingest other types of data into this dataset in the future.  If you wanted to do something more sophisticated you could categorize the cities by population and set ``kind`` to something like "small_city," "medium_city," and "large_city."
 
-Following this pattern the first city in the dataset takes the following form::
+Following this pattern, the first city in the dataset takes the following form::
 
     {
         "id": str(uuid.uuid4()),
@@ -135,7 +131,7 @@ In this example, you are ingesting constant entities and will use :py:func:`api.
 
     conduce.api.ingest_entities(world_cities_dataset_id, entity_list, host=app.conduce.com, api-key=00000000-0000-0000-0000-000000000000)
 
-After this function returns the dataset will be populated with the entities derived from the spreadsheet.
+After this function returns, the dataset will be populated with the entities derived from the spreadsheet.
 
 ----------
 Next steps

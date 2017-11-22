@@ -1,9 +1,5 @@
 .. _conduce-entities:
 
-.. toctree::
-    :hidden:
-
-    entity-sample-definitions
 
 ================
 Conduce Entities
@@ -14,23 +10,23 @@ Conduce Entities
 What is an entity?
 ------------------
 
-Conduce uses a concept called entity to define a person, place, or thing that exists in space and time.  An entity can exist for an instant or across a time span.  It can describe a point in space, a path (sequence of points), or a region (polygon).  An entity is defined by a series of samples that describe it's location in space over a period of time.  An entity also has attributes that describe it's characteristics. An entity's attributes can change over time.  Entities can be static or dynamic.  To understand the difference between the two, it is helpful to understand dynamic entities first.
+Conduce uses a concept called entity to define a person, place, or thing that exists in space and time.  An entity can exist for an instant or across a span of time.  It can describe a point in space, a path (sequence of points), or a region (polygon).  An entity is defined by a series of samples that describe its location in space over a period of time.  An entity also has attributes that describe its characteristics. An entity's attributes can change over time.  Entities can be static or dynamic.  To understand the difference between the two, it is helpful to understand dynamic entities first.
 
 ++++++++++++++++
 Dynamic entities
 ++++++++++++++++
-Dynamic entities are composed of a sequence of samples.  The term sample is taken from the `signal processing domain <https://en.wikipedia.org/wiki/Sampling_(signal_processing)>`_ and describes the state of an entity at a discrete moment in time.  A sample describes an entity's location in space and other attributes.  These qualities can change from sample to sample so that when a visualization is constructed, these state changes can be visualized.  A sequence of samples that share the same ID define the entity, and so, an entity is a sequence of samples.  Entities defined this way are said to be `dynamic`.  Conduce does not require that an entity's sampling interval be regular.  This allows users to update entities based on events (state changes) rather than period (time changes).  However, note that some types of entities should be sampled regularly in order generate an accurate visual representations.
+Dynamic entities are composed of a sequence of samples.  The term sample is taken from the `signal processing domain <https://en.wikipedia.org/wiki/Sampling_(signal_processing)>`_ and describes the state of an entity at a discrete moment in time.  A sample describes an entity's location in space and other attributes.  These qualities can change from sample to sample so that when a visualization is constructed, these state changes can be visualized.  A sequence of samples that share the same ID define the entity, and so, an entity is a sequence of samples.  Entities defined this way are said to be `dynamic`.  Conduce does not require that an entity's sampling interval be regular.  This allows users to update entities based on events (state changes) rather than period (time changes).  However, note that some types of entities should be sampled regularly in order to generate an accurate visual representation.
 
 +++++++++++++++
 Static entities
 +++++++++++++++
-A static entity is one that does not change over time.  If an entity has a state that does not change, it may be ingested with a single message that does not have a time field.  As such the entity is a sequence with one element that defines the entity for all time.  Entities defined by a single state are considered `static`.  This document focuses on dynamic entities.  However the same basic principles apply for ingesting static entities, with the exception that static entities do not have ``time`` fields and, because the entity exists across all time, only one instance of the entity can exist in the dataset.  See :doc:`data-ingest` for an example of ingesting static entities.
+A static entity is one that does not change over time.  If an entity has a state that does not change, it may be ingested with a single message that does not have a time field.  As such, the entity is a sequence with one element that defines the entity for all time.  Entities defined by a single state are considered `static`.  This document focuses on dynamic entities.  However, the same basic principles apply for ingesting static entities, with the exception that static entities do not have ``time`` fields and, because the entity exists across all time, only one instance of the entity can exist in the dataset.  See :doc:`data-ingest` for an example of ingesting static entities.
 
 -----------------
 Creating entities
 -----------------
 
-An entity is a series of samples that describe the state of and object over a period of time.  A sample is the representation of an entity's momentary state.  Samples are created from user data.  User data should describe people or things that exist in some location during some time span.  Data can be ingested from static files with thousands of records or real-time streams that provide state updates in real-time.  As an example we'll ingest the following real-time shipment data into an existing dataset named ``shipments``:
+An entity is a series of samples that describe the state of an object over a period of time.  A sample is the representation of an entity's momentary state.  Samples are created from user data.  User data should describe people or things that exist in some location during some time span.  Data can be ingested from static files with thousands of records or real-time streams that provide state updates in real-time.  As an example we'll ingest the following real-time shipment data into an existing dataset named ``shipments``:
 
 .. list-table:: Source data: real-time shipment status
    :header-rows: 1
@@ -79,7 +75,7 @@ An entity is a series of samples that describe the state of and object over a pe
      - $1,431,873,345.01
      - transit
 
-The data in this table represents the present location of 5 shipments.  Each shipment has an ID, a shipping method, a date when it was last updated and a location in geographic coordinates.  Additionally the current state and value of the shipment is documented.  A Conduce entity is able to capture and represent all of this information.  These data records will be ingested as the first samples of 5 unique entities of the ``shipments`` dataset.
+The data in this table represents the present location of 5 shipments.  Each shipment has an ID, a shipping method, a date when it was last updated and a location in geographic coordinates.  Additionally, the current state and value of the shipment is documented.  A Conduce entity is able to capture and represent all of this information.  These data records will be ingested as the first samples of 5 unique entities of the ``shipments`` dataset.
 
 An entity sample requires four fields:
  **id**
@@ -87,15 +83,15 @@ An entity sample requires four fields:
  **kind**
      the type or category of the object.
  **time**
-     A :py:class:`datetime.datetime` at which the entity state described by this sample is valid.
+     a :py:class:`datetime.datetime` at which the entity state described by this sample is valid.
 
 And one of:
  **point**
-     A coordinate pair that defines a location in a 2D Cartesian coordinate system.
+     a coordinate pair that defines a location in a 2D Cartesian coordinate system.
  **path**
-     A list of coordinates that define a series of connected line segments in a 2D Cartisian coordinate system.
+     a list of coordinates that define a series of connected line segments in a 2D Cartesian coordinate system.
  **polygon**
-     A list of coordinates that define a closed shape in a 2D Cartisian coordinate system.
+     a list of coordinates that define a closed shape in a 2D Cartesian coordinate system.
 
 Each can be specified in (x,y) or (latitude,longitude).  If coordinate types are mixed or multiple coordinate types are specified, a :py:func:`KeyError` will be raised.  If more than one location type is defined, a :py:func:`KeyError` will be raised.
 
@@ -147,7 +143,7 @@ This function takes a dataset ID as the first argument.  A dataset must exist be
 Updating entities
 -----------------
 
-Stuff about updating the state of an entity (append API)
+When the state of an entity changes the updates need to be ingested by Conduce to be visualized.
 
 .. list-table:: Data update: shipment 1
    :header-rows: 1
@@ -168,10 +164,12 @@ Stuff about updating the state of an entity (append API)
      - $102,325.26
      - delivered
 
+In the table above, ID 1 has changed location and its state has been updated to "delivered."  To update the entity follow the same process used to ingest the initial sample.  Convert the data to a sample and call :py:func:`api.ingest_samples`.
+
 -----------
 Particulars
 -----------
 
-+ The kind of an entity may change.
++ The **kind** of an entity may change.
 + Conduce will not allow an entity to exist in two different states at the same time.  That is to say that two samples describing the same entity cannot have the same timestamp.
 

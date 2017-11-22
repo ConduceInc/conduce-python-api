@@ -65,7 +65,7 @@ def list_resources(resource_type, **kwargs):
         host : string
             The Conduce server's hostname (ex. app.conduce.com)
         api_key : string
-            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precedent.
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
         user : string
             The user's email address.  Used to look up an API key from the Conduce configuration or, if not found, authenticate via password.  Ignored if `api_key` is provided.
 
@@ -211,7 +211,7 @@ def make_delete_request(fragment, **kwargs):
         host : string
             The Conduce server's hostname (ex. app.conduce.com)
         api_key : string
-            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precedent.
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
         user : string
             The user's email address.  Used to look up an API key from the Conduce configuration or, if not found, authenticate via password.  Ignored if `api_key` is provided.
 
@@ -246,7 +246,7 @@ def make_get_request(fragment, **kwargs):
         host : string
             The Conduce server's hostname (ex. app.conduce.com)
         api_key : string
-            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precedent.
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
         user : string
             The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
 
@@ -524,7 +524,7 @@ def ingest_samples(dataset_id, sample_list, **kwargs):
     """
     Upload a :doc:`sample list <conduce-entities>` to the Conduce datastore.
 
-    A convenience method that adds an list of entity samples to the Conduce datastore and waits for the job to complete. This function POSTs a sample list to Conduce and :py:func:`wait_for_job` until the ingest job completes.
+    A convenience method that adds a list of entity samples to the Conduce datastore and waits for the job to complete. This function POSTs a sample list to Conduce and :py:func:`wait_for_job` until the ingest job completes.
 
     Parameters
     ----------
@@ -613,7 +613,7 @@ def ingest_entities(dataset_id, entity_list, **kwargs):
 
     It may also contain additional fields with arbitrary keys.
 
-    Since entities do not have timestamps they exists across all time.  Entities must be unique, that means each element in ``entity_list`` must have a unique ID.  Because entities do not have timestamps, ID is the only field that makes them unique.
+    Since entities do not have timestamps they exist across all time.  Entities must be unique, that means each element in ``entity_list`` must have a unique ID.  Because entities do not have timestamps, ID is the only field that makes them unique.
 
     Parameters
     ----------
@@ -733,7 +733,7 @@ def find_resource(**kwargs):
         host : string
             The Conduce server's hostname (ex. app.conduce.com)
         api_key : string
-            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precedent.
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
         user : string
             The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
 
@@ -872,7 +872,7 @@ def find_orchestration(**kwargs):
     """
     Find orchestrations matching the given parameters.
 
-    A convenience methond that calls :py:func:`find_resource` with the ``type`` argument set to "ORCHESTRATION."
+    A convenience method that calls :py:func:`find_resource` with the ``type`` argument set to "ORCHESTRATION."
 
     See :py:func:`find_resource` for more information on the other query parameters.
     """
@@ -883,7 +883,7 @@ def find_asset(**kwargs):
     """
     Find assets matching the given parameters.
 
-    A convenience methond that calls :py:func:`find_resource` with the ``type`` argument set to "ASSET."
+    A convenience method that calls :py:func:`find_resource` with the ``type`` argument set to "ASSET."
 
     See :py:func:`find_resource` for more information on the other query parameters.
     """
@@ -894,7 +894,7 @@ def find_substrate(**kwargs):
     """
     Find substrates matching the given parameters.
 
-    A convenience methond that calls :py:func:`find_resource` with the ``type`` argument set to "SUBSTRATE."
+    A convenience method that calls :py:func:`find_resource` with the ``type`` argument set to "SUBSTRATE."
 
     See :py:func:`find_resource` for more information on the other query parameters.
     """
@@ -905,7 +905,7 @@ def find_template(**kwargs):
     """
     Find lens templates matching the given parameters.
 
-    A convenience methond that calls :py:func:`find_resource` with the ``type`` argument set to "LENS_TEMPLATE."
+    A convenience method that calls :py:func:`find_resource` with the ``type`` argument set to "LENS_TEMPLATE."
 
     See :py:func:`find_resource` for more information on the other query parameters.
     """
@@ -916,7 +916,7 @@ def find_dataset(**kwargs):
     """
     Find datasets matching the given parameters.
 
-    A convenience methond that calls :py:func:`find_resource` with the ``type`` argument set to "DATASET."
+    A convenience method that calls :py:func:`find_resource` with the ``type`` argument set to "DATASET."
 
     See :py:func:`find_resource` for more information on the other query parameters.
     """
@@ -1181,7 +1181,7 @@ def make_post_request(payload, fragment, **kwargs):
         host : string
             The Conduce server's hostname (ex. app.conduce.com)
         api_key : string
-            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precedent.
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
         user : string
             The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
 
@@ -1254,7 +1254,7 @@ def make_put_request(payload, fragment, **kwargs):
         host : string
             The Conduce server's hostname (ex. app.conduce.com)
         api_key : string
-            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precedent.
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
         user : string
             The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
 
@@ -1327,7 +1327,7 @@ def make_patch_request(payload, fragment, **kwargs):
         host : string
             The Conduce server's hostname (ex. app.conduce.com)
         api_key : string
-            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both `api_key` takes precedent.
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
         user : string
             The user's email address.  Used to look up an API key from the Conduce configuration or, if not found, authenticate via password.  Ignored if `api_key` is provided.
 

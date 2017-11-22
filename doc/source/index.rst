@@ -4,14 +4,16 @@
    contain the root `toctree` directive.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :titlesonly:
    :hidden:
+   :name: mastertoc
 
    getting-started
-   data-ingest
    api-key-creation
+   data-ingest
    conduce-entities
+   entity-sample-definitions
    api-ref
 
 
