@@ -4,14 +4,14 @@
 API Key Creation
 ====================
 
-API keys provide a flexible mechanism for granting access to your account and are used to authenticate requests made using the Conduce REST API.  They can be used in place of username/password authentication.  You may create as many API keys as you need, and may wish to use different API keys for performing specific API operations.  API keys can also be used to grant others users temporary access to your account.
+API keys provide a flexible mechanism for granting access to your account and are used to authenticate requests made using the Conduce REST API.  They can be used in place of username/password authentication.  You may create as many API keys as you need, and may wish to use different API keys for performing specific API operations.  API keys can also be used to grant other users temporary access to your account.
 
 Generally, there are three methods used to authenticate Conduce REST requests:
 
 **username/password**
     used to establish a session
 **session cookie**
-    returned from a user name password login.  Used to continue a session started with a username/password login.
+    returned from a username/password login.  Used to continue a session started with a username/password login.
 **API key**
     a unique string generated upon request that can be used to authenticate requests.
 
@@ -23,7 +23,7 @@ In order to generate an API key, you must have a Conduce account.  Contact suppo
 
     conduce-api create-api-key --user=<email_address> --host=app.conduce.com
 
-After entering the command you will be prompted for your password. After password submission, the new API key will be printed to the prompt and the command will finish.  Alternatively you may run a Python REPL and call :py:func:`api.create_api_key` directly.::
+After entering the command you will be prompted for your password. After password submission, the new API key will be printed to the prompt and the command will finish.  Alternatively, you may run a Python REPL and call :py:func:`api.create_api_key` directly::
 
     import conduce
     conduce.api.create_api_key(user="<email_address>", host="app.conduce.com")
@@ -35,7 +35,7 @@ Again, you will be prompted for your password.  Upon submission, the new API key
 
 
 -------------------
-Retreiving API keys
+Retrieving API keys
 -------------------
 
 API keys you have created may be retrieved using the following command::

@@ -10,15 +10,15 @@ A sample represents an entity at a given point in time.  There are a few differe
  **kind**
      the type or category of the object.
  **time**
-     A :py:class:`datetime.datetime` at which the entity state described by this sample is valid.
+     a :py:class:`datetime.datetime` at which the entity state described by this sample is valid.
 
 And one of the following location fields:
  **point**
-     A coordinate pair that defines a location in a 2D cartisian coordinate system.
+     a coordinate pair that defines a location in a 2D cartisian coordinate system.
  **path**
-     A list of coordinates that define a series of connected line segments in a 2D cartisian coordinate system.
+     a list of coordinates that define a series of connected line segments in a 2D cartisian coordinate system.
  **polygon**
-     A list of coordinates that define a closed shape in a 2D cartisian coordinate system.
+     a list of coordinates that define a closed shape in a 2D cartisian coordinate system.
 
 These options provide the user with the means to define entities with three different spatial representations and convenient structures for defining geographic coordinates.
 
@@ -34,7 +34,7 @@ Location fields are used to define where an entity exists and the entity's shape
 Point sample
 --------------------
 
-A point sample defines an entity as a point in space.  Point samples are best used to represent entities in substrates other than the world map.::
+A point sample defines an entity as a point in space.  Point samples are best used to represent entities in substrates other than the world map::
 
     {
         "id": 1,
@@ -50,7 +50,7 @@ A point sample defines an entity as a point in space.  Point samples are best us
 Geographic point sample
 ------------------------
 
-A geopoint sample defines an entity at a point in space.  Coordinates are defined in latitude and longitude for convenience.::
+A geopoint sample defines an entity at a point in space.  Coordinates are defined in latitude and longitude for convenience::
 
     {
         "id": 1,
@@ -62,7 +62,7 @@ A geopoint sample defines an entity at a point in space.  Coordinates are define
         },
     }
 
-A geographic sample may also be represented in x,y (x = longitude, y = latitude) notation.::
+A geographic sample may also be represented in x,y (x = longitude, y = latitude) notation::
 
     {
         "id": 1,
@@ -81,7 +81,7 @@ This same pattern follows for the other location types.  The geographic paramete
 Path sample
 --------------------
 
-A path sample describes a connected sequence of points.  A path requires at least two points.::
+A path sample describes a connected sequence of points.  A path requires at least two points::
 
     {
         "id": 1,
@@ -103,7 +103,7 @@ A path sample describes a connected sequence of points.  A path requires at leas
 Geographic path sample
 -----------------------
 
-A geographic path sample describes a connected sequence of points in geographic coordinates.  A path requires at least two points.::
+A geographic path sample describes a connected sequence of points in geographic coordinates.  A path requires at least two points::
 
     {
         "id": 1,
@@ -126,7 +126,7 @@ A geographic path sample describes a connected sequence of points in geographic 
 Polygon sample
 --------------------
 
-A polygon sample describes a closed sequence of points.  A polygon requires at least three points.  The last point in the list is implicitly connected to the first.::
+A polygon sample describes a closed sequence of points.  A polygon requires at least three points.  The last point in the list is always connected to the first::
 
     {
         "id": 1,
@@ -151,7 +151,7 @@ A polygon sample describes a closed sequence of points.  A polygon requires at l
 Geographic polygon sample
 ------------------------------
 
-A geographic polygon sample describes a closed sequence of points in geographic coordinates.  Otherwise it has the same requirements as a polygon sample.::
+A geographic polygon sample describes a closed sequence of points in geographic coordinates.  Otherwise, it has the same requirements as a polygon sample::
 
     {
         "id": 1,
@@ -193,4 +193,4 @@ Attributes are used to define characteristics of entities not encompassed by the
         "pressure": 12
     }
 
-Here we've extended the entity sample from the previous example with attributes that further define the entity.  Each attribute can be used to affect how an entity is rendered in Conduce.
+Here, we've extended the entity sample from the previous example with attributes that further define the entity.  Each attribute can be used to affect how an entity is rendered in Conduce.

@@ -2,7 +2,7 @@
 
 This library implements the most commonly used Conduce API endpoints.  It can be used for creating datasets and ingesting data, managing lenses and templates, and uploading various resources.
 
-`api.py` is the majority of the implementation.  `conduce.py` is a command line utility for invoking the API.  It also servers as a representative implementation of the library.
+`api.py` is the majority of the implementation.  `conduce.py` is a command line utility for invoking the API.  It also serves as a representative implementation of the library.
 
 # Prerequisites
 
@@ -35,16 +35,16 @@ conduce.api.create_dataset('my-dataset-name', host='app.condcuce.com', user='ema
 ```
 However, this requires that the user authenticate with their password when the script is executed.  To avoid this, provide an `api-key` argument instead of `user`.  If you would like to learn more about API key creation, take a look at [API Key Creation](https://conduce-conduce-python-api.readthedocs-hosted.com/en/latest/api-key-creation.html).
 
-The most common use for the python API is data ingest.  Data ingest is too large a topic to be covered here, if you'd like to learn more check out [Intro to Data Ingest](https://conduce-conduce-python-api.readthedocs-hosted.com/en/latest/data-ingest.html)
+The most common use for the python API is data ingest.  Data ingest is too large a topic to be covered here, if you'd like to learn more, check out [Intro to Data Ingest](https://conduce-conduce-python-api.readthedocs-hosted.com/en/latest/data-ingest.html)
 
 Other API features are documented in the [API Reference](https://conduce-conduce-python-api.readthedocs-hosted.com/en/latest/api-ref.html).
 
 
-# Conduce Command Line Utilities
+# Conduce Command Line Interface
 
 ## Getting started
 
-If you want to use the CLI without any setup you may fully specify your requests on the command line.
+The Conduce command line interface provides users with utilities for exercising common API commands, and textual feedback for inspecting and debugging.  If you want to use the CLI without any setup you may fully specify your requests on the command line.
 
 As an example, you may list existing datasets with the following command:
 
@@ -112,7 +112,7 @@ and is stored at `~/.conduceconfig`
 
 ## Building documentation
 
-Documentation is built with Sphinx.  To install Sphinx and Sphinx extensions run:
+Documentation is built with Sphinx.  To install Sphinx and Sphinx extensions, run:
 
 ```
 pip install -r requirements-all.txt
