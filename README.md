@@ -44,17 +44,24 @@ Other API features are documented in the [API Reference](https://conduce-conduce
 
 ## Getting started
 
-The Conduce command line interface provides users with utilities for exercising common API commands, and textual feedback for inspecting and debugging.  If you want to use the CLI without any setup you may fully specify your requests on the command line.
+The Conduce command line interface provides users with utilities for exercising common API commands, and textual feedback for inspecting and debugging. Features include:
+
+- Creating API keys
+- Adding and removing datasets
+- Creating a dataset from a CSV or JSON file
+- Listing datasets and other resources
+
+All CLI functionality is available through `conduce/api.py` and all API functionality should be usable with or without a `.conduceconfig` file. If you want to use the CLI without any setup you may fully specify your requests on the command line.
 
 As an example, you may list existing datasets with the following command:
 
 ```
-conduce-api list datasets --host=app.conduce.com --user=email@example.com
+conduce-api list datasets --host=app.conduce.com --user=email@example.com --api-key=<your api key>
 ```
 
 ## Setup
 
-You may omit the `host` and `user` arguments if you setup a configuration file.  You may do this by creating your own `~/.conduceconfig` and entering the configuration data, or by using the `config` subcommand:
+As mentioned above, rather than fully specifying every request, you can setup a `~/.conduceconfig` and entering the configuration data, or by using the `config` subcommand:
 
 To list configuration options and syntax:
 
@@ -81,17 +88,6 @@ conduce-api config set api-key --new --user=valid_user --host=valid_host
 ```
 
 If you provide an API key for your default user and host you will never have to enter credentials to use that account as long as the API key is valid.
-
-## Features
-
-The CLI provides many high level functions.  These include:
-
-- Creating API keys
-- Adding and removing datasets
-- Creating a dataset from a CSV or JSON file
-- Listing datasets and other resources
-
-All CLI functionality is available through `conduce/api.py` and all API functionality should be usable with or without a `.conduceconfig` file.
 
 
 ## Conduce Configuration
