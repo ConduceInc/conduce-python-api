@@ -57,7 +57,7 @@ All CLI functionality is available through `conduce/api.py` and all API function
 As an example, you may list existing datasets with the following command:
 
 ```
-conduce-api list datasets --host=app.conduce.com --user=email@example.com --api-key=<your api key>
+conduce-api list datasets --host=app.conduce.com --user=email@example.com
 ```
 
 ## Setup

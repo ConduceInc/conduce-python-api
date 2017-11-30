@@ -34,7 +34,7 @@ Datasets hold collections of related entities and provide the interface a user n
     world_cities_dataset = conduce.api.create_dataset('world cities', host='app.conduce.com', api-key='00000000-0000-0000-0000-000000000000')
     world_cities_dataset_id = world_cities_dataset['id']
 
-The dataset object retuned contains a dataset ID. This is a UUID which will be passed as a function parameter to the :py:func:`api.ingest_entities` function.
+The dataset object retuned contains a dataset ID such as '55611f65-c657-45b1-9d04-fe19227f6306'. This is a UUID which will be passed as a function parameter to the :py:func:`api.ingest_entities` function.
 
 If you want to ingest data into an existing dataset you will need to acquire its dataset ID.  Datasets are Conduce resources.  All resources have an ID and can be queried with the REST API.  The Conduce Python API provides a convenience method (:py:func:`api.list_datasets`) for listing datasets::
 

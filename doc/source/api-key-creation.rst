@@ -4,7 +4,7 @@
 API Key Creation
 ====================
 
-API keys are used to authenticate requests made using the Conduce REST API.  They can be used in place of username/password authentication.  You may create as many API keys as you need, and you may wish to use different API keys for performing specific API operations.  API keys can also be used to grant other users temporary access to your account.
+API keys are used to authenticate requests made using the Conduce REST API.  They can be used in place of username/password authentication.  You may create as many API keys as you need, and may wish to use different API keys for performing specific API operations.  API keys can also be used to grant other users temporary access to your account.
 
 Generally, there are three methods used to authenticate Conduce REST requests:
 
