@@ -21,8 +21,6 @@ import sys
 sys.path.insert(0, os.path.abspath('../..'))
 
 
-# -- General configuration ------------------------------------------------
-
 # If your documentation needs a minimal Sphinx version, state it here.
 #
 # needs_sphinx = '1.0'
@@ -105,6 +103,8 @@ html_theme = 'alabaster'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+def setup(app):
+    app.add_stylesheet('my-styles.css')
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
 #
