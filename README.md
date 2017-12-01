@@ -51,7 +51,6 @@ The Conduce command line interface provides users with utilities for exercising 
 - Creating a dataset from a CSV or JSON file
 - Listing datasets and other resources
 
-```
 All CLI functionality is available through `conduce/api.py` and all API functionality should be usable with or without a `.conduceconfig` file. If you want to use the CLI without any setup you may fully specify your requests on the command line.
 
 As an example, you may list existing datasets with the following command:
