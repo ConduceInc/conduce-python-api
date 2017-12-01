@@ -56,7 +56,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Conduce Python API'
-copyright = u'2017, Kevin Van Leer'
+copyright = u'2017, Conduce'
 author = u'Kevin Van Leer'
 
 # The version info for the project you're documenting, acts as replacement for
