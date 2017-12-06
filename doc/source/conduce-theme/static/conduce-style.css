@@ -95,163 +95,24 @@ h6 {
   -moz-font-feature-settings: 'tnum','lnum';
   */
 }
-
-.palette-section {
-  display: flex;
+@media screen and (min-width: 876px)
+div.sphinxsidebar {
+    position: fixed;
+    margin-left: 0;
 }
-
-.notification {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+.sphinxsidebarwrapper {
+  float: left;
+  padding:10px;
+  font-size: 14px;
+  line-height: 1.5;  
+  height: 100%; /* Full-height: remove this if you want "auto" height */
+    width: 220px; /* Set the width of the sidebar */
+    position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+    z-index: 1; /* Stay on top */
+    top: 0; /* Stay at the top */
+    left: 0;
+    overflow-x: hidden; /* Disable horizontal scroll */
 }
-
-.notification-default {
-  background-color: var(--color-secondary-light);
-  color: var(--color-text-dark);
-}
-
-.notification-top-right {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-}
-
-.color-swatch {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: 40px;
-  height: 250px;
-  width: 250px;
-  font-family: var(--font-monospace);
-}
-
-.notification-icon {
-  content: url(conduce-bug.svg);
-  height: 24px;
-  margin-right: 10px;
-}
-
-.data-point-icon {
-  content: url(conduce-data-point.svg);
-  height: 16px;
-  margin-right: 10px;
-}
-
-.color-text-dark {
-  background-color: var(--color-text-dark);
-  color: white; 
-}
-.color-text-secondary {
-  background-color: var(--color-text-secondary);
-  color: white; 
-}
-.color-text-light {
-  background-color: var(--color-text-light);
-  color: black; 
-}
-.color-primary-dark {
-  background-color: var(--color-primary-dark);
-  color: var(--color-text-light);
-}
-.color-primary {
-  background-color: var(--color-primary);
-  color: var(--color-text-dark);
-}
-.color-primary-light {
-  background-color: var(--color-primary-light);
-  color: var(--color-text-dark);
-}
-.color-secondary-dark {
-  background-color: var(--color-secondary-dark);
-  color: var(--color-text-dark);
-}
-.color-secondary {
-  background-color: var(--color-secondary);
-  color: var(--color-text-dark);
-}
-.color-secondary-light {
-  background-color: var(--color-secondary-light);
-  color: var(--color-text-dark);
-}
-.color-divider {
-  background-color: var(--color-divider);
-  color: var(--color-primary-text);
-}
-.color-iris-blue {
-  background-color: var(--color-conduce-iris-blue);
-  color: var(--color-text-dark);
-}
-.color-iris-blue-light {
-  background-color: var(--color-conduce-iris-blue-light);
-  color: var(--color-text-dark);
-}
-.color-iris-blue-dark {
-  background-color: var(--color-conduce-iris-blue-dark);
-  color: var(--color-text-light);
-}
-.color-pear {
-  background-color: var(--color-conduce-pear);
-  color: var(--color-text-dark);
-}
-.color-pear-light {
-  background-color: var(--color-conduce-pear-light);
-  color: var(--color-text-dark);
-}
-.color-pear-dark {
-  background-color: var(--color-conduce-pear-dark);
-  color: var(--color-text-dark);
-}
-.color-apple {
-  background-color: var(--color-conduce-apple);
-  color: var(--color-text-dark);
-}
-.color-apple-light {
-  background-color: var(--color-conduce-apple-light);
-  color: var(--color-text-dark);
-}
-.color-apple-dark {
-  background-color: var(--color-conduce-apple-dark);
-  color: var(--color-text-dark);
-}
-.color-crimson {
-  background-color: var(--color-conduce-crimson);
-  color: var(--color-text-light);
-}
-.color-crimson-light {
-  background-color: var(--color-conduce-crimson-light);
-  color: var(--color-text-dark);
-}
-.color-crimson-dark {
-  background-color: var(--color-conduce-crimson-dark);
-  color: var(--color-text-light);
-}
-
-.elevation-1 {
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-}
-
-.elevation-1:hover {
-  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
-  transition: all 0.3s cubic-bezier(.25,.8,.25,1);
-}
-
-.elevation-2 {
-  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
-}
-
-.elevation-3 {
-  box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-}
-
-.elevation-4 {
-  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
-}
-
-.elevation-5 {
-  box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
-}   
+.bodywrapper {
+  margin-left: 230px;
+  padding: 10px;  
