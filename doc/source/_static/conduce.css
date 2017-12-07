@@ -1,27 +1,15 @@
 body {
     font-family: 'Gotham Rounded Light', sans-serif;
-    font-size: 17px;
-    background-color: #fff;
-    color: #000;
-    margin: 0;
-    padding: 0;
 }
 
 
 div.sphinxsidebar h3,
 div.sphinxsidebar h4 {
     font-family: 'Gotham Bold', sans-serif;
-    color: #444;
-    font-size: 24px;
-    font-weight: normal;
-    margin: 0 0 5px 0;
-    padding: 0;
 }
 
 div.sphinxsidebar input {
-    border: 1px solid #CCC;
     font-family: 'Gotham Rounded Light', sans-serif;
-    font-size: 1em;
 }
 
 div.body h1,
@@ -31,18 +19,10 @@ div.body h4,
 div.body h5,
 div.body h6 {
     font-family: 'Gotham Bold', sans-serif;
-    font-weight: normal;
-    margin: 30px 0px 10px 0px;
-    padding: 0;
 }
 
 div.admonition p.admonition-title {
     font-family: 'Gotham Bold', sans-serif;
-    font-weight: normal;
-    font-size: 24px;
-    margin: 0 0 10px 0;
-    padding: 0;
-    line-height: 1;
 }
 
 pre, tt, code {
