@@ -115,4 +115,5 @@ div.sphinxsidebar {
 }
 .bodywrapper {
   margin-left: 230px;
+  position: relative;
   padding: 10px;  
