@@ -205,3 +205,8 @@ epub_exclude_files = ['search.html']
 intersphinx_mapping = {'https://docs.python.org/': None,
                        'dateutil': ('http://dateutil.readthedocs.io/en/stable', None),
                        'requests': ('http://docs.python-requests.org/en/master', None)}
+
+
+def setup(app):
+    app.add_stylesheet('conduce-style.css')
+    app.add_stylesheet('conduce.css')
