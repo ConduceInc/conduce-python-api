@@ -200,30 +200,13 @@ a:hover {
     text-decoration: underline;
 }
 
-div.body h1 {
-  font-family: 'Gotham Ultra', sans-serif;
-}
-
-div.body h2 {
-  font-family: 'Gotham Black', sans-serif;
-}
-
-div.body h3 {
-  font-family: 'Gotham Bold', sans-serif;
-}
-
-div.body h4,
-div.body h5,
-div.body h6 {
-  font-family: 'Gotham Medium', sans-serif;
-}
-
 div.body h1,
 div.body h2,
 div.body h3,
 div.body h4,
 div.body h5,
 div.body h6 {
+    font-family: 'Gotham Medium', sans-serif;
     font-weight: normal;
     margin: 30px 0px 10px 0px;
     padding: 0;
