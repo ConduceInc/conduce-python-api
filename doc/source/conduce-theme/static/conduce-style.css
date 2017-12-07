@@ -18,6 +18,10 @@
     font-family: "Gotham Medium";
     src: url("fonts/Gotham/Gotham-Medium.woff2") format("woff2");
    }
+@font-face {
+    font-family: "Roboto Mono";
+    src: url("fonts/RobotoMono/RobotoMono-Medium.ttf") format("truetype");
+   }
    
 
 :root {
@@ -45,14 +49,13 @@
  --color-secondary-light: var(--color-conduce-pear-light);
  --color-secondary-dark: var(--color-conduce-pear-dark);
  --color-divider: #bdbdbd;
- --font-monospace: 'Droid Sans Mono', monospace;
+ --font-monospace: 'Roboto Mono', monospace;
  --font-primary: 'Gotham Rounded Light', sans-serif;
 }
 
 body {
   font-family: var(--font-primary);
   color: var(--color-text-dark);
-  background-color: var(--color-background-light);
 }
 
 

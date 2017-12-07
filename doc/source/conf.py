@@ -106,8 +106,11 @@ html_theme_path = ['.']
 
 html_static_path = ['_static']
 
+
 def setup(app):
     app.add_stylesheet('conduce-style.css')
+
+
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
 #
