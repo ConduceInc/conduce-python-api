@@ -64,7 +64,7 @@ Populating datasets
 
 Once a dataset has been created, it needs to be populated before it can be visualized.  A dataset is populated by creating entries and making API calls to add them to the dataset.  See :doc:`conduce-entities` for detailed information on creating entities.
 
-In this primer you will focus on a simple example, ingesting constant entities from a data file.  simplemaps.com provides a free list of world cities.  Follow `this link <https://simplemaps.com/data/world-cities>`_ to download this data.  Conduce also provides a version of this list in the ``samples`` directory.
+In this primer you will focus on a simple example, ingesting constant entities from a data file. simplemaps.com provides a free list of world cities. Follow this link to download this data. A version of this list is also provided in the Conduce Python API samples directory.
 
 Once you have the data downloaded you must decide how the data should be represented in Conduce.  Each record is described by the following fields:
 
