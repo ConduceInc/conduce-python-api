@@ -55,7 +55,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Python API'
+project = u'Conduce Python API'
 copyright = u'2017, Conduce'
 author = u'Kevin Van Leer'
 
