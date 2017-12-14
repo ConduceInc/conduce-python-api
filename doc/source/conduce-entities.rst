@@ -10,7 +10,7 @@ Conduce Entities
 What is an entity?
 ------------------
 
-Conduce uses a concept called an entity to define a person, place, or thing that exists in space and time.  An entity can exist for an instant or across a span of time.  It can describe a point in space, a path (sequence of points), or a region (polygon).  An entity also has attributes that describe its characteristics. An entitiy's attributes can change over time.  An entity is defined by a series of samples that describe its location and attributes over a period of time.  There are two types of entities - static (state does not change) or dynamic (state may change).  To understand when to use each type, it is helpful to understand dynamic entities first.
+Conduce uses a concept called an entity to define a person, place, or thing that exists in space and time.  An entity can exist for an instant or across a span of time.  It can describe a point in space, a path (sequence of points), or a region (polygon).  An entity also has attributes that describe its characteristics. An entitiy's attributes can change over time.  There are two types of entities - static (state does not change) or dynamic (state may change).  To understand when to use each type, it is helpful to understand dynamic entities first.
 
 ++++++++++++++++
 Dynamic entities
@@ -125,7 +125,7 @@ Example (first record in table)::
         "Status": "delivered"
     }
 
-In the example above the ISO-8601 date time string is converted to a :py:class:`datetime.datetime` using :py:func:`dateutil.parser.parse`.
+In the example above the ISO-8601 datetime string is converted to a :py:class:`datetime.datetime` using :py:func:`dateutil.parser.parse`.
 
 More :ref:`example sample definitions <entity-sample-definitions>`
 
@@ -172,4 +172,5 @@ Particulars
 
 + The **kind** of an entity may change.
 + Conduce will not allow an entity to exist in two different states at the same time.  That is to say that two samples describing the same entity cannot have the same timestamp.
++ A dataset should contain only static or dynamic entities, not both  
 
