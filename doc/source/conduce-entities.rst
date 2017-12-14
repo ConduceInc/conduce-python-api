@@ -10,12 +10,12 @@ Conduce Entities
 What is an entity?
 ------------------
 
-Conduce uses a concept called entity to define a person, place, or thing that exists in space and time.  An entity can exist for an instant or across a span of time.  It can describe a point in space, a path (sequence of points), or a region (polygon).  An entity is defined by a series of samples that describe its location in space over a period of time.  An entity also has attributes that describe its characteristics. An entity's attributes can change over time.  Entities can be static or dynamic.  To understand the difference between the two, it is helpful to understand dynamic entities first.
+Conduce uses a concept called an entity to define a person, place, or thing that exists in space and time.  An entity can exist for an instant or across a span of time.  It can describe a point in space, a path (sequence of points), or a region (polygon).  An entity also has attributes that describe its characteristics. An entitiy's attributes can change over time.  An entity is defined by a series of samples that describe its location and attributes over a period of time.  There are two types of entities - static (state does not change) or dynamic (state may change).  To understand when to use each type, it is helpful to understand dynamic entities first.
 
 ++++++++++++++++
 Dynamic entities
 ++++++++++++++++
-Dynamic entities are composed of a sequence of samples.  The term sample is taken from the `signal processing domain <https://en.wikipedia.org/wiki/Sampling_(signal_processing)>`_ and describes the state of an entity at a discrete moment in time.  A sample describes an entity's location in space and other attributes.  These qualities can change from sample to sample so that when a visualization is constructed, these state changes can be visualized.  A sequence of samples that share the same ID define the entity, and so, an entity is a sequence of samples.  Entities defined this way are said to be `dynamic`.  Conduce does not require that an entity's sampling interval be regular.  This allows users to update entities based on events (state changes) rather than period (time changes).  However, note that some types of entities should be sampled regularly in order to generate an accurate visual representation.
+Dynamic entities are composed of a sequence of samples.  The term sample is taken from the `signal processing domain <https://en.wikipedia.org/wiki/Sampling_(signal_processing)>`_ and describes the state of an entity at a discrete moment in time.  A sample describes an entity's location and other attributes.  Attributes can change from sample to sample so that when a visualization is constructed, these state changes can be visualized.  A sequence of samples that share the same ID define the entity, and so, an entity is a sequence of samples.  Entities defined this way are said to be `dynamic`.  Conduce does not require that an entity's sampling interval be regular.  This allows users to update entities based on events (state changes) rather than period (time changes).  However, note that some types of entities should be sampled regularly in order to generate an accurate visual representation.
 
 +++++++++++++++
 Static entities
@@ -26,7 +26,7 @@ A static entity is one that does not change over time.  If an entity has a state
 Creating entities
 -----------------
 
-An entity is a series of samples that describe the state of an object over a period of time.  A sample is the representation of an entity's momentary state.  Samples are created from user data.  User data should describe people or things that exist in some location during some time span.  Data can be ingested from static files with thousands of records or real-time streams that provide state updates in real-time.  As an example we'll ingest the following real-time shipment data into an existing dataset named ``shipments``:
+A dynamic entity is created by defining a series of samples that describe the state of an object over a period of time. Each sample is the representation of an entity's momentary state.  Samples are created from user data.  User data should describe people or things that exist in some location during some time span.  Data can be ingested from static files with thousands of records or real-time streams that provide state updates in real-time.  As an example we'll ingest the following real-time shipment data into an existing dataset named ``shipments``:
 
 .. list-table:: Source data: real-time shipment status
    :header-rows: 1
