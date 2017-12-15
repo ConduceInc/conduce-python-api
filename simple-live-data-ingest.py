@@ -7,14 +7,12 @@ import pprint
 import conduce.api
 import datetime
 r = 1
-headers = {'Authorization':'Bearer gauDIMLRRx62adtZGWbZGOAe8p3M8kAovRe6onsOTXo',
-            'Content-type':'application/json'}
+
 ents = []
 while True:
     cur_time = int(round(time.time() * 1000))
     time.sleep(1)
     r = cur_time%5+1
-    print r
     ent = {'id': 1,
             'time': datetime.datetime.now(),
             'kind':'test',
