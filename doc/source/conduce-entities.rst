@@ -10,7 +10,7 @@ Conduce Entities
 What is an entity?
 ------------------
 
-Conduce uses a concept called an entity to define a person, place, or thing that exists in space and time.  An entity can exist for an instant or across a span of time.  It can describe a point in space, a path (sequence of points), or a region (polygon).  An entity also has attributes that describe its characteristics. An entitiy's attributes can change over time.  When an entity changes over time it is said to be dynamic. If it does not change, it is considered static.  To understand when to use each type, it is helpful to understand dynamic entities first.
+Conduce uses a concept called entity to define a person, place, or thing that exists in space and time. An entity can exist for an instant or across a span of time. It can describe a point in space, a path (sequence of points), or a region (polygon). An entity also has attributes that describe its characteristics. An entity’s location and attributes can change over time. When an entity changes over time it is said to be dynamic.  If it does not change, it is considered static.  To understand when to use each type, it is helpful to understand dynamic entities first.
 
 ++++++++++++++++
 Dynamic entities
