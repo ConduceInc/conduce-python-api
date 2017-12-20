@@ -31,7 +31,8 @@ import conduce
 ```
 Then you may use API functions, like `create_dataset` as follows:
 ```
-conduce.api.create_dataset('my-dataset-name', host='app.conduce.com', user='email@example.com')
+conduce.api.create_dataset('my-dataset-name',
+     host='app.conduce.com', user='email@example.com')
 ```
 However, this requires that the user authenticate with their password when the script is executed.  To avoid this, provide an `api-key` argument instead of `user`.  If you would like to learn more about API key creation, take a look at [API Key Creation](https://conduce-conduce-python-api.readthedocs-hosted.com/en/latest/api-key-creation.html).
 
@@ -56,7 +57,8 @@ All CLI functionality is available through `conduce/api.py` and all API function
 As an example, you may list existing datasets with the following command:
 
 ```
-conduce-api list datasets --host=app.conduce.com --user=email@example.com
+conduce-api list datasets --host=app.conduce.com
+                          --user=email@example.com
 ```
 
 ## Setup
@@ -80,11 +82,15 @@ conduce-api config set default-host valid_host_name
 If you want to avoid typing your password add API keys for the desired accounts:
 
 ```
-conduce-api config set api-key --key=valid_api_key --user=valid_user --host=valid_host
+conduce-api config set api-key --key=valid_api_key
+                               --user=valid_user
+                               --host=valid_host
 ```
 or create an API key by adding the `--new` flag
 ```
-conduce-api config set api-key --new --user=valid_user --host=valid_host
+conduce-api config set api-key --new
+                               --user=valid_user
+                               --host=valid_host
 ```
 
 If you configure an API key for your default user and host you will never have to enter credentials to use that account as long as the API key is valid.

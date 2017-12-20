@@ -39,7 +39,8 @@ The dataset object retuned contains a dataset ID such as '55611f65-c657-45b1-9d0
 If you want to ingest data into an existing dataset you will need to acquire its dataset ID.  Datasets are Conduce resources.  All resources have an ID and can be queried with the REST API.  The Conduce Python API provides a convenience method (:py:func:`api.list_datasets`) for listing datasets::
 
 
-    datasets = conduce.api.list_datasets(host='app.conduce.com', api-key='00000000-0000-0000-0000-000000000000')
+    datasets = conduce.api.list_datasets(host='app.conduce.com',
+        api-key='00000000-0000-0000-0000-000000000000')
 
 This call returns a list of dictionaries, each contains information about a particular dataset::
 
@@ -130,7 +131,9 @@ Datasets are populated through a process called ingest.  If creating or updating
 
 In this example, you are ingesting constant entities and will use :py:func:`api.ingest_entities`.  The list of entities you generated was written to a variable named ``entity_list``.  All that's left is to call the API function using the dataset ID you created earlier and the API key you generated::
 
-    conduce.api.ingest_entities(world_cities_dataset_id, entity_list, host=app.conduce.com, api-key=00000000-0000-0000-0000-000000000000)
+    conduce.api.ingest_entities(world_cities_dataset_id,
+        entity_list, host=app.conduce.com, 
+        api-key=00000000-0000-0000-0000-000000000000)
 
 After this function returns, the dataset will be populated with the entities derived from the spreadsheet.
 
