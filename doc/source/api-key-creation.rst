@@ -43,7 +43,7 @@ Retrieving API keys
 API keys you have created may be retrieved using the following command::
 
     conduce-api list-api-keys --user=<email_address>
-                                host=app.conduce.com
+                              --host=app.conduce.com
 
 The API keys and the date on which they were created will be printed to the terminal.  As with API creation, the API keys may be listed using the Python API directly using :py:func:`api.list_api_keys`.
 
