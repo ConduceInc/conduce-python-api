@@ -5,17 +5,17 @@
 Intro to Data Ingest
 ====================
 
-Visualizing your data in Conduce begins with data ingest.  Ingest is the process of translating your data into Conduce entities.  A conduce entity represents a unique object and is defined by entries in a dataset.  There are two types of entries:
+Visualizing your data in Conduce begins with data ingest.  Ingest is the process of translating your data into Conduce entities.  A Conduce entity represents a unique object and is defined by entries in a dataset.  There are two ways to define an entity:
 
-- a series of discrete samples
-- a constant continuous function (constant entity)
+- a series of entries(i.e. samples) that define discrete states of an entity 
+- a single entry that defines the state of an entity across all time (static entity)   
 
 Entries are ingested into datasets.  Entries that share a common ID field describe the same entity.  Conduce needs a few key pieces of information in order to visualize your data in space and time, those are:
 
 **Identity**
-   Identities distinguish one entity from another.  For constant entities, each constant has a unique identity.  For other entities, all samples that describe the same entity share an identity.
+   Identities distinguish one entity from another.  For static entities, each dataset entry has a unique identity.  For other entities, all entries that describe the same entity share an identity.
 **Location**
-   An entity's location describes where in space the entity exists.  Locations are defined in units according to the coordinate system in which they are displayed. (Latitude and Longitude on a world map.)
+   An entity's location describes where in space the entity exists.  Locations are defined in units according to the coordinate system in which they are displayed (latitude and longitude on a world map). 
 **Time (samples only)**
    Time defines the moment in time at which the rest of the information describing an entity is valid.
 
@@ -34,7 +34,7 @@ Datasets hold collections of related entities and provide the interface a user n
     world_cities_dataset = conduce.api.create_dataset('world cities', host='app.conduce.com', api-key='00000000-0000-0000-0000-000000000000')
     world_cities_dataset_id = world_cities_dataset['id']
 
-The dataset object retuned contains a dataset ID such as '55611f65-c657-45b1-9d04-fe19227f6306'. This is a UUID which will be passed as a function parameter to the :py:func:`api.ingest_entities` function.
+The dataset object returned contains a dataset ID such as '55611f65-c657-45b1-9d04-fe19227f6306'. This is a UUID which will be passed as a function parameter to the :py:func:`api.ingest_entities` function.
 
 If you want to ingest data into an existing dataset you will need to acquire its dataset ID.  Datasets are Conduce resources.  All resources have an ID and can be queried with the REST API.  The Conduce Python API provides a convenience method (:py:func:`api.list_datasets`) for listing datasets::
 
@@ -126,7 +126,7 @@ The resulting entities should be compiled into a list.  Once you have generated 
 Ingest
 ++++++
 
-Datasets are populated through a process called ingest.  If creating or updating constant entities call :py:func:`api.ingest_entities`.  If you are defining entities with samples, call :py:func:`api.ingest_samples`.
+Datasets are populated through a process called ingest.  If creating or updating constant entities call :py:func:`api.ingest_entities`.  If you are defining entities with samples (dynamic entities), call :py:func:`api.ingest_samples`.
 
 In this example, you are ingesting constant entities and will use :py:func:`api.ingest_entities`.  The list of entities you generated was written to a variable named ``entity_list``.  All that's left is to call the API function using the dataset ID you created earlier and the API key you generated::
 
