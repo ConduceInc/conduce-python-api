@@ -4,3 +4,6 @@ doc/build
 *.dwl*
 *.bak
 *.pyc
+build/
+dist/
+conduce.egg-info/
