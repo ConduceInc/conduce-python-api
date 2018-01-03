@@ -1,22 +1,22 @@
 @font-face {
  font-family: "Gotham Ultra";
- src: url("fonts/Gotham/Gotham-Ultra.woff2") format("woff2");
+ src: url("fonts/Gotham/Gotham-Ultra.ttf") format("truetype");
 }
 @font-face {
     font-family: "Gotham Black";
-    src: url("fonts/Gotham/Gotham-Black.woff2") format("woff2");
+    src: url("fonts/Gotham/Gotham-Black.ttf") format("truetype");
    }
 @font-face {
     font-family: "Gotham Rounded Light";
-    src: url("fonts/Gotham/gotham-rounded-light.woff2") format("woff2");
+    src: url("fonts/Gotham/GothamRnd-Light.ttf") format("truetype");
    }
 @font-face {
     font-family: "Gotham Bold";
-    src: url("fonts/Gotham/Gotham-Bold.woff2") format("woff2");
+    src: url("fonts/Gotham/Gotham-Bold.ttf") format("truetype");
    }
 @font-face {
     font-family: "Gotham Medium";
-    src: url("fonts/Gotham/Gotham-Medium.woff2") format("woff2");
+    src: url("fonts/Gotham/Gotham-Medium.ttf") format("truetype");
    }
 @font-face {
     font-family: "Roboto Mono";
