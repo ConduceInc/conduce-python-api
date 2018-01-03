@@ -38,7 +38,6 @@ The dataset object retuned contains a dataset ID such as '55611f65-c657-45b1-9d0
 
 If you want to ingest data into an existing dataset you will need to acquire its dataset ID.  Datasets are Conduce resources.  All resources have an ID and can be queried with the REST API.  The Conduce Python API provides a convenience method (:py:func:`api.list_datasets`) for listing datasets::
 
-
     datasets = conduce.api.list_datasets(host='app.conduce.com',
         api-key='00000000-0000-0000-0000-000000000000')
 
