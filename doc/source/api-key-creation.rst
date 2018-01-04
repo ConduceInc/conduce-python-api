@@ -26,7 +26,8 @@ In order to generate an API key, you must have a Conduce account.  Contact suppo
 After entering the command you will be prompted for your password. After password submission, the new API key will be printed to the prompt and the command will finish.  Alternatively, you may run a Python REPL and call :py:func:`api.create_api_key` directly::
 
     import conduce
-    conduce.api.create_api_key(user="<email_address>", host="app.conduce.com")
+    conduce.api.create_api_key(user="<email_address>",
+        host="app.conduce.com")
 
 Again, you will be prompted for your password.  Upon submission, the new API key will be written to the prompt.
 
@@ -40,7 +41,7 @@ Retrieving API keys
 
 API keys you have created may be retrieved using the following command::
 
-    conduce-api list-api-keys --user=<email_address> host=app.conduce.com
+    conduce-api list-api-keys --user=<email_address> --host=app.conduce.com
 
 The API keys and the date on which they were created will be printed to the terminal.  As with API creation, the API keys may be listed using the Python API directly using :py:func:`api.list_api_keys`.
 
@@ -55,7 +56,8 @@ Once you have created an API key you may now execute API calls without password 
 or::
 
     import conduce
-    conduce.api.list_api_keys(api_key="<your-api-key>" host="app.conduce.com")
+    conduce.api.list_api_keys(api_key="<your-api-key>",
+        host="app.conduce.com")
 
 API keys can be used as an alternative to email addresses for all Conduce API requests.  You will not be prompted for a password when authenticating via API key.
 
@@ -74,4 +76,5 @@ or::
 or directly with the API using :py:func:`api.remove_api_key`::
 
     import conduce
-    conduce.api.remove_api_key("<the-api-key-to-remove>", api_key="<valid-api-key>", host="app.conduce.com")
+    conduce.api.remove_api_key("<the-api-key-to-remove>",
+        api_key="<valid-api-key>", host="app.conduce.com")

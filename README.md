@@ -31,7 +31,8 @@ import conduce
 ```
 Then you may use API functions, like `create_dataset` as follows:
 ```
-conduce.api.create_dataset('my-dataset-name', host='app.conduce.com', user='email@example.com')
+conduce.api.create_dataset('my-dataset-name',
+     host='app.conduce.com', user='email@example.com')
 ```
 However, this requires that the user authenticate with their password when the script is executed.  To avoid this, provide an `api-key` argument instead of `user`.  If you would like to learn more about API key creation, take a look at [API Key Creation](https://conduce-conduce-python-api.readthedocs-hosted.com/en/latest/api-key-creation.html).
 
@@ -57,6 +58,7 @@ As an example, you may list existing datasets with the following command:
 
 ```
 conduce-api list datasets --host=app.conduce.com --user=email@example.com
+
 ```
 
 ## Setup
