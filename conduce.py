@@ -5,6 +5,10 @@ import json
 import api
 import util
 import base64
+import tempfile
+import os
+import sys
+from subprocess import call
 
 
 def list_from_args(args):
@@ -36,6 +40,43 @@ def find_resource(args):
                     resource['content'] = base64.b64decode(resource['content'])
 
     return resources
+
+
+def edit_resource(args):
+    if args.type is not None:
+        resource_type = args.type
+
+        if resource_type.lower() == "lenses" or resource_type.lower() == "templates":
+            resource_type = "LENS_TEMPLATE"
+
+        args.type = resource_type.upper().rstrip('S')
+
+    args.content = 'full'
+    resources = api.find_resource(**vars(args))
+    for resource in resources:
+        if resource.get('mime', 'invalid-mime') == 'application/json':
+            resource['content'] = json.dumps(json.loads(resource['content']), indent=2)
+        elif not resource.get('mime', 'invalid-mime').startswith('text/'):
+            resources.remove(resource)
+
+    if len(resources) == 0:
+        print "No text resources found"
+        return
+
+    for resource in resources:
+        EDITOR = os.environ.get('EDITOR', 'vim')
+        with tempfile.NamedTemporaryFile(suffix='.tmp') as resource_file:
+            resource_file.write(str(resource['content']))
+            resource_file.flush()
+            call([EDITOR, resource_file.name])
+
+            with open(resource_file.name, 'r') as edited_resource_file:
+                edited_resource_content = edited_resource_file.read()
+
+                if edited_resource_content != str(resource['content']):
+                    print "Updating modified resource"
+                    resource['content'] = json.dumps(json.loads(edited_resource_content))
+                    api.update_resource(resource, **vars(args))
 
 
 def list_datasets(args):
@@ -338,9 +379,16 @@ def main():
     parser_config_find.add_argument('--name', help='The name of the dataset to query')
     parser_config_find.add_argument('--id', help='The ID of the dataset to query')
     parser_config_find.add_argument('--regex', help='An expression to match datasets and query')
-    parser_config_find.add_argument('--content', help='Content to retreive: id,full,meta')
+    parser_config_find.add_argument('--content', help='Content to retrieve: id,full,meta')
     parser_config_find.add_argument('--decode', action='store_true', help='Decode base64 and JSON for full content requests')
     parser_config_find.set_defaults(func=find_resource)
+
+    parser_config_edit = subparsers.add_parser('edit',  parents=[api_cmd_parser], help='edit resources that match the given parameters')
+    parser_config_edit.add_argument('--type', help='Conduce resource type to edit')
+    parser_config_edit.add_argument('--name', help='The name of the dataset to query')
+    parser_config_edit.add_argument('--id', help='The ID of the dataset to query')
+    parser_config_edit.add_argument('--regex', help='An expression to match datasets and query')
+    parser_config_edit.set_defaults(func=edit_resource)
 
     parser_list_api_keys = subparsers.add_parser('list-api-keys', parents=[api_cmd_parser], help='List API keys for your account')
     parser_list_api_keys.set_defaults(func=list_api_keys)
