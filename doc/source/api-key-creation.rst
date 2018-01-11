@@ -25,7 +25,7 @@ In order to generate an API key, you must have a Conduce account.  Contact suppo
 
 After entering the command you will be prompted for your password. After password submission, the new API key will be printed to the prompt and the command will finish.  Alternatively, you may run a Python REPL and call :py:func:`api.create_api_key` directly::
 
-    import conduce
+    import conduce.api
     conduce.api.create_api_key(user="<email_address>",
         host="app.conduce.com")
 
@@ -55,7 +55,7 @@ Once you have created an API key you may now execute API calls without password 
 
 or::
 
-    import conduce
+    import conduce.api
     conduce.api.list_api_keys(api_key="<your-api-key>",
         host="app.conduce.com")
 
@@ -75,6 +75,6 @@ or::
 
 or directly with the API using :py:func:`api.remove_api_key`::
 
-    import conduce
+    import conduce.api
     conduce.api.remove_api_key("<the-api-key-to-remove>",
         api_key="<valid-api-key>", host="app.conduce.com")
