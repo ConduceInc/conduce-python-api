@@ -24,7 +24,7 @@ def get_user_id(email, users):
     if 'members' not in users:
         raise RuntimeError('No users in list')
     for user in users['members']:
-        if user['user']['email'] == email.lower():
+        if user['user']['email'].lower() == email.lower():
             return user['user']['id']
 
 
