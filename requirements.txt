@@ -3,4 +3,3 @@ retrying
 python-dateutil
 pytz
 pyyaml
-unicodecsv
