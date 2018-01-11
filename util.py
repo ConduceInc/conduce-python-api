@@ -1,4 +1,5 @@
 import csv
+import unicodecsv
 import json
 import os
 import uuid
@@ -8,6 +9,7 @@ import copy
 import api
 import pytz
 import sys
+import cStringIO as StringIO
 
 
 def get_dataset_id(dataset_name, **kwargs):
@@ -104,6 +106,40 @@ def csv_to_json(infile, outfile=None, toStdout=False, **kwargs):
                 json.dump(out, output_file)
 
     return json.loads(out)
+
+
+def dicts_to_csv(dicts_to_csv_mapping, dicts_list):
+    """
+    The mapping should be a list, it is ordered like a csv row.
+    The entries in the list should be tuples, where the ind 0 is
+    the csv header name & ind 1 is the corresponding json field
+    name.  For example, the list may be: [
+        ("csv header 1", "json field"),
+        ("csv header 2", "other json field"),
+    ]
+    dicts_list should be a list of dicts where each dict has the
+    fields specified in the mapping
+    """
+    num_records = 0
+    csv_header = [csvf for (csvf, _) in dicts_to_csv_mapping]
+    csv_fh = StringIO.StringIO()
+    writer = unicodecsv.writer(csv_fh)
+    writer.writerow(csv_header)
+    #translate the data
+    num_cols = len(dicts_to_csv_mapping)
+    for jrow in dicts_list:
+        row = [None] * num_cols
+        for i, (_, dict_field_name) in enumerate(dicts_to_csv_mapping):
+            #TODO: Should this fail if the field isn't there?
+            val = jrow.get(dict_field_name)
+            #The null values are translated to empty fields
+            val = val if val is not None else ""
+            row[i] = val
+        writer.writerow(row)
+        num_records += 1
+    #return as a unicode string
+    data_unicode = csv_fh.getvalue().decode("utf-8")
+    return data_unicode, num_records
 
 
 def get_id_score(key, value):
