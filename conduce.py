@@ -60,7 +60,7 @@ def edit_resource(args):
             resources.remove(resource)
 
     if len(resources) == 0:
-        print "No text resources found"
+        print "No text editable resources found"
         return
 
     for resource in resources:
@@ -385,9 +385,9 @@ def main():
 
     parser_config_edit = subparsers.add_parser('edit',  parents=[api_cmd_parser], help='edit resources that match the given parameters')
     parser_config_edit.add_argument('--type', help='Conduce resource type to edit')
-    parser_config_edit.add_argument('--name', help='The name of the dataset to query')
-    parser_config_edit.add_argument('--id', help='The ID of the dataset to query')
-    parser_config_edit.add_argument('--regex', help='An expression to match datasets and query')
+    parser_config_edit.add_argument('--name', help='The name of the resource to edit')
+    parser_config_edit.add_argument('--id', help='The ID of the resource to edit')
+    parser_config_edit.add_argument('--regex', help='An expression matching resources to edit')
     parser_config_edit.set_defaults(func=edit_resource)
 
     parser_list_api_keys = subparsers.add_parser('list-api-keys', parents=[api_cmd_parser], help='List API keys for your account')
