@@ -9,6 +9,7 @@ import tempfile
 import os
 import sys
 from subprocess import call
+import asset
 
 
 def list_from_args(args):
@@ -321,6 +322,13 @@ def dump_data(args):
     return api.make_get_request(uri, **vars(args))
 
 
+def upload_image(args):
+    path = args.path
+    del vars(args)['path']
+
+    return asset.initialize_binary_asset(path, **vars(args))
+
+
 def main():
     import argparse
     import pkg_resources
@@ -549,6 +557,15 @@ def main():
     parser_set_user_permissions = parser_set_permissions_subparsers.add_parser('user', parents=[api_cmd_parser], help='Set team permissions of a resource')
     parser_set_user_permissions.add_argument('user_id', help='The user UUID')
     parser_set_user_permissions.set_defaults(func=set_user_permissions)
+
+    parser_upload_image = subparsers.add_parser('upload-image', parents=[api_cmd_parser], help='Ingest data to a Conduce dataset')
+    parser_upload_image.add_argument('path', help='The local path to the image file.')
+    parser_upload_image.add_argument('--name', help='String to help identify the Conduce resource')
+    parser_upload_image.add_argument('--id', help='UUID of the Conduce resource (only for modifying existing resources)')
+    parser_upload_image.add_argument('--modify',
+                                     help='Modify existing resource if it exists (this is the default behavior if --id is specified)',
+                                     action='store_true')
+    parser_upload_image.set_defaults(func=upload_image)
 
     parser_get = subparsers.add_parser('get',  parents=[api_cmd_parser], help='Make an arbitrary get request')
     parser_get.add_argument('uri', help='The URI of the resource being requested')
