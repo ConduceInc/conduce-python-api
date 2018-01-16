@@ -131,8 +131,8 @@ Datasets are populated through a process called ingest.  If creating or updating
 In this example, you are ingesting constant entities and will use :py:func:`api.ingest_entities`.  The list of entities you generated was written to a variable named ``entity_list``.  All that's left is to call the API function using the dataset ID you created earlier and the API key you generated::
 
     conduce.api.ingest_entities(world_cities_dataset_id,
-        entity_list, host=app.conduce.com, 
-        api-key=00000000-0000-0000-0000-000000000000)
+        entity_list, host='app.conduce.com',
+        api-key='00000000-0000-0000-0000-000000000000')
 
 After this function returns, the dataset will be populated with the entities derived from the spreadsheet.
 
