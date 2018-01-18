@@ -27,7 +27,7 @@ from the installed directory.
 
 Once you have installed the API, you may use it in a python script by importing the `conduce` module:
 ```
-import conduce
+import conduce.api
 ```
 Then you may use API functions, like `create_dataset` as follows:
 ```
