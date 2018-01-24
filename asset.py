@@ -11,8 +11,7 @@ def initialize_binary_asset(path, **kwargs):
 
         name = kwargs.get('name', os.path.basename(path))
         del kwargs['name']
-        asset_id = initialize_asset(name, image, mime, **kwargs)
-        return asset_id
+        return initialize_asset(name, image, mime, **kwargs)
 
 
 def initialize_asset(name, data, mime_type, **kwargs):
