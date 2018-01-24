@@ -1,6 +1,7 @@
 import mimetypes
 import api
 import util
+import os
 
 
 def initialize_binary_asset(path, **kwargs):
@@ -8,10 +9,7 @@ def initialize_binary_asset(path, **kwargs):
         mime = mimetypes.guess_type(path)[0]
         image = image_stream.read()
 
-        name = kwargs.get('name', path.replace('/', '-'))
-        if name is None:
-            name = path.replace('/', '-').strip('-').lower()
-        print path, name
+        name = kwargs.get('name', os.path.basename(path))
         del kwargs['name']
         asset_id = initialize_asset(name, image, mime, **kwargs)
         return asset_id

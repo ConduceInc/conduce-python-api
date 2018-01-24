@@ -323,7 +323,7 @@ def dump_data(args):
 
 
 def upload_image(args):
-    path = args.path
+    path = os.path.expanduser(args.path)
     del vars(args)['path']
 
     return asset.initialize_binary_asset(path, **vars(args))
