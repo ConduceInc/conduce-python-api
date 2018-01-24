@@ -105,9 +105,10 @@ def edit_entity(args):
             if entity['timestamp_ms'] == util.string_to_timestamp_ms(args.date):
                 subject = entity
 
-    edited_entity = open_in_editor(json.dumps(subject, indent=2))
-    if edited_entity != str(subject):
-        return api.modify_entity(dataset_id, json.loads(edited_entity), **vars(args))
+    if subject is not None:
+        edited_entity = open_in_editor(json.dumps(subject, indent=2))
+        if edited_entity != str(subject):
+            return api.modify_entity(dataset_id, json.loads(edited_entity), **vars(args))
 
     return "No entity found"
 
