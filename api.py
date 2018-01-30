@@ -155,7 +155,7 @@ def compose_uri(fragment):
 
 
 def get_generic_data(dataset_id, entity_id, **kwargs):
-    entity = get_entity(dataset_id, entity_id, **kwargs)
+    entity = _get_entity(dataset_id, entity_id, **kwargs)
     attrs = json.loads(entity.content)[0]['attrs']
     for attr in attrs:
         if attr["key"] == "json_data":
@@ -164,6 +164,11 @@ def get_generic_data(dataset_id, entity_id, **kwargs):
 
 
 def get_entity(dataset_id, entity_id, **kwargs):
+    entity = _get_entity(dataset_id, entity_id, **kwargs)
+    return json.loads(entity.content)
+
+
+def _get_entity(dataset_id, entity_id, **kwargs):
     return make_get_request('datasets/entity/{}/{}'.format(dataset_id, entity_id), **kwargs)
 
 
@@ -704,6 +709,27 @@ def clear_dataset(**kwargs):
             return_message = "No matching datasets found."
 
     return return_message
+
+
+def modify_entity(dataset_id, entity, **kwargs):
+    entity['modify'] = True
+    return _modify_data(dataset_id, {'entities': [entity]}, **kwargs)
+
+
+def modify_entities(dataset_id, entities, **kwargs):
+    for entity in entities:
+        entity['modify'] = True
+    return _modify_data(dataset_id, {'entities': entities}, **kwargs)
+
+
+def _modify_data(dataset_id, entity_set, **kwargs):
+    response = make_post_request(
+        entity_set, 'datasets/modify-data/{}'.format(dataset_id), **kwargs)
+    if 'location' in response.headers:
+        job_id = response.headers['location']
+        response = wait_for_job(job_id, **kwargs)
+
+    return response
 
 
 def find_resource(**kwargs):

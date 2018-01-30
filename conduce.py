@@ -43,6 +43,17 @@ def find_resource(args):
     return resources
 
 
+def open_in_editor(content):
+    EDITOR = os.environ.get('EDITOR', 'vim')
+    with tempfile.NamedTemporaryFile(suffix='.tmp') as resource_file:
+        resource_file.write(str(content))
+        resource_file.flush()
+        call([EDITOR, resource_file.name])
+
+        with open(resource_file.name, 'r') as edited_resource_file:
+            return edited_resource_file.read()
+
+
 def edit_resource(args):
     if args.type is not None:
         resource_type = args.type
@@ -78,6 +89,29 @@ def edit_resource(args):
                     print "Updating modified resource"
                     resource['content'] = json.dumps(json.loads(edited_resource_content))
                     api.update_resource(resource, **vars(args))
+
+
+def edit_entity(args):
+    dataset_id = args.dataset_id
+    entity_id = args.id
+    del vars(args)['dataset_id']
+    del vars(args)['id']
+    entity_history = api.get_entity(dataset_id, entity_id, **vars(args))
+
+    subject = None
+    if args.date is None:
+        subject = entity_history[-1]
+    else:
+        for entity in entity_history:
+            if entity['timestamp_ms'] == util.string_to_timestamp_ms(args.date):
+                subject = entity
+
+    if subject is not None:
+        edited_entity = open_in_editor(json.dumps(subject, indent=2))
+        if edited_entity != str(subject):
+            return api.modify_entity(dataset_id, json.loads(edited_entity), **vars(args))
+
+    return "No entity found"
 
 
 def list_datasets(args):
@@ -391,12 +425,18 @@ def main():
     parser_config_find.add_argument('--decode', action='store_true', help='Decode base64 and JSON for full content requests')
     parser_config_find.set_defaults(func=find_resource)
 
-    parser_config_edit = subparsers.add_parser('edit',  parents=[api_cmd_parser], help='edit resources that match the given parameters')
+    parser_config_edit = subparsers.add_parser('edit',  parents=[api_cmd_parser], help='Edit resources that match the given parameters')
     parser_config_edit.add_argument('--type', help='Conduce resource type to edit')
     parser_config_edit.add_argument('--name', help='The name of the resource to edit')
     parser_config_edit.add_argument('--id', help='The ID of the resource to edit')
     parser_config_edit.add_argument('--regex', help='An expression matching resources to edit')
     parser_config_edit.set_defaults(func=edit_resource)
+
+    parser_config_edit_entity = subparsers.add_parser('edit-entity',  parents=[api_cmd_parser], help='Edit a dataset entity that match the given parameters')
+    parser_config_edit_entity.add_argument('--id', help='The ID of the entity to edit')
+    parser_config_edit_entity.add_argument('--dataset-id', help='The ID of the dataset that contains the entity')
+    parser_config_edit_entity.add_argument('--date', help='The date at which the entity occurred (optional, if not specified the newest will be selected.)')
+    parser_config_edit_entity.set_defaults(func=edit_entity)
 
     parser_list_api_keys = subparsers.add_parser('list-api-keys', parents=[api_cmd_parser], help='List API keys for your account')
     parser_list_api_keys.set_defaults(func=list_api_keys)
