@@ -7,7 +7,7 @@ with open(os.path.join(os.path.dirname(__file__), 'requirements.txt'), "r") as f
 
 setup(
     name="conduce",
-    version="2.0.6",
+    version="2.1.0",
     description="Python Distribution Utilities",
     author="Conduce",
     author_email="support@conduce.com",
