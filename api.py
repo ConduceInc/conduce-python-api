@@ -172,6 +172,10 @@ def _get_entity(dataset_id, entity_id, **kwargs):
     return make_get_request('datasets/entity/{}/{}'.format(dataset_id, entity_id), **kwargs)
 
 
+def get_dataset_metadata(dataset_id, **kwargs):
+    return json.loads(make_get_request('datasets/metadata/{}'.format(dataset_id), **kwargs).content)
+
+
 @retry(retry_on_exception=_retry_on_retryable_error, wait_exponential_multiplier=WAIT_EXPONENTIAL_MULTIPLIER, stop_max_attempt_number=NUM_RETRIES)
 def _make_delete_request(uri, **kwargs):
     cfg = config.get_full_config()
