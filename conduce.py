@@ -346,7 +346,7 @@ def get_entity(args):
     datasets = api.find_dataset(id=args.dataset_id, name=args.dataset_name, regex=args.dataset_regex, host=args.host, user=args.user, api_key=args.api_key)
     entities = []
     for dataset in datasets:
-        entities.append(json.loads(api.get_entity(dataset['id'], args.entity_id, host=args.host, user=args.user, api_key=args.api_key).content))
+        entities.append(api.get_entity(dataset['id'], args.entity_id, host=args.host, user=args.user, api_key=args.api_key))
     return entities
 
 
