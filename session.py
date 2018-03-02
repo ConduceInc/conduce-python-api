@@ -12,7 +12,7 @@ def api_key_header(api_key):
     return {'Authorization': 'Bearer {}'.format(api_key)}
 
 
-def get_session(host, email):
+def get_session(host, email, password):
     api_key = config.get_api_key(email, host)
     if api_key:
         return api_key_header(api_key)
@@ -32,7 +32,10 @@ def get_session(host, email):
         print
         print "host: {}".format(host)
         print "user: {}".format(email)
-        cookies = login(host, email, getpass.getpass())
+        if password is None:
+            cookies = login(host, email, getpass.getpass())
+        else:
+            cookies = login(host, email, password)
         with open(cookie_file_path, 'w') as cookie_file:
             pickle.dump(requests.utils.dict_from_cookiejar(cookies), cookie_file)
 
@@ -54,6 +57,7 @@ def login(host, email, password):
         raise Exception('No user provided for login')
     if password is None:
         raise Exception('No password provided for login')
+    print "Password: {}".format(password)
 
     response = requests.post("https://{}/conduce/api/v1/user/login".format(host), json={
         "email": email,
@@ -71,6 +75,7 @@ if __name__ == '__main__':
         description='Get Conduce session')
     arg_parser.add_argument('--host', help='The field to sort on', default='dev-app.conduce.com')
     arg_parser.add_argument('--user', help='Email address of user making request')
+    arg_parser.add_argument('--password', help='The password of the user making the request')
     arg_parser.add_argument('--api-key', help='API key used to authenticate')
 
     args = arg_parser.parse_args()
@@ -79,4 +84,4 @@ if __name__ == '__main__':
     if email is None:
         email = "dhl-dev@conduce.com"
 
-    print get_session(args.host, email)
+    print get_session(args.host, email, password)
