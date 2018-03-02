@@ -393,6 +393,7 @@ def main():
     parser_config_set_api_key = parser_config_set_subparsers.add_parser('api-key', help='Set a Conduce API key')
     parser_config_set_api_key.add_argument('--user', help='The user to which the API key belongs')
     parser_config_set_api_key.add_argument('--host', help='The server on which the API key is valid')
+    parser_config_set_api_key.add_argument('--password', help='The password of the user making the request')
     parser_config_set_api_key.add_argument('--key', help='The API key')
     parser_config_set_api_key.add_argument('--new', help='Generate a new API key', action='store_true')
     parser_config_set_api_key.set_defaults(func=set_api_key)

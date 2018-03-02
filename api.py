@@ -184,6 +184,10 @@ def _make_delete_request(uri, **kwargs):
         host = kwargs['host']
     else:
         host = cfg['default-host']
+    if 'password' in kwargs and kwargs['password']:
+        password = kwargs['password']
+    else:
+        password = None
 
     if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
@@ -192,7 +196,7 @@ def _make_delete_request(uri, **kwargs):
             user = kwargs['user']
         else:
             user = cfg['default-user']
-        auth = session.get_session(host, user)
+        auth = session.get_session(host, user, password)
 
     url = 'https://{}/{}'.format(host, uri)
     if 'Authorization' in auth:
@@ -282,6 +286,11 @@ def _make_get_request(uri, **kwargs):
     else:
         host = cfg['default-host']
 
+    if 'password' in kwargs and kwargs['password']:
+        password = kwargs['password']
+    else:
+        password = None
+
     if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
     else:
@@ -289,7 +298,7 @@ def _make_get_request(uri, **kwargs):
             user = kwargs['user']
         else:
             user = cfg['default-user']
-        auth = session.get_session(host, user)
+        auth = session.get_session(host, user, password)
 
     url = 'https://{}/{}'.format(host, uri)
     if 'Authorization' in auth:
@@ -1238,6 +1247,11 @@ def _make_post_request(payload, uri, **kwargs):
     else:
         host = cfg['default-host']
 
+    if 'password' in kwargs and kwargs['password']:
+        password = kwargs['password']
+    else:
+        password = None
+
     if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
     else:
@@ -1245,7 +1259,7 @@ def _make_post_request(payload, uri, **kwargs):
             user = kwargs['user']
         else:
             user = cfg['default-user']
-        auth = session.get_session(host, user)
+        auth = session.get_session(host, user, password)
 
     headers = {}
     url = 'https://{}/{}'.format(host, uri)
@@ -1311,6 +1325,11 @@ def _make_put_request(payload, uri, **kwargs):
     else:
         host = cfg['default-host']
 
+    if 'password' in kwargs and kwargs['password']:
+        password = kwargs['password']
+    else:
+        password = None
+
     if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
     else:
@@ -1318,7 +1337,7 @@ def _make_put_request(payload, uri, **kwargs):
             user = kwargs['user']
         else:
             user = cfg['default-user']
-        auth = session.get_session(host, user)
+        auth = session.get_session(host, user, password)
 
     headers = {}
     url = 'https://{}/{}'.format(host, uri)
@@ -1384,6 +1403,11 @@ def _make_patch_request(payload, uri, **kwargs):
     else:
         host = cfg['default-host']
 
+    if 'password' in kwargs and kwargs['password']:
+        password = kwargs['password']
+    else:
+        password = None
+
     if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
     else:
@@ -1391,7 +1415,7 @@ def _make_patch_request(payload, uri, **kwargs):
             user = kwargs['user']
         else:
             user = cfg['default-user']
-        auth = session.get_session(host, user)
+        auth = session.get_session(host, user, password)
 
     headers = {}
     url = 'https://{}/{}'.format(host, uri)
