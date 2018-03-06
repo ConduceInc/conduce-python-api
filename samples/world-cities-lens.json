@@ -1,0 +1,57 @@
+{
+    "hover_info": [
+        {
+            "hoverable": true,
+            "html_template": "<style>\n.city {\nfont-size: 0.85em;\n}\n.province {\nfont-size: 0.75em;\n}\n.country {\nfont-size: 0.75em;\n}\n.population {\nfont-size: 0.5em;\n}\n</style>\n<div class='city'>{{attrs.city}}</div>\n<div class='province'>{{attrs.province}}</div>\n<div class='country'>{{attrs.country}}</div>\n<div class='population'>population: {{attrs.pop}}</div>",
+            "kinds": ["city"]
+        }
+    ],
+    "kinds": ["city"],
+    "name": "world-cities",
+    "renderer_service_name": "marker",
+    "renderings": [
+        {
+            "name": "city",
+            "point": [
+                {
+                    "defines": [
+                        { "shader_define_name": "SCALE_LOG" }
+                    ],
+                    "shader": {
+                        "fragment": { "uri": "dots/fragment.glsl" },
+                        "vertex": { "uri": "dots/vertex.glsl" }
+                    },
+                    "uniforms": [
+                        {
+                            "float_value": [0.1],
+                            "shader_uniform": "size_base",
+                            "type": "GL_FLOAT"
+                        },
+                        {
+                            "float_value": [2],
+                            "shader_uniform": "reference_zoom",
+                            "type": "GL_FLOAT"
+                        },
+                        {
+                            "shader_uniform": "color_base",
+                            "type": "GL_VEC4",
+                            "vec_value": [
+                                {
+                                    "w": 0.45490196,
+                                    "x": 0.0192,
+                                    "y": 0.63072,
+                                    "z": 0.96
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "rule": {
+                "kinds": ["city"],
+                "match": "ALL"
+            },
+            "use_high_precision_time": true
+        }
+    ]
+}
