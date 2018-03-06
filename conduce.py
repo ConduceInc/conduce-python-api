@@ -10,6 +10,7 @@ import os
 import sys
 from subprocess import call
 import asset
+import mimetypes
 
 
 def list_from_args(args):
@@ -20,6 +21,25 @@ def list_from_args(args):
         object_to_list = "LENS_TEMPLATE"
 
     return api.list_resources(object_to_list.upper().rstrip('S'), **vars(args))
+
+
+def create_resource(args):
+    resource_type = args.type.upper()
+    resource_name = args.name
+    content_path = args.content
+
+    del vars(args)['name']
+    del vars(args)['type']
+    del vars(args)['content']
+
+    with open(content_path, 'rb') as content_stream:
+        if resource_type.lower() == 'asset':
+            mime_type = mimetypes.guess_type(content_path)[0]
+        else:
+            mime_type = 'application/json'
+        content = content_stream.read()
+
+        return api.create_resource(resource_type, resource_name, content, mime_type, **vars(args))
 
 
 def find_resource(args):
@@ -425,6 +445,12 @@ def main():
     parser_config_find.add_argument('--content', help='Content to retrieve: id,full,meta')
     parser_config_find.add_argument('--decode', action='store_true', help='Decode base64 and JSON for full content requests')
     parser_config_find.set_defaults(func=find_resource)
+
+    parser_config_edit = subparsers.add_parser('create',  parents=[api_cmd_parser], help='Create a new resource')
+    parser_config_edit.add_argument('name', help='The name of the resource to create')
+    parser_config_edit.add_argument('type', help='Conduce resource type to create')
+    parser_config_edit.add_argument('--content', help='The content of the new resource')
+    parser_config_edit.set_defaults(func=create_resource)
 
     parser_config_edit = subparsers.add_parser('edit',  parents=[api_cmd_parser], help='Edit resources that match the given parameters')
     parser_config_edit.add_argument('--type', help='Conduce resource type to edit')
