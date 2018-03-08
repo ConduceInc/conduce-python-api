@@ -9,6 +9,7 @@ import json
 
 def create_world_cities(args):
     kwargs = vars(args)
+    kwargs['tags'] = ['conduce', 'getting-started']
     print "Creating dataset"
     dataset_meta = api.create_dataset('world-cities-data', **kwargs)
     print "Ingesting data from CSV"
