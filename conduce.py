@@ -571,8 +571,8 @@ def main():
 
 
     parser_create_account = subparsers.add_parser('create-account', parents=[api_cmd_parser], help='Create a new user by name and email')
-    parser_create_account.add_argument('name', help='A friendly name for the user. \"First Last\" has been our convention')
-    parser_create_account.add_argument('email', help='The email address for the new user')
+    parser_create_account.add_argument('name', help='The user\'s name as it will be displayed in Conduce')
+    parser_create_account.add_argument('email', help='The email address associated with the new user')
     parser_create_account.set_defaults(func=create_account)
 
 
