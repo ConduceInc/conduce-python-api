@@ -362,6 +362,15 @@ def account_exists(args):
     return api.account_exists(email, **vars(args))
 
 
+def create_account(args):
+    name = args.name
+    del vars(args)['name']
+    email = args.email
+    del vars(args)['email']
+
+    return api.create_account(name, email, **vars(args))
+
+
 def get_entity(args):
     datasets = api.find_dataset(id=args.dataset_id, name=args.dataset_name, regex=args.dataset_regex, host=args.host, user=args.user, api_key=args.api_key)
     entities = []
@@ -559,6 +568,13 @@ def main():
     parser_account_exists = subparsers.add_parser('account-exists', parents=[api_cmd_parser], help='')
     parser_account_exists.add_argument('email', help='The email address to check')
     parser_account_exists.set_defaults(func=account_exists)
+
+
+    parser_create_account = subparsers.add_parser('create-account', parents=[api_cmd_parser], help='Create a new user by name and email')
+    parser_create_account.add_argument('name', help='The user\'s name as it will be displayed in Conduce')
+    parser_create_account.add_argument('email', help='The email address associated with the new user')
+    parser_create_account.set_defaults(func=create_account)
+
 
     parser_set_generic_data = subparsers.add_parser('set-generic-data',  parents=[api_cmd_parser], help='Add generic data to Conduce dataset')
     parser_set_generic_data.add_argument('--json', help='The data to be consumed')
