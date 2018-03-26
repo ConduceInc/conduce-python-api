@@ -14,7 +14,8 @@ def api_key_header(api_key):
 
 def get_session(host, email, password):
     api_key = config.get_api_key(email, host)
-    if api_key:
+    #If a password is provided, it should override the API key
+    if api_key and password is None:
         return api_key_header(api_key)
     cookies = None
     cookie_file_dir = os.path.join(os.path.expanduser('~'), '.conduce', host, email)
