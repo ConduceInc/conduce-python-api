@@ -58,7 +58,6 @@ def login(host, email, password):
         raise Exception('No user provided for login')
     if password is None:
         raise Exception('No password provided for login')
-    print "Password: {}".format(password)
 
     response = requests.post("https://{}/conduce/api/v1/user/login".format(host), json={
         "email": email,
