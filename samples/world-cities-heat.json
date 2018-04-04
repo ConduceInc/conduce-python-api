@@ -1,0 +1,40 @@
+{
+  "renderer_service_name": "heatmap",
+  "attributes": [{
+      "type": "VAL_STRING",
+      "name": "style",
+      "value": {
+        "current": {
+          "string_value": "colors"
+        },
+        "options": [{
+          "string_value": "colors"
+        }],
+        "d_fault": {
+          "string_value": "colors"
+        }
+      }
+    },
+    {
+      "type": "VAL_NUMBER",
+      "name": "maxval",
+      "value": {
+        "current": {
+          "number_value": 5
+        }
+      }
+    },
+    {
+      "type": "VAL_NUMBER",
+      "name": "dotwidth",
+      "value": {
+        "current": {
+          "number_value": 1
+        }
+      }
+    }
+  ],
+  "kinds": [
+    "city"
+  ]
+}

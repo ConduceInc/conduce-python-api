@@ -17,10 +17,17 @@ def create_world_cities(args):
     api.set_public_permissions(dataset_meta['id'], True, False, False, **kwargs)
 
     with open('world-cities-lens.json', 'rb') as content_stream:
+        print "Creating dot lens"
         content = json.load(content_stream)
         content['dataset_id'] = dataset_meta['id']
-        print "Creating lens"
         lens_meta = api.create_template('world-cities', content, **kwargs)
+        api.set_public_permissions(lens_meta['id'], True, False, False, **kwargs)
+
+    with open('world-cities-heat.json', 'rb') as content_stream:
+        print "Creating heatmap lens"
+        content = json.load(content_stream)
+        content['dataset_id'] = dataset_meta['id']
+        lens_meta = api.create_template('world-cities-heat', content, **kwargs)
         api.set_public_permissions(lens_meta['id'], True, False, False, **kwargs)
 
     print "Done."
