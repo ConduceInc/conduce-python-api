@@ -589,7 +589,7 @@ def main():
     parser_add_group_user.add_argument('user_id', help='The UUID of the user being added')
     parser_add_group_user.set_defaults(func=add_group_user)
 
-    parser_account_exists = subparsers.add_parser('account-exists', parents=[api_cmd_parser], help='')
+    parser_account_exists = subparsers.add_parser('account-exists', parents=[api_cmd_parser], help='Check if an account exists for a given email address')
     parser_account_exists.add_argument('email', help='The email address to check')
     parser_account_exists.set_defaults(func=account_exists)
 
