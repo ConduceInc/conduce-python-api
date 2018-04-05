@@ -460,14 +460,14 @@ def main():
 
     parser_config_list.set_defaults(func=list_from_args)
 
-    parser_config_find = subparsers.add_parser('find',  parents=[api_cmd_parser], help='Find resources that match the given parameters')
-    parser_config_find.add_argument('--type', help='Conduce resource type to find')
-    parser_config_find.add_argument('--name', help='The name of the dataset to query')
-    parser_config_find.add_argument('--id', help='The ID of the dataset to query')
-    parser_config_find.add_argument('--regex', help='An expression to match datasets and query')
-    parser_config_find.add_argument('--content', help='Content to retrieve: id,full,meta')
-    parser_config_find.add_argument('--decode', action='store_true', help='Decode base64 and JSON for full content requests')
-    parser_config_find.set_defaults(func=find_resource)
+    parser_find = subparsers.add_parser('find',  parents=[api_cmd_parser], help='Find resources that match the given parameters')
+    parser_find.add_argument('--type', help='Conduce resource type to find')
+    parser_find.add_argument('--name', help='The name of the dataset to query')
+    parser_find.add_argument('--id', help='The ID of the dataset to query')
+    parser_find.add_argument('--regex', help='An expression to match datasets and query')
+    parser_find.add_argument('--content', help='Content to retrieve: id,full,meta')
+    parser_find.add_argument('--decode', action='store_true', help='Decode base64 and JSON for full content requests')
+    parser_find.set_defaults(func=find_resource)
 
     parser_dataset = subparsers.add_parser('dataset', help='Conduce dataset operations')
     parser_dataset_subparsers = parser_dataset.add_subparsers(help='dataset subcommands')
