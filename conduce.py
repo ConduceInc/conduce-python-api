@@ -42,6 +42,40 @@ def create_resource(args):
         return api.create_resource(resource_type, resource_name, content, mime_type, **vars(args))
 
 
+def copy_resource(args):
+    if args.type is not None:
+        resource_type = args.type
+
+        if resource_type.lower() == "lenses" or resource_type.lower() == "templates":
+            resource_type = "LENS_TEMPLATE"
+
+        args.type = resource_type.upper().rstrip('S')
+
+    resources = api.find_resource(content='full', **vars(args))
+
+    if len(resources) > 1:
+        print "Found multiple resources:"
+        print resources
+        print "Please select a single resource and try again."
+        return
+
+    if len(resources) == 0:
+        print "Resource not found, please update your query and try again."
+
+    resource_name = args.resource_name
+    del vars(args)['resource_name']
+    del vars(args)['name']
+    del vars(args)['type']
+    del vars(args)['id']
+    del vars(args)['regex']
+
+    resource_type = resources[0]['type']
+    content = resources[0]['content']
+    mime_type = resources[0]['mime']
+
+    return api.create_resource(resource_type, resource_name, content, mime_type, **vars(args))
+
+
 def get_dataset_metadata(args):
     if args.id is not None:
         metadata = api.get_dataset_metadata(args.id, **vars(args))
@@ -479,24 +513,32 @@ def main():
     parser_dataset_get_metadata.add_argument('--regex', help='An expression to match datasets and query')
     parser_dataset_get_metadata.set_defaults(func=get_dataset_metadata)
 
-    parser_config_edit = subparsers.add_parser('create',  parents=[api_cmd_parser], help='Create a new resource')
-    parser_config_edit.add_argument('name', help='The name of the resource to create')
-    parser_config_edit.add_argument('type', help='Conduce resource type to create')
-    parser_config_edit.add_argument('--content', help='The content of the new resource')
-    parser_config_edit.set_defaults(func=create_resource)
+    parser_create_resource = subparsers.add_parser('create',  parents=[api_cmd_parser], help='Create a new resource')
+    parser_create_resource.add_argument('name', help='The name of the resource to create')
+    parser_create_resource.add_argument('type', help='Conduce resource type to create')
+    parser_create_resource.add_argument('--content', help='The content of the new resource')
+    parser_create_resource.set_defaults(func=create_resource)
 
-    parser_config_edit = subparsers.add_parser('edit',  parents=[api_cmd_parser], help='Edit resources that match the given parameters')
-    parser_config_edit.add_argument('--type', help='Conduce resource type to edit')
-    parser_config_edit.add_argument('--name', help='The name of the resource to edit')
-    parser_config_edit.add_argument('--id', help='The ID of the resource to edit')
-    parser_config_edit.add_argument('--regex', help='An expression matching resources to edit')
-    parser_config_edit.set_defaults(func=edit_resource)
+    parser_edit_resource = subparsers.add_parser('edit',  parents=[api_cmd_parser], help='Edit resources that match the given parameters')
+    parser_edit_resource.add_argument('--type', help='Conduce resource type to edit')
+    parser_edit_resource.add_argument('--name', help='The name of the resource to edit')
+    parser_edit_resource.add_argument('--id', help='The ID of the resource to edit')
+    parser_edit_resource.add_argument('--regex', help='An expression matching resources to edit')
+    parser_edit_resource.set_defaults(func=edit_resource)
 
-    parser_config_edit_entity = subparsers.add_parser('edit-entity',  parents=[api_cmd_parser], help='Edit a dataset entity that match the given parameters')
-    parser_config_edit_entity.add_argument('--id', help='The ID of the entity to edit')
-    parser_config_edit_entity.add_argument('--dataset-id', help='The ID of the dataset that contains the entity')
-    parser_config_edit_entity.add_argument('--date', help='The date at which the entity occurred (optional, if not specified the newest will be selected.)')
-    parser_config_edit_entity.set_defaults(func=edit_entity)
+    parser_copy_resource = subparsers.add_parser('copy',  parents=[api_cmd_parser], help='Copy resource that matches the given parameters')
+    parser_copy_resource.add_argument('resource_name', help='Name of newly copied resource')
+    parser_copy_resource.add_argument('--type', help='Conduce resource type to copy')
+    parser_copy_resource.add_argument('--name', help='The name of the resource to copy')
+    parser_copy_resource.add_argument('--id', help='The ID of the resource to edit')
+    parser_copy_resource.add_argument('--regex', help='An expression matching a single resource to copy')
+    parser_copy_resource.set_defaults(func=copy_resource)
+
+    parser_edit_entity_entity = subparsers.add_parser('edit-entity',  parents=[api_cmd_parser], help='Edit a dataset entity that match the given parameters')
+    parser_edit_entity_entity.add_argument('--id', help='The ID of the entity to edit')
+    parser_edit_entity_entity.add_argument('--dataset-id', help='The ID of the dataset that contains the entity')
+    parser_edit_entity_entity.add_argument('--date', help='The date at which the entity occurred (optional, if not specified the newest will be selected.)')
+    parser_edit_entity_entity.set_defaults(func=edit_entity)
 
     parser_list_api_keys = subparsers.add_parser('list-api-keys', parents=[api_cmd_parser], help='List API keys for your account')
     parser_list_api_keys.set_defaults(func=list_api_keys)
