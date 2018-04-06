@@ -42,6 +42,20 @@ def create_resource(args):
         return api.create_resource(resource_type, resource_name, content, mime_type, **vars(args))
 
 
+def get_dataset_metadata(args):
+    if args.id is not None:
+        metadata = api.get_dataset_metadata(args.id, **vars(args))
+        return [metadata]
+    else:
+        datasets = api.find_dataset(**vars(args))
+
+        metadatas = []
+        for dataset in datasets:
+            metadata = api.get_dataset_metadata(dataset['id'], **vars(args))
+            metadatas.append(metadata)
+        return metadatas
+
+
 def find_resource(args):
     if args.type is not None:
         resource_type = args.type
@@ -446,14 +460,24 @@ def main():
 
     parser_config_list.set_defaults(func=list_from_args)
 
-    parser_config_find = subparsers.add_parser('find',  parents=[api_cmd_parser], help='Find resources that match the given parameters')
-    parser_config_find.add_argument('--type', help='Conduce resource type to find')
-    parser_config_find.add_argument('--name', help='The name of the dataset to query')
-    parser_config_find.add_argument('--id', help='The ID of the dataset to query')
-    parser_config_find.add_argument('--regex', help='An expression to match datasets and query')
-    parser_config_find.add_argument('--content', help='Content to retrieve: id,full,meta')
-    parser_config_find.add_argument('--decode', action='store_true', help='Decode base64 and JSON for full content requests')
-    parser_config_find.set_defaults(func=find_resource)
+    parser_find = subparsers.add_parser('find',  parents=[api_cmd_parser], help='Find resources that match the given parameters')
+    parser_find.add_argument('--type', help='Conduce resource type to find')
+    parser_find.add_argument('--name', help='The name of the dataset to query')
+    parser_find.add_argument('--id', help='The ID of the dataset to query')
+    parser_find.add_argument('--regex', help='An expression to match datasets and query')
+    parser_find.add_argument('--content', help='Content to retrieve: id,full,meta')
+    parser_find.add_argument('--decode', action='store_true', help='Decode base64 and JSON for full content requests')
+    parser_find.set_defaults(func=find_resource)
+
+    parser_dataset = subparsers.add_parser('dataset', help='Conduce dataset operations')
+    parser_dataset_subparsers = parser_dataset.add_subparsers(help='dataset subcommands')
+
+    parser_dataset_get_metadata = parser_dataset_subparsers.add_parser(
+        'metadata',  parents=[api_cmd_parser], help='List dataset metadata for resources that match the given parameters')
+    parser_dataset_get_metadata.add_argument('--name', help='The name of the dataset to query')
+    parser_dataset_get_metadata.add_argument('--id', help='The ID of the dataset to query')
+    parser_dataset_get_metadata.add_argument('--regex', help='An expression to match datasets and query')
+    parser_dataset_get_metadata.set_defaults(func=get_dataset_metadata)
 
     parser_config_edit = subparsers.add_parser('create',  parents=[api_cmd_parser], help='Create a new resource')
     parser_config_edit.add_argument('name', help='The name of the resource to create')
@@ -565,16 +589,14 @@ def main():
     parser_add_group_user.add_argument('user_id', help='The UUID of the user being added')
     parser_add_group_user.set_defaults(func=add_group_user)
 
-    parser_account_exists = subparsers.add_parser('account-exists', parents=[api_cmd_parser], help='')
+    parser_account_exists = subparsers.add_parser('account-exists', parents=[api_cmd_parser], help='Check if an account exists for a given email address')
     parser_account_exists.add_argument('email', help='The email address to check')
     parser_account_exists.set_defaults(func=account_exists)
-
 
     parser_create_account = subparsers.add_parser('create-account', parents=[api_cmd_parser], help='Create a new user by name and email')
     parser_create_account.add_argument('name', help='The user\'s name as it will be displayed in Conduce')
     parser_create_account.add_argument('email', help='The email address associated with the new user')
     parser_create_account.set_defaults(func=create_account)
-
 
     parser_set_generic_data = subparsers.add_parser('set-generic-data',  parents=[api_cmd_parser], help='Add generic data to Conduce dataset')
     parser_set_generic_data.add_argument('--json', help='The data to be consumed')
