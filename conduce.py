@@ -55,7 +55,7 @@ def copy_resource(args):
 
     if len(resources) > 1:
         print "Found multiple resources:"
-        print resources
+        print json.dumps(resources, indent=2)
         print "Please select a single resource and try again."
         return
 
