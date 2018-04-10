@@ -496,9 +496,9 @@ def main():
 
     parser_find = subparsers.add_parser('find',  parents=[api_cmd_parser], help='Find resources that match the given parameters')
     parser_find.add_argument('--type', help='Conduce resource type to find')
-    parser_find.add_argument('--name', help='The name of the dataset to query')
-    parser_find.add_argument('--id', help='The ID of the dataset to query')
-    parser_find.add_argument('--regex', help='An expression to match datasets and query')
+    parser_find.add_argument('--name', help='The name of the resource to find')
+    parser_find.add_argument('--id', help='The ID of the resource to find')
+    parser_find.add_argument('--regex', help='An expression on which to filter results')
     parser_find.add_argument('--content', help='Content to retrieve: id,full,meta')
     parser_find.add_argument('--decode', action='store_true', help='Decode base64 and JSON for full content requests')
     parser_find.set_defaults(func=find_resource)
