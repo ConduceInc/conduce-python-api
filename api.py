@@ -133,15 +133,19 @@ def wait_for_job(job_id, **kwargs):
     """
     while True:
         time.sleep(0.5)
-        response = make_get_request(job_id, **kwargs)
-        response.raise_for_status()
+        try:
+            response = make_get_request(job_id, **kwargs)
 
-        if response.ok:
-            msg = response.json()
-            if 'response' in msg:
+            if response.ok:
+                msg = response.json()
+                if 'response' in msg:
+                    return response
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code < 500:
                 return response
-        else:
-            return response
+            else:
+                print "Job status check failed:", e.response.reason
+                print "Will retry after sleep period."
 
 
 def compose_uri(fragment):
@@ -663,15 +667,14 @@ def _ingest_entity_set(dataset_id, entity_set, **kwargs):
         raise ValueError('parameter entity_set is not an \'entities\' dict')
 
     if kwargs.get('debug'):
+        kwargs['debug'] = False
         print "Debug ingest"
         responses = []
         for idx, entity in enumerate(entity_set['entities'], start=1):
-
             single_entity = {'entities': [entity]}
             print single_entity
-            kwargs['debug'] = False
-            _ingest_entity_set(dataset_id, single_entity, **kwargs)
-            print "{} / {} ingested".format(idx, entity_set['entities'])
+            responses.append(_ingest_entity_set(dataset_id, single_entity, **kwargs))
+            print "{} / {} ingested".format(idx, len(entity_set['entities']))
         return responses
 
     response = make_post_request(
