@@ -39,6 +39,9 @@ def create_resource(args):
             mime_type = 'application/json'
         content = content_stream.read()
 
+        if args.no_edit == False:
+            content = open_in_editor(content)
+
         return api.create_resource(resource_type, resource_name, content, mime_type, **vars(args))
 
 
@@ -517,6 +520,7 @@ def main():
     parser_create_resource.add_argument('name', help='The name of the resource to create')
     parser_create_resource.add_argument('type', help='Conduce resource type to create')
     parser_create_resource.add_argument('--content', help='The content of the new resource')
+    parser_create_resource.add_argument('--no-edit', action='store_true', help='Disable interactive content editing.')
     parser_create_resource.set_defaults(func=create_resource)
 
     parser_edit_resource = subparsers.add_parser('edit',  parents=[api_cmd_parser], help='Edit resources that match the given parameters')
