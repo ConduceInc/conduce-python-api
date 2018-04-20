@@ -142,7 +142,7 @@ def wait_for_job(job_id, **kwargs):
                     return response
         except requests.exceptions.HTTPError as e:
             if e.response.status_code < 500:
-                return response
+                return e.response
             else:
                 print "Job status check failed:", e.response.reason
                 print "Will retry after sleep period."
