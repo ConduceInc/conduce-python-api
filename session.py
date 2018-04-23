@@ -14,9 +14,9 @@ def api_key_header(api_key):
 
 def get_session(host, email, password):
     api_key = config.get_api_key(email, host)
-    #If a password is provided, it should override the API key
     if api_key and password is None:
         return api_key_header(api_key)
+
     cookies = None
     cookie_file_dir = os.path.join(os.path.expanduser('~'), '.conduce', host, email)
     if not os.path.exists(cookie_file_dir):
@@ -30,13 +30,13 @@ def get_session(host, email, password):
         pass
 
     if cookies is None or not validate_session(host, cookies):
-        print
-        print "host: {}".format(host)
-        print "user: {}".format(email)
         if password is None:
-            cookies = login(host, email, getpass.getpass())
-        else:
-            cookies = login(host, email, password)
+            print
+            print "host: {}".format(host)
+            print "user: {}".format(email)
+            password = getpass.getpass()
+
+        cookies = login(host, email, password)
         with open(cookie_file_path, 'w') as cookie_file:
             pickle.dump(requests.utils.dict_from_cookiejar(cookies), cookie_file)
 
@@ -63,7 +63,7 @@ def login(host, email, password):
         "email": email,
         "password": password,
         "keep": False,
-    })
+        })
     response.raise_for_status()
     return response.cookies
 
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     import argparse
 
     arg_parser = argparse.ArgumentParser(
-        description='Get Conduce session')
+            description='Get Conduce session')
     arg_parser.add_argument('--host', help='The field to sort on', default='dev-app.conduce.com')
     arg_parser.add_argument('--user', help='Email address of user making request')
     arg_parser.add_argument('--password', help='The password of the user making the request')
