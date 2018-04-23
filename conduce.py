@@ -544,6 +544,7 @@ def main():
     parser_list_api_keys.set_defaults(func=list_api_keys)
 
     parser_create_api_key = subparsers.add_parser('create-api-key', parents=[api_cmd_parser], help='Create an API key for your account')
+    parser_create_api_key.add_argument('--password', help='The password of the user making the request')
     parser_create_api_key.set_defaults(func=create_api_key)
 
     parser_remove_api_key = subparsers.add_parser('remove-api-key', parents=[api_cmd_parser], help='Delete an API key')
