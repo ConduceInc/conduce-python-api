@@ -149,11 +149,14 @@ def wait_for_job(job_id, **kwargs):
 
 
 def compose_uri(fragment):
-    prefix = 'conduce/api/v1'
-    fragment = fragment.lstrip('/')
-    uri = '{}'.format(fragment)
-    if not 'conduce/api' in fragment:
-        uri = '{}/{}'.format(prefix, fragment)
+    if not 'api' in fragment:
+        prefix = 'conduce/api/v1'
+        fragment = fragment.lstrip('/')
+        uri = '{}'.format(fragment)
+        if not 'conduce/api' in fragment:
+            uri = '{}/{}'.format(prefix, fragment)
+    else:
+        uri = fragment
 
     return uri
 
@@ -1488,13 +1491,6 @@ def modify_resource_content(resource_id, content, mime_type, **kwargs):
 
 
 def _modify_resource_content(resource_id, content, mime_type, **kwargs):
-    # payload = [{
-    #    'path': '/content',
-    #    'value': content,
-    #    'op': 'replace'
-    #}]
-    # return make_patch_request(payload, 'conduce/api/v2/resources/{}'.format(resource_id), **kwargs)
-
     resource = get_resource(resource_id, **kwargs)
     resource['content'] = content
     resource['mime'] = mime_type

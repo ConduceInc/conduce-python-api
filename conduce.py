@@ -403,6 +403,13 @@ def send_post_request(args):
     return api.make_post_request(json.loads(args.data), uri, **vars(args))
 
 
+def send_patch_request(args):
+    uri = args.uri
+    del vars(args)['uri']
+
+    return api.make_patch_request(json.loads(args.data), uri, **vars(args))
+
+
 def account_exists(args):
     email = args.email
     del vars(args)['email']
@@ -723,6 +730,11 @@ def main():
     parser_post.add_argument('uri', help='The URI of the resource being requested')
     parser_post.add_argument('data', help='The data being posted')
     parser_post.set_defaults(func=send_post_request)
+
+    parser_patch = subparsers.add_parser('patch', parents=[api_cmd_parser], help='Make an arbitrary patch request')
+    parser_patch.add_argument('uri', help='The URI of the resource being requested')
+    parser_patch.add_argument('data', help='The data being posted')
+    parser_patch.set_defaults(func=send_patch_request)
 
     args = arg_parser.parse_args()
 
