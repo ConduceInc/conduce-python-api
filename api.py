@@ -836,11 +836,11 @@ def find_resource(**kwargs):
 
     found = []
     if 'resources' in results:
-        if kwargs['name'] is None and kwargs['regex'] is None and kwargs['id'] is None:
+        if kwargs['name'] is None and kwargs['regex'] is None and kwargs['id'] is None and kwargs.get('no_name', False) is False:
             return results['resources']
         else:
             for resource_obj in results['resources']:
-                if (resource_obj.get('id') is not None and resource_obj['id'] == kwargs['id']) or (resource_obj.get('name') is not None and (resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])))):
+                if (resource_obj.get('id') is not None and resource_obj['id'] == kwargs['id']) or (resource_obj.get('name') is None and kwargs.get('no_name', False) is True) or (resource_obj.get('name') is not None and (resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])))):
                     found.append(resource_obj)
 
     return found
@@ -862,11 +862,11 @@ def remove_resource(**kwargs):
 
     if kwargs['id']:
         _remove_resource(kwargs['id'], **kwargs)
-    elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
+    elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "" or kwargs.get('no_name'):
         results = find_resource(**kwargs)
         to_remove = []
         for resource_obj in results:
-            if resource_obj.get('name') is not None and (resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name']))):
+            if (resource_obj.get('name') is not None and (resource_obj['name'] == kwargs['name']) or (resource_obj.get('name') is None and kwargs.get('no_name', False) is True) or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name']))):
                 to_remove.append(resource_obj)
         if len(to_remove) == 1:
             _remove_resource(to_remove[0]['id'], **kwargs)

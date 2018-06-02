@@ -90,14 +90,16 @@ def get_dataset_metadata(args):
         return metadatas
 
 
+def format_resource_type(resource_type):
+    if resource_type.lower() == "lenses" or resource_type.lower() == "templates":
+        resource_type = "LENS_TEMPLATE"
+
+    return resource_type.upper().rstrip('S')
+
+
 def find_resource(args):
     if args.type is not None:
-        resource_type = args.type
-
-        if resource_type.lower() == "lenses" or resource_type.lower() == "templates":
-            resource_type = "LENS_TEMPLATE"
-
-        args.type = resource_type.upper().rstrip('S')
+        args.type = format_resource_type(args.type)
 
     resources = api.find_resource(**vars(args))
     if args.decode:
@@ -287,6 +289,9 @@ def get_generic_data(args):
 
 
 def remove_resource(args):
+    if args.type is not None:
+        args.type = format_resource_type(args.type)
+
     return api.remove_resource(**vars(args))
 
 
@@ -508,6 +513,7 @@ def main():
     parser_find.add_argument('--regex', help='An expression on which to filter results')
     parser_find.add_argument('--content', help='Content to retrieve: id,full,meta')
     parser_find.add_argument('--decode', action='store_true', help='Decode base64 and JSON for full content requests')
+    parser_find.add_argument('--no-name', action='store_true', help='Match resources with no name')
     parser_find.set_defaults(func=find_resource)
 
     parser_dataset = subparsers.add_parser('dataset', help='Conduce dataset operations')
@@ -660,26 +666,28 @@ def main():
     parser_get_generic_data.add_argument('--key', help='Unique ID of entity to retrieve data from')
     parser_get_generic_data.set_defaults(func=get_generic_data)
 
-    parser_get_generic_data = subparsers.add_parser('clear-dataset', parents=[api_cmd_parser], help='Remove all records from a Conduce dataset')
-    parser_get_generic_data.add_argument('--id', help='The ID of the dataset to be cleared')
-    parser_get_generic_data.add_argument('--name', help='The name of the dataset to be cleared')
-    parser_get_generic_data.add_argument('--regex', help='clear datasets that match the regular expression')
-    parser_get_generic_data.add_argument('--all', help='clear all matching datasets', action='store_true')
-    parser_get_generic_data.set_defaults(func=clear_dataset)
+    parser_clear_dataset = subparsers.add_parser('clear-dataset', parents=[api_cmd_parser], help='Remove all records from a Conduce dataset')
+    parser_clear_dataset.add_argument('--id', help='The ID of the dataset to be cleared')
+    parser_clear_dataset.add_argument('--name', help='The name of the dataset to be cleared')
+    parser_clear_dataset.add_argument('--regex', help='clear datasets that match the regular expression')
+    parser_clear_dataset.add_argument('--all', help='clear all matching datasets', action='store_true')
+    parser_clear_dataset.set_defaults(func=clear_dataset)
 
-    parser_get_generic_data = subparsers.add_parser('remove-dataset', parents=[api_cmd_parser], help='Remove a dataset from Conduce')
-    parser_get_generic_data.add_argument('--id', help='The ID of the dataset to be removed')
-    parser_get_generic_data.add_argument('--name', help='The name of the dataset to be removed')
-    parser_get_generic_data.add_argument('--regex', help='Remove datasets that match the regular expression')
-    parser_get_generic_data.add_argument('--all', help='Remove all matching datasets', action='store_true')
-    parser_get_generic_data.set_defaults(func=remove_dataset)
+    parser_remove_dataset = subparsers.add_parser('remove-dataset', parents=[api_cmd_parser], help='Remove a dataset from Conduce')
+    parser_remove_dataset.add_argument('--id', help='The ID of the dataset to be removed')
+    parser_remove_dataset.add_argument('--name', help='The name of the dataset to be removed')
+    parser_remove_dataset.add_argument('--regex', help='Remove datasets that match the regular expression')
+    parser_remove_dataset.add_argument('--all', help='Remove all matching datasets', action='store_true')
+    parser_remove_dataset.set_defaults(func=remove_dataset)
 
-    parser_get_generic_data = subparsers.add_parser('remove', parents=[api_cmd_parser], help='Remove a resource from Conduce')
-    parser_get_generic_data.add_argument('--id', help='The ID of the resource to be removed')
-    parser_get_generic_data.add_argument('--name', help='The name of the resource to be removed')
-    parser_get_generic_data.add_argument('--regex', help='Remove resources that match the regular expression')
-    parser_get_generic_data.add_argument('--all', help='Remove all matching resources', action='store_true')
-    parser_get_generic_data.set_defaults(func=remove_resource)
+    parser_remove = subparsers.add_parser('remove', parents=[api_cmd_parser], help='Remove a resource from Conduce')
+    parser_remove.add_argument('--id', help='The ID of the resource to be removed')
+    parser_remove.add_argument('--type', help='Conduce resource type to remove')
+    parser_remove.add_argument('--name', help='The name of the resource to be removed')
+    parser_remove.add_argument('--regex', help='Remove resources that match the regular expression')
+    parser_remove.add_argument('--no-name', action='store_true', help='Match resources with no name')
+    parser_remove.add_argument('--all', help='Remove all matching resources', action='store_true')
+    parser_remove.set_defaults(func=remove_resource)
 
     parser_permissions = subparsers.add_parser('permissions', help='Conduce permissions operations')
     parser_permissions_subparsers = parser_permissions.add_subparsers(help='permissions subcommands')
