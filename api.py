@@ -1076,6 +1076,7 @@ def create_resource(resource_type, resource_name, content, mime_type, **kwargs):
     resource_def = {
         'name': resource_name,
         'tags': kwargs.get('tags'),
+        'version': kwargs.get('version'),
         'type': resource_type,
         'mime': mime_type,
         'content': content
