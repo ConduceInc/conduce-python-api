@@ -315,6 +315,21 @@ def create_api_key(args):
     return api.create_api_key(**vars(args))
 
 
+def create_tileset(args):
+    if args.tile_json:
+        raise "TileJSON not currently supported by the CLI"
+
+    if args.style_url.split('mapbox://styles/')[1] < 2:
+        raise ValueError('Style URL must be a Mapbox style URL')
+
+    content = {
+        'url': args.style_url,
+        'style': args.style_url.split('mapbox://styles/')[1]
+    }
+
+    return api.create_json_resource('TILESET', args.name, content, version=2, **vars(args))
+
+
 def remove_api_key(args):
     key = args.key
     del vars(args)['key']
@@ -577,6 +592,12 @@ def main():
     parser_create_dataset.add_argument('--answer-yes', help='Set this flag to answer yes at all prompts', action='store_true')
     parser_create_dataset.add_argument('--debug', help='Get better information about errors', action='store_true')
     parser_create_dataset.set_defaults(func=create_dataset)
+
+    parser_create_tileset = subparsers.add_parser('create-tileset', parents=[api_cmd_parser], help='Create a Conduce tileset')
+    parser_create_tileset.add_argument('name', help='The name to be given to the new tileset')
+    parser_create_tileset.add_argument('--style-url', help='The Mapbox URL used to access the style <mapbox://styles/...>')
+    parser_create_tileset.add_argument('--tile-json', help='A valid TileJSON file')
+    parser_create_tileset.set_defaults(func=create_tileset)
 
     parser_ingest_data = subparsers.add_parser('ingest-data', parents=[api_cmd_parser], help='Ingest data to a Conduce dataset')
     parser_ingest_data.add_argument('dataset_id', help='The ID of the dataset to receive the entities')
