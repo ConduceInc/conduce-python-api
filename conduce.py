@@ -106,7 +106,11 @@ def find_resource(args):
         if args.content == 'full':
             for resource in resources:
                 if resource.get('mime', 'invalid-mime') == 'application/json':
-                    resource['content'] = json.loads(resource['content'])
+                    if 'content' in resource:
+                        try:
+                            resource['content'] = json.loads(resource['content'])
+                        except:
+                            print('Could not decode content for {}'.format(resource['id']))
                 elif not resource.get('mime', 'invalid-mime').startswith('text/'):
                     resource['content'] = base64.b64decode(resource['content'])
 
