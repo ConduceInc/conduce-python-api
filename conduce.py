@@ -324,7 +324,8 @@ def create_tileset(args):
 
     content = {
         'url': args.style_url,
-        'style': args.style_url.split('mapbox://styles/')[1]
+        'style': args.style_url.split('mapbox://styles/')[1],
+        'accessToken': args.access_token,
     }
 
     return api.create_json_resource('TILESET', args.name, content, version=2, **vars(args))
@@ -596,6 +597,7 @@ def main():
     parser_create_tileset = subparsers.add_parser('create-tileset', parents=[api_cmd_parser], help='Create a Conduce tileset')
     parser_create_tileset.add_argument('name', help='The name to be given to the new tileset')
     parser_create_tileset.add_argument('--style-url', help='The Mapbox URL used to access the style <mapbox://styles/...>')
+    parser_create_tileset.add_argument('--access-token', help='Mapbox access token. Use for user owned private map styles.')
     parser_create_tileset.add_argument('--tile-json', help='A valid TileJSON file')
     parser_create_tileset.set_defaults(func=create_tileset)
 
