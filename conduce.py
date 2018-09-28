@@ -475,7 +475,11 @@ def upload_image(args):
 def main():
     import argparse
     import pkg_resources
-    version = pkg_resources.require("conduce")[0].version
+
+    if sys.argv[0] != 'conduce.py':
+        version = pkg_resources.require("conduce")[0].version
+    else:
+        version = 'dev'
 
     arg_parser = argparse.ArgumentParser(description='Conduce command line utility\nv{}'.format(version), formatter_class=argparse.RawTextHelpFormatter)
     api_cmd_parser = argparse.ArgumentParser(add_help=False)
