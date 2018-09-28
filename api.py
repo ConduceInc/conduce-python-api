@@ -149,7 +149,7 @@ def wait_for_job(job_id, **kwargs):
 
 
 def compose_uri(fragment):
-    if not 'api' in fragment:
+    if not 'api/v' in fragment:
         prefix = 'conduce/api/v1'
         fragment = fragment.lstrip('/')
         uri = '{}'.format(fragment)
