@@ -1,0 +1,5 @@
+city,city_ascii,lat,lng,pop,country,iso2,iso3,province
+City One,City One,41.82999066,-87.75005497,5915976,United States of America,US,USA,Illinois
+City Two,City Two,41.82999066,-87.75005497,5915976,United States of America,US,USA,Illinois
+City Three,City Three,41.82999066,-87.75005497,5915976,United States of America,US,USA,Illinois
+City Four,City Four,41.82999066,-87.75005497,5915976,United States of America,US,USA,Illinois
