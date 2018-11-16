@@ -861,7 +861,7 @@ def remove_resource(**kwargs):
     kwargs['all'] = kwargs.get('all')
 
     if kwargs['id']:
-        _remove_resource(kwargs['id'], **kwargs)
+        return_message = _remove_resource(kwargs['id'], **kwargs)
     elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "" or kwargs.get('no_name'):
         results = find_resource(**kwargs)
         to_remove = []
