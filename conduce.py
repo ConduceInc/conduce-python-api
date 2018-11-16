@@ -300,7 +300,7 @@ def remove_resource(args):
 
 
 def remove_dataset(args):
-    return api.remove_dataset(**vars(args))
+    return api.remove_dataset(permanent=args.hard, **vars(args))
 
 
 def clear_dataset(args):
@@ -704,10 +704,11 @@ def main():
     parser_clear_dataset.add_argument('--all', help='clear all matching datasets', action='store_true')
     parser_clear_dataset.set_defaults(func=clear_dataset)
 
-    parser_remove_dataset = subparsers.add_parser('remove-dataset', parents=[api_cmd_parser], help='Remove a dataset from Conduce')
+    parser_remove_dataset = subparsers.add_parser('remove-dataset', parents=[api_cmd_parser], help='Remove a dataset from Conduce (soft delete)')
     parser_remove_dataset.add_argument('--id', help='The ID of the dataset to be removed')
     parser_remove_dataset.add_argument('--name', help='The name of the dataset to be removed')
     parser_remove_dataset.add_argument('--regex', help='Remove datasets that match the regular expression')
+    parser_remove_dataset.add_argument('--hard', action='store_true', help='Permanently destroy (hard delete) the dataset')
     parser_remove_dataset.add_argument('--all', help='Remove all matching datasets', action='store_true')
     parser_remove_dataset.set_defaults(func=remove_dataset)
 
