@@ -693,7 +693,7 @@ def _clear_dataset(dataset_id, **kwargs):
     response = make_post_request(
         None, 'datasets/clear/{}'.format(dataset_id), **kwargs)
 
-    return True
+    return response
 
 
 def clear_dataset(**kwargs):
@@ -704,8 +704,9 @@ def clear_dataset(**kwargs):
     kwargs['name'] = kwargs.get('name')
     kwargs['all'] = kwargs.get('all')
 
+    responses = []
     if kwargs['id']:
-        _clear_dataset(kwargs['id'], **kwargs)
+        responses.append(_clear_dataset(kwargs['id'], **kwargs))
         return_message = 'cleared 1 dataset'
     elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "":
         datasets = list_datasets(**kwargs)
@@ -714,11 +715,11 @@ def clear_dataset(**kwargs):
             if dataset.get('name') is not None and (dataset['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], dataset['name']))):
                 to_clear.append(dataset)
         if len(to_clear) == 1:
-            _clear_dataset(to_clear[0]['id'], **kwargs)
+            responses.append(_clear_dataset(to_clear[0]['id'], **kwargs))
             return_message = 'cleared 1 dataset'
         elif kwargs['all']:
             for dataset in to_clear:
-                _clear_dataset(dataset['id'], **kwargs)
+                responses.append(_clear_dataset(dataset['id'], **kwargs))
             return_message = "cleared {:d} datasets".format(len(to_clear))
         elif len(to_clear) > 1:
             return_message = "Matching datasets:\n"
@@ -726,6 +727,11 @@ def clear_dataset(**kwargs):
             return_message += "\n\nName or regular expression matched multiple datasets.  Pass --all to clear all matching datasets."
         else:
             return_message = "No matching datasets found."
+
+    for response in responses:
+        if 'location' in response.headers:
+            job_id = response.headers['location']
+            response = wait_for_job(job_id, **kwargs)
 
     return return_message
 
