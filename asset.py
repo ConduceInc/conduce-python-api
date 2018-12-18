@@ -10,7 +10,8 @@ def initialize_binary_asset(path, **kwargs):
         image = image_stream.read()
 
         name = kwargs.get('name', os.path.basename(path))
-        del kwargs['name']
+        if 'name' in kwargs:
+            del kwargs['name']
         return initialize_asset(name, image, mime, **kwargs)
 
 
@@ -20,7 +21,7 @@ def initialize_asset(name, data, mime_type, **kwargs):
 
     if asset_id is not None:
         api.modify_asset_content(asset_id, data, mime_type, **kwargs)
-        print 'Updated asset {} {}'.format(name, asset_id)
+        print('Updated asset {} {}'.format(name, asset_id))
         return asset_id
 
     if kwargs.get('modify'):
@@ -28,11 +29,11 @@ def initialize_asset(name, data, mime_type, **kwargs):
 
     if len(found) == 0:
         asset_id = api.create_asset(name, data, mime_type, **kwargs)['id']
-        print 'Created asset {} {}'.format(name, asset_id)
+        print('Created asset {} {}'.format(name, asset_id))
     else:
         asset_id = found[0]['id']
-        print 'Found asset {} {}'.format(name, asset_id)
+        print ('Found asset {} {}'.format(name, asset_id))
         api.modify_asset_content(asset_id, data, mime_type, **kwargs)
-        print 'Updated asset {} {}'.format(name, asset_id)
+        print('Updated asset {} {}'.format(name, asset_id))
 
     return asset_id
