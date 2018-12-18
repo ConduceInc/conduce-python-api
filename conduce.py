@@ -299,6 +299,26 @@ def remove_resource(args):
     return api.remove_resource(**vars(args))
 
 
+def tag_resource(args):
+    tags = vars(args).pop('tags')
+    set_tags = vars(args).pop('set')
+    remove_tags = vars(args).pop('remove')
+
+    if args.type is not None:
+        args.type = format_resource_type(args.type)
+
+    resources = api.find_resource(**vars(args))
+
+    print(resources)
+    for resource in resources:
+        if set_tags:
+            api.set_tags(resource['id'], tags, **vars(args))
+        elif remove_tags:
+            api.remove_tags(resource['id'], tags, **vars(args))
+        else:
+            api.add_tags(resource['id'], tags, **vars(args))
+
+
 def remove_dataset(args):
     return api.remove_dataset(permanent=args.hard, **vars(args))
 
@@ -538,6 +558,7 @@ def main():
     parser_find.add_argument('--content', help='Content to retrieve: id,full,meta')
     parser_find.add_argument('--decode', action='store_true', help='Decode base64 and JSON for full content requests')
     parser_find.add_argument('--no-name', action='store_true', help='Match resources with no name')
+    parser_find.add_argument('--tags', type=str, nargs='+', help='Match resources with the specified tag')
     parser_find.set_defaults(func=find_resource)
 
     parser_dataset = subparsers.add_parser('dataset', help='Conduce dataset operations')
@@ -718,8 +739,20 @@ def main():
     parser_remove.add_argument('--name', help='The name of the resource to be removed')
     parser_remove.add_argument('--regex', help='Remove resources that match the regular expression')
     parser_remove.add_argument('--no-name', action='store_true', help='Match resources with no name')
+    parser_remove.add_argument('--tags', nargs='+', help='Match resources with specified tag')
     parser_remove.add_argument('--all', help='Remove all matching resources', action='store_true')
     parser_remove.set_defaults(func=remove_resource)
+
+    parser_tag = subparsers.add_parser('tag', parents=[api_cmd_parser], help='Add tag to resources that match the given parameters')
+    parser_tag.add_argument('tags', nargs='+', help='The tag or tags to be applied to the matched resource(s) (separated by spaces)')
+    parser_tag.add_argument('--id', help='The ID of the resource to be tagged')
+    parser_tag.add_argument('--type', help='Conduce resource type to tag')
+    parser_tag.add_argument('--name', help='The name of the resource to be tagged')
+    parser_tag.add_argument('--regex', help='tag resources that match the regular expression')
+    parser_tag.add_argument('--no-name', action='store_true', help='Match resources with no name')
+    parser_tag.add_argument('--remove', action='store_true', help='Remove tags instead of adding')
+    parser_tag.add_argument('--set', action='store_true', help='Set the list of tags to the specified')
+    parser_tag.set_defaults(func=tag_resource)
 
     parser_permissions = subparsers.add_parser('permissions', help='Conduce permissions operations')
     parser_permissions_subparsers = parser_permissions.add_subparsers(help='permissions subcommands')
