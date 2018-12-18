@@ -868,11 +868,11 @@ def remove_resource(**kwargs):
 
     if kwargs['id']:
         return_message = _remove_resource(kwargs['id'], **kwargs)
-    elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "" or kwargs.get('no_name'):
+    elif kwargs['name'] or kwargs['regex'] or kwargs['name'] == "" or kwargs.get('no_name') or kwargs.get('tags'):
         results = find_resource(**kwargs)
         to_remove = []
         for resource_obj in results:
-            if (resource_obj.get('name') is not None and (resource_obj['name'] == kwargs['name']) or (resource_obj.get('name') is None and kwargs.get('no_name', False) is True) or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name']))):
+            if (resource_obj.get('name') is not None and (resource_obj['name'] == kwargs['name']) or (resource_obj.get('name') is None and kwargs.get('no_name', False) is True) or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])) or (kwargs.get('tags') is not None and set(kwargs.get('tags')) < set(resource_obj['tags']))):
                 to_remove.append(resource_obj)
         if len(to_remove) == 1:
             _remove_resource(to_remove[0]['id'], **kwargs)
@@ -885,8 +885,8 @@ def remove_resource(**kwargs):
         elif len(to_remove) > 1:
             return_message = "Matching {}:\n".format(resource_type)
             return_message += json.dumps(to_remove)
-            return_message += "\n\nName or regular expression matched multiple {}.  Pass --all to remove all matching {}.".format(
-                resource_type, resource_type)
+            return_message += "\n\nName or regular expression matched {} {}.  Pass --all to remove all matching {}.".format(
+                len(to_remove), resource_type, resource_type)
         else:
             return_message = "No matching {} found.".format(resource_type)
     else:
@@ -1501,6 +1501,24 @@ def _modify_resource_content(resource_id, content, mime_type, **kwargs):
     resource = get_resource(resource_id, **kwargs)
     resource['content'] = content
     resource['mime'] = mime_type
+    update_resource(resource, **kwargs)
+
+
+def set_tags(resource_id, tags, **kwargs):
+    resource = get_resource(resource_id, **kwargs)
+    resource['tags'] = tags
+    update_resource(resource, **kwargs)
+
+
+def add_tags(resource_id, tags, **kwargs):
+    resource = get_resource(resource_id, **kwargs)
+    resource['tags'] += tags
+    update_resource(resource, **kwargs)
+
+
+def remove_tags(resource_id, tags, **kwargs):
+    resource = get_resource(resource_id, **kwargs)
+    resource['tags'] = [tag for tag in resource['tags'] if tag not in tags]
     update_resource(resource, **kwargs)
 
 
