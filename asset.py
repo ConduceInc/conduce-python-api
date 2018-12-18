@@ -32,7 +32,7 @@ def initialize_asset(name, data, mime_type, **kwargs):
         print('Created asset {} {}'.format(name, asset_id))
     else:
         asset_id = found[0]['id']
-        print ('Found asset {} {}'.format(name, asset_id))
+        print('Found asset {} {}'.format(name, asset_id))
         api.modify_asset_content(asset_id, data, mime_type, **kwargs)
         print('Updated asset {} {}'.format(name, asset_id))
 
