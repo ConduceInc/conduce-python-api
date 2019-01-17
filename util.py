@@ -7,6 +7,7 @@ from dateutil import parser
 import copy
 import api
 import pytz
+import math
 import sys
 
 
@@ -99,7 +100,7 @@ def csv_to_json(infile, outfile=None, toStdout=False, **kwargs):
         if toStdout is True:
             print out
             print
-        if not outfile is None:
+        if outfile is not None:
             with open(outfile, "w") as output_file:
                 json.dump(out, output_file)
 
@@ -118,7 +119,7 @@ def get_id_score(key, value):
     try:
         if float.is_integer(float(value)):
             score += 100
-            if not '.' in value:
+            if '.' not in value:
                 score += 300
     except:
         pass
@@ -267,7 +268,7 @@ def build_attribute(key, value):
     attribute = {'key': key}
     try:
         float_val = float(value)
-        if float_val.isinf() or float_val.isnan():
+        if math.isinf(float_val) or math.isnan(float_val):
             raise RuntimeError('This value should be parsed as a string')
         if float.is_integer(float_val):
             attribute['type'] = 'INT64'
