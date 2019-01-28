@@ -17,27 +17,27 @@ def get_lightning_data():
         return None
 
 
-def filter_lightning_data(ld, maxInputTime):
-    ldout = {}
-    items = ld.items()
+def filter_lightning_data(lightning_strikes, maxInputTime):
+    items = lightning_strikes.items()
+    filtered_strikes = {}
     items.sort(key=lambda x: x[1]["unixTime"])
-    for lid, linfo in items:
-        if linfo["unixTime"] <= maxInputTime:
+    for strike_id, strike_info in items:
+        if strike_info["unixTime"] <= maxInputTime:
             continue
-        ldout[lid] = linfo
-    return ldout
+        filtered_strikes[strike_id] = strike_info
+    return filtered_strikes
 
 
-def format_data_into_entities(ld):
-    entities = [None]*len(ld)
-    for i, (lid, linfo) in enumerate(ld.iteritems()):
-        entities[i] = {
-            "id": lid,
+def format_data_into_entities(lightning_strikes):
+    samples = [None]*len(lightning_strikes)
+    for i, (strike_id, strike_info) in enumerate(lightning_strikes.iteritems()):
+        samples[i] = {
+            "id": strike_id,
             "kind": "lightning",
-            "time": datetime.utcfromtimestamp(linfo["unixTime"]),
-            "point": {"x": linfo["long"], "y": linfo["lat"]},
+            "time": datetime.utcfromtimestamp(strike_info["unixTime"]),
+            "point": {"x": strike_info["long"], "y": strike_info["lat"]},
         }
-    return entities
+    return samples
 
 
 def ingest_new_strikes(dataset_id, samples, host):
@@ -74,23 +74,23 @@ def main(event, context):
     print([dataset['id'] for dataset in datasets.values()])
     maxInputTime = 0
     while True:
-        raw_ld = get_lightning_data()
-        if not raw_ld:
+        strikes = get_lightning_data()
+        if not strikes:
             print "No data received"
             time.sleep(ITER_TIME*0.25)
             continue
-        ld = filter_lightning_data(raw_ld, maxInputTime)
-        if not ld:
+        filtered_strikes = filter_lightning_data(strikes, maxInputTime)
+        if not filtered_strikes:
             print "No entities to add"
             time.sleep(ITER_TIME)
             continue
-        ents = format_data_into_entities(ld)
+        samples = format_data_into_entities(filtered_strikes)
 
         for host, dataset in datasets.iteritems():
-            ingest_new_strikes(dataset['id'], ents, host)
+            ingest_new_strikes(dataset['id'], samples, host)
 
-        maxInputTime = max(ld.itervalues(), key=lambda x: x["unixTime"])["unixTime"]
-        print "Added %d entities" % len(ents)
+        maxInputTime = max(filtered_strikes.itervalues(), key=lambda x: x["unixTime"])["unixTime"]
+        print "Added %d entities" % len(samples)
         time.sleep(ITER_TIME)
 
 
