@@ -4,9 +4,6 @@ import time
 import random
 from datetime import datetime
 
-ITER_TIME = 60
-DATASET_NAME = "wwln_lightning"
-
 
 def get_lightning_data():
     req = requests.get("http://wwlln.net/new/map/data/current.json")
@@ -21,30 +18,13 @@ def get_lightning_data():
 
 
 def filter_lightning_data(ld, maxInputTime):
-    # HACK really
     ldout = {}
-    ##count = 0
     items = ld.items()
-    # NOTE: The sort order is increasing time.  With the limits
-    # on count, this is just adding old data slowly.  The sort
-    # should have reverse=True & no count limit if this is to
-    # cecome a real daemon.
-    # But for the demo, I want to see data streaming in
-    # so I stream in small parts of it so there is a continuous
-    # supply of new data coming in during the demo.
     items.sort(key=lambda x: x[1]["unixTime"])
     for lid, linfo in items:
-        # American lightning is the Best!
-        if linfo["lat"] < 18 or linfo["lat"] > 50:
-            continue
-        if linfo["long"] > -65 or linfo["long"] < -125:
-            continue
         if linfo["unixTime"] <= maxInputTime:
             continue
-        ##count += 1
         ldout[lid] = linfo
-        # if count >= 40:
-        # break
     return ldout
 
 
@@ -56,18 +36,42 @@ def format_data_into_entities(ld):
             "kind": "lightning",
             "time": datetime.utcfromtimestamp(linfo["unixTime"]),
             "point": {"x": linfo["long"], "y": linfo["lat"]},
-            "strength": random.randint(0, 9001)
         }
     return entities
 
 
-def main(event, context):
-    datasets = conduce.api.find_dataset(name=DATASET_NAME, host='app.conduce.com')
+def ingest_new_strikes(dataset_id, samples, host):
+    try:
+        conduce.api.ingest_samples(dataset_id, samples, host=host)
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code < 500:
+            print "Client error, dropping new data"
+            print(e.response)
+        else:
+            print "Server error"
+            print(e.response)
+            time.sleep(30)
+            ingest_new_strikes(dataset_id, samples, host)
+
+
+def get_dataset(dataset_name, host):
+    datasets = conduce.api.find_dataset(name=dataset_name, host=host)
     if len(datasets) == 0:
-        dataset = conduce.api.create_dataset(DATASET_NAME, host='app.conduce.com')
+        dataset = conduce.api.create_dataset(dataset_name, host=host)
     else:
         dataset = datasets[0]
-    print "Using dataset", dataset['id']
+
+    return dataset
+
+
+def main(event, context):
+    DATASET_NAME = "wwln_lightning_kvl_test"
+    ITER_TIME = 60
+    datasets = {}
+    #datasets['app.conduce.com'] = get_dataset(DATASET_NAME, 'app.conduce.com')
+    datasets['dev-app.conduce.com'] = get_dataset(DATASET_NAME, 'dev-app.conduce.com')
+    print("Using datasets")
+    print([dataset['id'] for dataset in datasets.values()])
     maxInputTime = 0
     while True:
         raw_ld = get_lightning_data()
@@ -81,9 +85,10 @@ def main(event, context):
             time.sleep(ITER_TIME)
             continue
         ents = format_data_into_entities(ld)
-        conduce.api.ingest_samples(dataset['id'], ents, host='app.conduce.com')
-        # only update maxtime if the post worked - right now this has happened
-        # because of deployments taking the server down for a short time
+
+        for host, dataset in datasets.iteritems():
+            ingest_new_strikes(dataset['id'], ents, host)
+
         maxInputTime = max(ld.itervalues(), key=lambda x: x["unixTime"])["unixTime"]
         print "Added %d entities" % len(ents)
         time.sleep(ITER_TIME)
