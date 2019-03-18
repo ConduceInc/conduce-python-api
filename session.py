@@ -12,7 +12,7 @@ def api_key_header(api_key):
     return {'Authorization': 'Bearer {}'.format(api_key)}
 
 
-def get_session(host, email, password):
+def get_session(host, email, password, verify=True):
     api_key = config.get_api_key(email, host)
     if api_key and password is None:
         return api_key_header(api_key)
@@ -29,22 +29,22 @@ def get_session(host, email, password):
     except:
         pass
 
-    if cookies is None or not validate_session(host, cookies):
+    if cookies is None or not validate_session(host, cookies, verify):
         if password is None:
             print
             print "host: {}".format(host)
             print "user: {}".format(email)
             password = getpass.getpass()
 
-        cookies = login(host, email, password)
+        cookies = login(host, email, password, verify)
         with open(cookie_file_path, 'w') as cookie_file:
             pickle.dump(requests.utils.dict_from_cookiejar(cookies), cookie_file)
 
     return cookies
 
 
-def validate_session(host, cookies):
-    response = requests.get("https://{}/conduce/api/v1/user/validate-session".format(host), cookies=cookies)
+def validate_session(host, cookies, verify):
+    response = requests.get("https://{}/conduce/api/v1/user/validate-session".format(host), cookies=cookies, verify=verify)
     if response.status_code == 401:
         print "Session expired"
         cookies = None
@@ -53,7 +53,7 @@ def validate_session(host, cookies):
     return cookies
 
 
-def login(host, email, password):
+def login(host, email, password, verify):
     if email is None:
         raise Exception('No user provided for login')
     if password is None:
@@ -63,7 +63,7 @@ def login(host, email, password):
         "email": email,
         "password": password,
         "keep": False,
-        })
+        }, verify=verify)
     response.raise_for_status()
     return response.cookies
 
@@ -77,6 +77,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--user', help='Email address of user making request')
     arg_parser.add_argument('--password', help='The password of the user making the request')
     arg_parser.add_argument('--api-key', help='API key used to authenticate')
+    arg_parser.add_argument('--no-verify', action='store_true', help='If passed, the SSL certificate of the host will not be verified')
 
     args = arg_parser.parse_args()
 
@@ -84,4 +85,9 @@ if __name__ == '__main__':
     if email is None:
         email = "dhl-dev@conduce.com"
 
-    print get_session(args.host, email, password)
+    if args.no_verify:
+        verify = False
+    else:
+        verify = True
+
+    print get_session(args.host, email, args.password, verify)
