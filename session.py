@@ -77,7 +77,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--user', help='Email address of user making request')
     arg_parser.add_argument('--password', help='The password of the user making the request')
     arg_parser.add_argument('--api-key', help='API key used to authenticate')
-    arg_parser.add_argument('--noverify', action='store_true', help='If passed, the SSL certificate of the host will not be verified')
+    arg_parser.add_argument('--no-verify', action='store_true', help='If passed, the SSL certificate of the host will not be verified')
 
     args = arg_parser.parse_args()
 
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     if email is None:
         email = "dhl-dev@conduce.com"
 
-    if args.noverify:
+    if args.no_verify:
         verify = False
     else:
         verify = True

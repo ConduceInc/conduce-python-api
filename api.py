@@ -195,7 +195,7 @@ def _make_delete_request(uri, **kwargs):
         password = kwargs['password']
     else:
         password = None
-    if 'noverify' in kwargs and kwargs['noverify']:
+    if 'no_verify' in kwargs and kwargs['no_verify']:
         verify=False
     else:
         verify=True
@@ -302,7 +302,7 @@ def _make_get_request(uri, **kwargs):
     else:
         password = None
 
-    if 'noverify' in kwargs and kwargs['noverify']:
+    if 'no_verify' in kwargs and kwargs['no_verify']:
         verify = False
     else:
         verify = True
@@ -1274,7 +1274,7 @@ def _make_post_request(payload, uri, **kwargs):
     else:
         password = None
 
-    if 'noverify' in kwargs and kwargs['noverify']:
+    if 'no_verify' in kwargs and kwargs['no_verify']:
         verify = False
     else:
         verify = True
@@ -1357,7 +1357,7 @@ def _make_put_request(payload, uri, **kwargs):
     else:
         password = None
 
-    if 'noverify' in kwargs and kwargs['noverify']:
+    if 'no_verify' in kwargs and kwargs['no_verify']:
         verify=False
     else:
         verify=True
@@ -1440,7 +1440,7 @@ def _make_patch_request(payload, uri, **kwargs):
     else:
         password = None
 
-    if 'noverify' in kwargs and kwargs['noverify']:
+    if 'no_verify' in kwargs and kwargs['no_verify']:
         verify=False
     else:
         verify=True

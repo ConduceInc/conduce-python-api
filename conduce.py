@@ -506,7 +506,7 @@ def main():
     api_cmd_parser.add_argument('--user', help='The user whose is making the request')
     api_cmd_parser.add_argument('--host', help='The server on which the command will run')
     api_cmd_parser.add_argument('--api-key', help='The API key used to authenticate')
-    api_cmd_parser.add_argument('--noverify', action='store_true', help='If passed, the SSL certificate of the host will not be verified')
+    api_cmd_parser.add_argument('--no-verify', action='store_true', help='If passed, the SSL certificate of the host will not be verified')
 
     subparsers = arg_parser.add_subparsers(help='help for subcommands')
 
