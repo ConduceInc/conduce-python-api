@@ -195,6 +195,10 @@ def _make_delete_request(uri, **kwargs):
         password = kwargs['password']
     else:
         password = None
+    if 'noverify' in kwargs and kwargs['noverify']:
+        verify=False
+    else:
+        verify=True
 
     if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
@@ -207,9 +211,9 @@ def _make_delete_request(uri, **kwargs):
 
     url = 'https://{}/{}'.format(host, uri)
     if 'Authorization' in auth:
-        response = requests.delete(url, headers=auth)
+        response = requests.delete(url, headers=auth, verify=verify)
     else:
-        response = requests.delete(url, cookies=auth)
+        response = requests.delete(url, cookies=auth, verify=verify)
     response.raise_for_status()
     return response
 
@@ -298,6 +302,11 @@ def _make_get_request(uri, **kwargs):
     else:
         password = None
 
+    if 'noverify' in kwargs and kwargs['noverify']:
+        verify = False
+    else:
+        verify = True
+
     if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
     else:
@@ -309,9 +318,9 @@ def _make_get_request(uri, **kwargs):
 
     url = 'https://{}/{}'.format(host, uri)
     if 'Authorization' in auth:
-        response = requests.get(url, headers=auth)
+        response = requests.get(url, headers=auth, verify=verify)
     else:
-        response = requests.get(url, cookies=auth)
+        response = requests.get(url, cookies=auth, verify=verify)
     response.raise_for_status()
     return response
 
@@ -1274,6 +1283,11 @@ def _make_post_request(payload, uri, **kwargs):
             user = cfg['default-user']
         auth = session.get_session(host, user, password)
 
+    if 'noverify' in kwargs and kwargs['noverify']:
+        verify = False
+    else:
+        verify = True
+
     headers = {}
     url = 'https://{}/{}'.format(host, uri)
     if 'Authorization' in auth:
@@ -1283,9 +1297,9 @@ def _make_post_request(payload, uri, **kwargs):
         else:
             headers = auth
 
-        response = requests.post(url, json=payload, headers=headers)
+        response = requests.post(url, json=payload, headers=headers, verify=verify)
     else:
-        response = requests.post(url, json=payload, cookies=auth, headers=headers)
+        response = requests.post(url, json=payload, cookies=auth, headers=headers, verify=verify)
 
     response.raise_for_status()
     return response
@@ -1352,6 +1366,11 @@ def _make_put_request(payload, uri, **kwargs):
             user = cfg['default-user']
         auth = session.get_session(host, user, password)
 
+    if 'noverify' in kwargs and kwargs['noverify']:
+        verify=False
+    else:
+        verify=True
+
     headers = {}
     url = 'https://{}/{}'.format(host, uri)
     if 'Authorization' in auth:
@@ -1361,9 +1380,9 @@ def _make_put_request(payload, uri, **kwargs):
         else:
             headers = auth
 
-        response = requests.put(url, json=payload, headers=headers)
+        response = requests.put(url, json=payload, headers=headers, verify=verify)
     else:
-        response = requests.put(url, json=payload, cookies=auth, headers=headers)
+        response = requests.put(url, json=payload, cookies=auth, headers=headers, verify=verify)
 
     response.raise_for_status()
     return response
@@ -1430,6 +1449,11 @@ def _make_patch_request(payload, uri, **kwargs):
             user = cfg['default-user']
         auth = session.get_session(host, user, password)
 
+    if 'noverify' in kwargs and kwargs['noverify']:
+        verify=False
+    else:
+        verify=True
+
     headers = {}
     url = 'https://{}/{}'.format(host, uri)
     if 'Authorization' in auth:
@@ -1439,9 +1463,9 @@ def _make_patch_request(payload, uri, **kwargs):
         else:
             headers = auth
 
-        response = requests.patch(url, json=payload, headers=headers)
+        response = requests.patch(url, json=payload, headers=headers, verify=verify)
     else:
-        response = requests.patch(url, json=payload, cookies=auth, headers=headers)
+        response = requests.patch(url, json=payload, cookies=auth, headers=headers, verify=verify)
 
     response.raise_for_status()
     return response
