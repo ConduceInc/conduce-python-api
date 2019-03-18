@@ -207,7 +207,7 @@ def _make_delete_request(uri, **kwargs):
             user = kwargs['user']
         else:
             user = cfg['default-user']
-        auth = session.get_session(host, user, password)
+        auth = session.get_session(host, user, password, verify)
 
     url = 'https://{}/{}'.format(host, uri)
     if 'Authorization' in auth:
@@ -314,7 +314,7 @@ def _make_get_request(uri, **kwargs):
             user = kwargs['user']
         else:
             user = cfg['default-user']
-        auth = session.get_session(host, user, password)
+        auth = session.get_session(host, user, password, verify)
 
     url = 'https://{}/{}'.format(host, uri)
     if 'Authorization' in auth:
@@ -1274,6 +1274,11 @@ def _make_post_request(payload, uri, **kwargs):
     else:
         password = None
 
+    if 'noverify' in kwargs and kwargs['noverify']:
+        verify = False
+    else:
+        verify = True
+
     if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
     else:
@@ -1281,12 +1286,7 @@ def _make_post_request(payload, uri, **kwargs):
             user = kwargs['user']
         else:
             user = cfg['default-user']
-        auth = session.get_session(host, user, password)
-
-    if 'noverify' in kwargs and kwargs['noverify']:
-        verify = False
-    else:
-        verify = True
+        auth = session.get_session(host, user, password, verify)
 
     headers = {}
     url = 'https://{}/{}'.format(host, uri)
@@ -1357,6 +1357,11 @@ def _make_put_request(payload, uri, **kwargs):
     else:
         password = None
 
+    if 'noverify' in kwargs and kwargs['noverify']:
+        verify=False
+    else:
+        verify=True
+
     if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
     else:
@@ -1364,12 +1369,7 @@ def _make_put_request(payload, uri, **kwargs):
             user = kwargs['user']
         else:
             user = cfg['default-user']
-        auth = session.get_session(host, user, password)
-
-    if 'noverify' in kwargs and kwargs['noverify']:
-        verify=False
-    else:
-        verify=True
+        auth = session.get_session(host, user, password, verify)
 
     headers = {}
     url = 'https://{}/{}'.format(host, uri)
@@ -1440,6 +1440,11 @@ def _make_patch_request(payload, uri, **kwargs):
     else:
         password = None
 
+    if 'noverify' in kwargs and kwargs['noverify']:
+        verify=False
+    else:
+        verify=True
+
     if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
     else:
@@ -1447,12 +1452,7 @@ def _make_patch_request(payload, uri, **kwargs):
             user = kwargs['user']
         else:
             user = cfg['default-user']
-        auth = session.get_session(host, user, password)
-
-    if 'noverify' in kwargs and kwargs['noverify']:
-        verify=False
-    else:
-        verify=True
+        auth = session.get_session(host, user, password, verify)
 
     headers = {}
     url = 'https://{}/{}'.format(host, uri)
