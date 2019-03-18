@@ -530,6 +530,7 @@ def main():
     parser_config_set_api_key.add_argument('--password', help='The password of the user making the request')
     parser_config_set_api_key.add_argument('--key', help='The API key')
     parser_config_set_api_key.add_argument('--new', help='Generate a new API key', action='store_true')
+    parser_config_set_api_key.add_argument('--no-verify', action='store_true', help='If passed, the SSL certificate of the host will not be verified when creating a new key')
     parser_config_set_api_key.set_defaults(func=set_api_key)
 
     parser_config_get = parser_config_subparsers.add_parser('get', help='Get Conduce configuration setting')
