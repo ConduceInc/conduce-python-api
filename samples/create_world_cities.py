@@ -41,6 +41,7 @@ def main():
     arg_parser.add_argument('--user', help='The user whose is making the request')
     arg_parser.add_argument('--host', help='The server on which the command will run')
     arg_parser.add_argument('--api-key', help='The API key used to authenticate')
+    arg_parser.add_argument('--no-verify', action='store_true', help='If passed, the SSL certificate of the host will not be verified')
 
     args = arg_parser.parse_args()
 
