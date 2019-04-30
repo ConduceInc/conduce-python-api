@@ -198,11 +198,15 @@ def create_dataset(args):
     if args.json or args.csv:
         print json.dumps(response, indent=2)
         response = util.ingest_file(response['id'], **vars(args))
+    elif args.raw:
+        response = ingest_entities(args)
 
     return response
 
 
 def ingest_data(args):
+    if args.raw:
+        return ingest_entities(args)
     dataset_id = args.dataset_id
     del vars(args)['dataset_id']
     return util.ingest_file(dataset_id, **vars(args))
@@ -539,7 +543,8 @@ def main():
     parser_config_set_api_key.add_argument('--password', help='The password of the user making the request')
     parser_config_set_api_key.add_argument('--key', help='The API key')
     parser_config_set_api_key.add_argument('--new', help='Generate a new API key', action='store_true')
-    parser_config_set_api_key.add_argument('--no-verify', action='store_true', help='If passed, the SSL certificate of the host will not be verified when creating a new key')
+    parser_config_set_api_key.add_argument('--no-verify', action='store_true',
+                                           help='If passed, the SSL certificate of the host will not be verified when creating a new key')
     parser_config_set_api_key.set_defaults(func=set_api_key)
 
     parser_config_get = parser_config_subparsers.add_parser('get', help='Get Conduce configuration setting')
@@ -622,8 +627,9 @@ def main():
 
     parser_create_dataset = subparsers.add_parser('create-dataset', parents=[api_cmd_parser], help='Create a Conduce dataset')
     parser_create_dataset.add_argument('name', help='The name to be given to the new dataset')
-    parser_create_dataset.add_argument('--json', help='Optional: A well formatted Conduce entities JSON file')
+    parser_create_dataset.add_argument('--json', help='Optional: A JSON file that can parsed into Conduce entities')
     parser_create_dataset.add_argument('--csv', help='Optional: A CSV file that can be parsed as Conduce data')
+    parser_create_dataset.add_argument('--raw', help='Optional: A well formatted Conduce entities JSON file. Ignores --kind, --generate-ids and --answer-yes')
     parser_create_dataset.add_argument('--generate-ids', help='Set this flag if the data does not contain an ID field', action='store_true')
     parser_create_dataset.add_argument('--kind', help='Use this value as the kind for all entities')
     parser_create_dataset.add_argument('--answer-yes', help='Set this flag to answer yes at all prompts', action='store_true')
@@ -639,19 +645,14 @@ def main():
 
     parser_ingest_data = subparsers.add_parser('ingest-data', parents=[api_cmd_parser], help='Ingest data to a Conduce dataset')
     parser_ingest_data.add_argument('dataset_id', help='The ID of the dataset to receive the entities')
-    parser_ingest_data.add_argument('--json', help='Optional: A well formatted Conduce entities JSON file')
-    parser_ingest_data.add_argument('--csv', help='Optional: A CSV file that can be parsed as Conduce data')
+    parser_ingest_data.add_argument('--json', help='A JSON file that can parsed into Conduce entities')
+    parser_ingest_data.add_argument('--csv', help='A CSV file that can be parsed as Conduce data')
+    parser_ingest_data.add_argument('--raw', help='A well formatted Conduce entities JSON file. Ignores --kind, --generate-ids and --answer-yes')
     parser_ingest_data.add_argument('--generate-ids', help='Set this flag if the data does not contain an ID field', action='store_true')
     parser_ingest_data.add_argument('--kind', help='Use this value as the kind for all entities')
     parser_ingest_data.add_argument('--answer-yes', help='Set this flag to answer yes at all prompts', action='store_true')
     parser_ingest_data.add_argument('--debug', help='Get better information about errors', action='store_true')
     parser_ingest_data.set_defaults(func=ingest_data)
-
-    parser_ingest_entities = subparsers.add_parser('ingest-entities', parents=[api_cmd_parser], help='Ingest entities to a Conduce dataset')
-    parser_ingest_entities.add_argument('dataset_id', help='The ID of the dataset to receive the entities')
-    parser_ingest_entities.add_argument('filename', help='The JSON representation of the entity set to ingest.')
-    parser_ingest_entities.add_argument('--debug', help='Get better information about errors', action='store_true')
-    parser_ingest_entities.set_defaults(func=ingest_entities)
 
     parser_dump_data = subparsers.add_parser('dump-data', parents=[api_cmd_parser], help='dump all data from a Conduce dataset')
     parser_dump_data.add_argument('dataset_id', help='The ID of the dataset to dump')
