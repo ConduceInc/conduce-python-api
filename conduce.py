@@ -208,6 +208,15 @@ def ingest_data(args):
     return util.ingest_file(dataset_id, **vars(args))
 
 
+def ingest_entities(args):
+    dataset_id = args.dataset_id
+    with open(args.filename) as json_file:
+        entities = json.load(json_file)
+        del vars(args)['dataset_id']
+        del vars(args)['filename']
+        return api._ingest_entity_set(dataset_id, entities, **vars(args))
+
+
 def create_team(args):
     return api.create_team(args.name, **vars(args))
 
@@ -637,6 +646,12 @@ def main():
     parser_ingest_data.add_argument('--answer-yes', help='Set this flag to answer yes at all prompts', action='store_true')
     parser_ingest_data.add_argument('--debug', help='Get better information about errors', action='store_true')
     parser_ingest_data.set_defaults(func=ingest_data)
+
+    parser_ingest_entities = subparsers.add_parser('ingest-entities', parents=[api_cmd_parser], help='Ingest entities to a Conduce dataset')
+    parser_ingest_entities.add_argument('dataset_id', help='The ID of the dataset to receive the entities')
+    parser_ingest_entities.add_argument('filename', help='The JSON representation of the entity set to ingest.')
+    parser_ingest_entities.add_argument('--debug', help='Get better information about errors', action='store_true')
+    parser_ingest_entities.set_defaults(func=ingest_entities)
 
     parser_dump_data = subparsers.add_parser('dump-data', parents=[api_cmd_parser], help='dump all data from a Conduce dataset')
     parser_dump_data.add_argument('dataset_id', help='The ID of the dataset to dump')
