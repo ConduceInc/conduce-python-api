@@ -196,9 +196,9 @@ def _make_delete_request(uri, **kwargs):
     else:
         password = None
     if 'no_verify' in kwargs and kwargs['no_verify']:
-        verify=False
+        verify = False
     else:
-        verify=True
+        verify = True
 
     if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
@@ -822,8 +822,6 @@ def find_resource(**kwargs):
         Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
 
     """
-    return_message = None
-
     search_uri = 'conduce/api/v2/resources/searches'
 
     if kwargs.get('content') is not None:
@@ -1358,9 +1356,9 @@ def _make_put_request(payload, uri, **kwargs):
         password = None
 
     if 'no_verify' in kwargs and kwargs['no_verify']:
-        verify=False
+        verify = False
     else:
-        verify=True
+        verify = True
 
     if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
@@ -1441,9 +1439,9 @@ def _make_patch_request(payload, uri, **kwargs):
         password = None
 
     if 'no_verify' in kwargs and kwargs['no_verify']:
-        verify=False
+        verify = False
     else:
-        verify=True
+        verify = True
 
     if 'api_key' in kwargs and kwargs['api_key']:
         auth = session.api_key_header(kwargs['api_key'])
