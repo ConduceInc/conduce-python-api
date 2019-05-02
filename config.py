@@ -14,7 +14,7 @@ def open_config():
             yaml.dump(new_config, config_file, default_flow_style=False)
 
     with open(config_file_path, 'r') as config_file:
-        config = yaml.load(config_file)
+        config = yaml.load(config_file, Loader=yaml.FullLoader)
         if not config:
             config = {}
 
