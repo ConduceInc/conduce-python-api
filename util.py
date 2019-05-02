@@ -331,12 +331,14 @@ def generate_entities(raw_entities, key_map, **kwargs):
     entities = []
     for raw_entity in raw_entities:
         attribute_keys = [key for key in raw_entity.keys() if key not in critical_keys]
+        timestamp = string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'timestamp_ms'))
+        endtime = string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'endtime_ms')) if key_map['endtime_ms']['key'] is not None else timestamp
 
         entity = {
             'identity': get_field_value(raw_entity, key_map, 'identity'),
             'kind': get_field_value(raw_entity, key_map, 'kind'),
-            'timestamp_ms': string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'timestamp_ms')),
-            'endtime_ms': string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'endtime_ms')),
+            'timestamp_ms': timestamp,
+            'endtime_ms': endtime,
             'path': [{
                 'x': float(get_field_value(raw_entity, key_map, 'x')),
                 'y': float(get_field_value(raw_entity, key_map, 'y')),
