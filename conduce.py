@@ -199,25 +199,24 @@ def create_dataset(args):
         print json.dumps(response, indent=2)
         response = util.ingest_file(response['id'], **vars(args))
     elif args.raw:
-        response = ingest_entities(args)
+        response = ingest_entities(response['id'], args)
 
     return response
 
 
 def ingest_data(args):
     if args.raw:
-        return ingest_entities(args)
+        del vars(args)['dataset_id']
+        return ingest_entities(args.dataset_id, args)
     dataset_id = args.dataset_id
     del vars(args)['dataset_id']
     return util.ingest_file(dataset_id, **vars(args))
 
 
-def ingest_entities(args):
-    dataset_id = args.dataset_id
-    with open(args.filename) as json_file:
+def ingest_entities(dataset_id, args):
+    with open(args.raw) as json_file:
         entities = json.load(json_file)
-        del vars(args)['dataset_id']
-        del vars(args)['filename']
+        del vars(args)['raw']
         return api._ingest_entity_set(dataset_id, entities, **vars(args))
 
 
