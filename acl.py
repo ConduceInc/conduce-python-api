@@ -1,7 +1,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import json
-from . import api
+import api
 
 
 def get_access_values(permissions):

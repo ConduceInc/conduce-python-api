@@ -1,9 +1,9 @@
 from __future__ import print_function
 from __future__ import absolute_import
-from . import util
+import util
 import requests
-from . import session
-from . import config
+import session
+import config
 import json
 import time
 import re

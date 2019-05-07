@@ -7,7 +7,7 @@ import uuid
 import re
 from dateutil import parser
 import copy
-from . import api
+import api
 import pytz
 import math
 import sys
