@@ -1,5 +1,8 @@
 from __future__ import print_function
 from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import util
 import requests
 import session
@@ -7,7 +10,7 @@ import config
 import json
 import time
 import re
-import urlparse
+import urllib.parse
 import base64
 import warnings
 from datetime import datetime
@@ -541,7 +544,7 @@ def _convert_samples_to_entity_set(sample_list):
             raise ValueError('Error processing sample at index {}.  Samples must define a location (point, path, or polygon)'.format(idx), sample)
 
         sample['_kind'] = sample['kind']
-        attribute_keys = [key for key in sample.keys() if key not in conduce_keys]
+        attribute_keys = [key for key in list(sample.keys()) if key not in conduce_keys]
         attributes = util.get_attributes(attribute_keys, sample)
 
         entities.append({
@@ -615,7 +618,7 @@ def convert_entities_to_entity_set(entity_list):
 
         ids.add(ent['id'])
         ent['_kind'] = ent['kind']
-        attribute_keys = [key for key in ent.keys() if key not in conduce_keys]
+        attribute_keys = [key for key in list(ent.keys()) if key not in conduce_keys]
         attributes = util.get_attributes(attribute_keys, ent)
 
         entities.append({

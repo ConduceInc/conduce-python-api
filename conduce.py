@@ -1,5 +1,6 @@
 from __future__ import print_function
 from __future__ import absolute_import
+from builtins import str
 import requests
 import session
 import config
@@ -829,6 +830,7 @@ def main():
     parser_patch.set_defaults(func=send_patch_request)
 
     args = arg_parser.parse_args()
+    print(args)
 
     user_config = config.get_full_config()
 

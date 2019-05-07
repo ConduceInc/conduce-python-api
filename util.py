@@ -1,5 +1,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
+from builtins import input
+from builtins import str
 import csv
 import json
 import os
@@ -130,7 +132,7 @@ def get_id_score(key, value):
         score += 500
     except:
         pass
-    if re.match("[0-9a-f]{2}([-:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", unicode(value.lower())):
+    if re.match("[0-9a-f]{2}([-:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", str(value.lower())):
         score += 400
 
     return score
@@ -280,7 +282,7 @@ def build_attribute(key, value):
             attribute['double_value'] = float_val
     except:
         attribute['type'] = 'STRING'
-        attribute['str_value'] = unicode(value)
+        attribute['str_value'] = str(value)
 
     return attribute
 
@@ -313,7 +315,7 @@ def score_fields(raw_entities, keys, **kwargs):
 
 def map_keys(key_scores, keys):
     key_map = {}
-    for score in key_scores[keys[0]].keys():
+    for score in list(key_scores[keys[0]].keys()):
         max_score = 0
         max_key = None
         for key in keys:
@@ -329,10 +331,10 @@ def map_keys(key_scores, keys):
 
 
 def generate_entities(raw_entities, key_map, **kwargs):
-    critical_keys = [d['key'] for d in key_map.values()]
+    critical_keys = [d['key'] for d in list(key_map.values())]
     entities = []
     for raw_entity in raw_entities:
-        attribute_keys = [key for key in raw_entity.keys() if key not in critical_keys]
+        attribute_keys = [key for key in list(raw_entity.keys()) if key not in critical_keys]
         timestamp = string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'timestamp_ms'))
         endtime = string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'endtime_ms')) if key_map['endtime_ms']['key'] is not None else timestamp
 
@@ -359,7 +361,7 @@ def generate_entities(raw_entities, key_map, **kwargs):
 
 
 def dict_to_entities(raw_entities, **kwargs):
-    keys = raw_entities[0].keys()
+    keys = list(raw_entities[0].keys())
     fields = ['identity', 'kind', 'x', 'y', 'z', 'timestamp_ms', 'endtime_ms']
 
     key_scores = score_fields(raw_entities, keys, **kwargs)
@@ -368,7 +370,7 @@ def dict_to_entities(raw_entities, **kwargs):
         key_map['kind'].update({'override_value': kwargs.get('kind')})
     if not kwargs.get('answer_yes'):
         print(json.dumps(key_map, indent=2))
-        answer = raw_input("Continue with this mapping? [Y/n]: ")
+        answer = input("Continue with this mapping? [Y/n]: ")
         if 'y' not in answer.lower():
             sys.exit()
 

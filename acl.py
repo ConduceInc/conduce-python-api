@@ -47,15 +47,15 @@ def initialize_permissions(resource_id, team_id, permissions, **kwargs):
     if 'public' in permissions:
         api.set_public_permissions(resource_id, *get_access_values(permissions['public']), **kwargs)
     if 'teams' in permissions:
-        for team, permissions in permissions['teams'].items():
+        for team, permissions in list(permissions['teams'].items()):
             api.set_team_permissions(resource_id, *get_access_values(permissions), **kwargs)
     if 'groups' in permissions:
         groups = json.loads(api.list_groups(team_id, **kwargs).content)
-        for group, permissions in permissions['groups'].items():
+        for group, permissions in list(permissions['groups'].items()):
             api.set_group_permissions(get_group_id(group, groups), resource_id, *get_access_values(permissions), **kwargs)
     if 'users' in permissions:
         users = api.list_team_members(team_id, **kwargs)
-        for email, permissions in permissions['users'].items():
+        for email, permissions in list(permissions['users'].items()):
             api.set_user_permissions(get_user_id(email, users), resource_id, *get_access_values(permissions), **kwargs)
 
 
@@ -70,7 +70,7 @@ def user_in_group(user_id, members):
 def build_groups(groups, team_id, **kwargs):
     team_members = json.loads(api.list_team_members(team_id, **kwargs).content)
     current_groups = json.loads(api.list_groups(team_id, **kwargs).content)
-    for name, users in groups.items():
+    for name, users in list(groups.items()):
         group_id = get_group_id(name, current_groups)
         if group_id is None:
             response = api.create_group(team_id, name, **kwargs)
