@@ -511,25 +511,33 @@ def main():
     import argparse
     import pkg_resources
 
+    class ConduceCommandLineParser(argparse.ArgumentParser):
+        def error(self, message):
+            self.print_help()
+            sys.exit(2)
+
     if sys.argv[0] != 'conduce.py':
         version = pkg_resources.require("conduce")[0].version
     else:
-        version = 'dev'
+        version = 'version-dev'
 
-    arg_parser = argparse.ArgumentParser(description='Conduce command line utility\nv{}'.format(version), formatter_class=argparse.RawTextHelpFormatter)
-    api_cmd_parser = argparse.ArgumentParser(add_help=False)
+    arg_parser = ConduceCommandLineParser(description='Conduce command line interface {}'.format(version), formatter_class=argparse.RawTextHelpFormatter)
+    api_cmd_parser = ConduceCommandLineParser(add_help=False)
     api_cmd_parser.add_argument('--user', help='The user whose is making the request')
     api_cmd_parser.add_argument('--host', help='The server on which the command will run')
     api_cmd_parser.add_argument('--api-key', help='The API key used to authenticate')
     api_cmd_parser.add_argument('--no-verify', action='store_true', help='If passed, the SSL certificate of the host will not be verified')
 
-    subparsers = arg_parser.add_subparsers(help='help for subcommands')
+    subparsers = arg_parser.add_subparsers(help='help for subcommands', dest='see subcommands')
+    subparsers.required = True
 
     parser_config = subparsers.add_parser('config', help='Conduce configuration settings')
-    parser_config_subparsers = parser_config.add_subparsers(help='config subcommands')
+    parser_config_subparsers = parser_config.add_subparsers(help='config subcommands', dest='see subcommands')
+    parser_config_subparsers.required = True
 
     parser_config_set = parser_config_subparsers.add_parser('set', help='Set Conduce configuration setting')
-    parser_config_set_subparsers = parser_config_set.add_subparsers(help='set subcommands')
+    parser_config_set_subparsers = parser_config_set.add_subparsers(help='set subcommands', dest='see subcommands')
+    parser_config_set_subparsers.required = True
 
     parser_config_set_default_user = parser_config_set_subparsers.add_parser('default-user', help='get the default user for executing commands')
     parser_config_set_default_user.add_argument('default_user', help='user name')
@@ -550,7 +558,8 @@ def main():
     parser_config_set_api_key.set_defaults(func=set_api_key)
 
     parser_config_get = parser_config_subparsers.add_parser('get', help='Get Conduce configuration setting')
-    parser_config_get_subparsers = parser_config_get.add_subparsers(help='get subcommands')
+    parser_config_get_subparsers = parser_config_get.add_subparsers(help='get subcommands', dest='see subcommands')
+    parser_config_get_subparsers.required = True
 
     parser_config_get_default_user = parser_config_get_subparsers.add_parser('default-user', help='get the default user for executing commands')
     parser_config_get_default_user.set_defaults(func=config.get_default_user)
@@ -580,7 +589,8 @@ def main():
     parser_find.set_defaults(func=find_resource)
 
     parser_dataset = subparsers.add_parser('dataset', help='Conduce dataset operations')
-    parser_dataset_subparsers = parser_dataset.add_subparsers(help='dataset subcommands')
+    parser_dataset_subparsers = parser_dataset.add_subparsers(help='dataset subcommands', dest='see subcommands')
+    parser_dataset_subparsers.required = True
 
     parser_dataset_get_metadata = parser_dataset_subparsers.add_parser(
         'metadata',  parents=[api_cmd_parser], help='List dataset metadata for resources that match the given parameters')
@@ -676,7 +686,8 @@ def main():
     parser_get_entity.set_defaults(func=get_entity)
 
     parser_team = subparsers.add_parser('team', help='Conduce team operations')
-    parser_team_subparsers = parser_team.add_subparsers(help='team subcommands')
+    parser_team_subparsers = parser_team.add_subparsers(help='team subcommands', dest='see subcommands')
+    parser_team_subparsers.required = True
 
     parser_create_team = parser_team_subparsers.add_parser('create', parents=[api_cmd_parser], help='Create a Conduce team')
     parser_create_team.add_argument('name', help='The name to be given to the new team')
@@ -695,7 +706,8 @@ def main():
     parser_add_team_user.set_defaults(func=add_team_user)
 
     parser_group = subparsers.add_parser('group', help='Conduce group operations')
-    parser_group_subparsers = parser_group.add_subparsers(help='group subcommands')
+    parser_group_subparsers = parser_group.add_subparsers(help='group subcommands', dest='see subcommands')
+    parser_group_subparsers.required = True
 
     parser_create_group = parser_group_subparsers.add_parser('create', parents=[api_cmd_parser], help='Create a Conduce group')
     parser_create_group.add_argument('team_id', help='The UUID of the team to which the group belongs')
@@ -775,7 +787,8 @@ def main():
     parser_tag.set_defaults(func=tag_resource)
 
     parser_permissions = subparsers.add_parser('permissions', help='Conduce permissions operations')
-    parser_permissions_subparsers = parser_permissions.add_subparsers(help='permissions subcommands')
+    parser_permissions_subparsers = parser_permissions.add_subparsers(help='permissions subcommands', dest='see subcommands')
+    parser_permissions_subparsers.required = True
 
     parser_set_owner = parser_permissions_subparsers.add_parser('set-owner', parents=[api_cmd_parser], help='Set the owner of this resource')
     parser_set_owner.add_argument('team_id', help='The UUID of the team to which the user belongs')
@@ -789,7 +802,8 @@ def main():
     parser_set_permissions = parser_permissions_subparsers.add_parser('set', parents=[api_cmd_parser], help='Set permissions of a resource')
     parser_set_permissions.add_argument('permissions', help='The permissions to enable [r|w|s]')
     parser_set_permissions.add_argument('resource_id', help='The UUID of the resource to be listed')
-    parser_set_permissions_subparsers = parser_set_permissions.add_subparsers(help='set permissions subcommands')
+    parser_set_permissions_subparsers = parser_set_permissions.add_subparsers(help='set permissions subcommands', dest='see subcommands')
+    parser_set_permissions.required = True
 
     parser_set_public_permissions = parser_set_permissions_subparsers.add_parser(
         'public', parents=[api_cmd_parser], help='Set public permissions of a resource')
@@ -830,9 +844,6 @@ def main():
     parser_patch.set_defaults(func=send_patch_request)
 
     args = arg_parser.parse_args()
-    print(args)
-
-    user_config = config.get_full_config()
 
     try:
         result = args.func(args)
