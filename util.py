@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import csv
 import json
 import os
@@ -5,7 +7,7 @@ import uuid
 import re
 from dateutil import parser
 import copy
-import api
+from . import api
 import pytz
 import math
 import sys
@@ -30,7 +32,7 @@ def walk_up_find(search_path, start_dir=os.getcwd()):
             break
         cwd = os.path.dirname(cwd)
 
-    print search_path, "not found"
+    print(search_path, "not found")
     return None
 
 
@@ -64,7 +66,7 @@ def string_to_timestamp_ms(datetime_string, ignoretz=True, tz=None):
             timestamp = timestamp.replace(tzinfo=pytz.timezone(tz))
         return datetime_to_timestamp_ms(timestamp)
     except ValueError as e:
-        print 'Could not parse datetime string:', datetime_string
+        print('Could not parse datetime string:', datetime_string)
         raise e
 
 
@@ -75,7 +77,7 @@ def get_csv_reader(infile, delimiter):
             infile.seek(0)
             return csv.DictReader(infile, dialect=dialect)
         except Exception as e:
-            print '{} (using default)'.format(str(e))
+            print('{} (using default)'.format(str(e)))
             infile.seek(0)
             return csv.DictReader(infile)
     else:
@@ -98,8 +100,8 @@ def csv_to_json(infile, outfile=None, toStdout=False, **kwargs):
         raise RuntimeError("No JSON output. Try again.")
     else:
         if toStdout is True:
-            print out
-            print
+            print(out)
+            print()
         if outfile is not None:
             with open(outfile, "w") as output_file:
                 json.dump(out, output_file)
@@ -365,7 +367,7 @@ def dict_to_entities(raw_entities, **kwargs):
     if kwargs.get('kind'):
         key_map['kind'].update({'override_value': kwargs.get('kind')})
     if not kwargs.get('answer_yes'):
-        print json.dumps(key_map, indent=2)
+        print(json.dumps(key_map, indent=2))
         answer = raw_input("Continue with this mapping? [Y/n]: ")
         if 'y' not in answer.lower():
             sys.exit()
@@ -422,5 +424,5 @@ if __name__ == '__main__':
     """
 
     entities = csv_to_entities(args.filename, **vars(args))
-    print json.dumps(entities, indent=2)
-    print len(json.dumps(entities))
+    print(json.dumps(entities, indent=2))
+    print(len(json.dumps(entities)))

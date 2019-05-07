@@ -1,15 +1,17 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import requests
-import session
-import config
+from . import session
+from . import config
 import json
-import api
-import util
+from . import api
+from . import util
 import base64
 import tempfile
 import os
 import sys
 from subprocess import call
-import asset
+from . import asset
 import mimetypes
 
 
@@ -54,13 +56,13 @@ def copy_resource(args):
     resources = api.find_resource(content='full', **vars(args))
 
     if len(resources) > 1:
-        print "Found multiple resources:"
-        print json.dumps(resources, indent=2)
-        print "Please select a single resource and try again."
+        print("Found multiple resources:")
+        print(json.dumps(resources, indent=2))
+        print("Please select a single resource and try again.")
         return
 
     if len(resources) == 0:
-        print "Resource not found, please update your query and try again."
+        print("Resource not found, please update your query and try again.")
 
     resource_name = args.resource_name
     del vars(args)['resource_name']
@@ -146,7 +148,7 @@ def edit_resource(args):
             resources.remove(resource)
 
     if len(resources) == 0:
-        print "No text editable resources found"
+        print("No text editable resources found")
         return
 
     for resource in resources:
@@ -160,7 +162,7 @@ def edit_resource(args):
                 edited_resource_content = edited_resource_file.read()
 
                 if edited_resource_content != str(resource['content']):
-                    print "Updating modified resource"
+                    print("Updating modified resource")
                     resource['content'] = json.dumps(json.loads(edited_resource_content))
                     api.update_resource(resource, **vars(args))
 
@@ -196,7 +198,7 @@ def create_dataset(args):
     response = api.create_dataset(args.name, **vars(args))
 
     if args.json or args.csv:
-        print json.dumps(response, indent=2)
+        print(json.dumps(response, indent=2))
         response = util.ingest_file(response['id'], **vars(args))
     elif args.raw:
         response = ingest_entities(response['id'], args)
@@ -282,7 +284,7 @@ def add_group_user(args):
 
 def set_generic_data(args):
     if args.csv:
-        import util
+        from . import util
         data = util.csv_to_json(args.csv)
     elif args.json:
         with open(args.json) as json_file:
@@ -834,32 +836,32 @@ def main():
         result = args.func(args)
         if result:
             if hasattr(result, 'headers'):
-                print result.headers
+                print(result.headers)
             if hasattr(result, 'content'):
                 if isinstance(result.content, str):
                     try:
-                        print json.dumps(json.loads(result.content), indent=2)
+                        print(json.dumps(json.loads(result.content), indent=2))
                     except:
-                        print result.content
+                        print(result.content)
                 else:
                     try:
-                        print json.dumps(result.content, indent=2)
+                        print(json.dumps(result.content, indent=2))
                     except:
-                        print result.content
+                        print(result.content)
             else:
                 if isinstance(result, str):
                     try:
-                        print json.dumps(json.loads(result), indent=2)
+                        print(json.dumps(json.loads(result), indent=2))
                     except:
-                        print result
+                        print(result)
                 else:
                     try:
-                        print json.dumps(result, indent=2)
+                        print(json.dumps(result, indent=2))
                     except:
-                        print result
+                        print(result)
     except requests.exceptions.HTTPError as e:
-        print e
-        print e.response.text
+        print(e)
+        print(e.response.text)
 
 
 if __name__ == '__main__':

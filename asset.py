@@ -1,6 +1,8 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import mimetypes
-import api
-import util
+from . import api
+from . import util
 import os
 
 

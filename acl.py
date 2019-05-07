@@ -1,5 +1,7 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import json
-import api
+from . import api
 
 
 def get_access_values(permissions):
@@ -33,13 +35,13 @@ def initialize_permissions(resource_id, team_id, permissions, **kwargs):
         raise RuntimeError('Resource ID must be provided to set permissions')
 
     if team_id is None:
-        print 'No team specified for {}, permissions will not be updated'.format(resource_id)
+        print('No team specified for {}, permissions will not be updated'.format(resource_id))
         return
 
     api.set_owner(team_id, resource_id, **kwargs)
 
     if permissions is None:
-        print 'Using default permissions for {}'.format(resource_id)
+        print('Using default permissions for {}'.format(resource_id))
         return
 
     if 'public' in permissions:
@@ -79,17 +81,17 @@ def build_groups(groups, team_id, **kwargs):
             if api.account_exists(user['email'], **kwargs):
                 user_id = get_user_id(user['email'], team_members)
                 if user_id is None:
-                    print 'Adding {} to team'.format(user['email'])
+                    print('Adding {} to team'.format(user['email']))
                     response = api.add_user_to_team(team_id, user['email'], **kwargs)
                     user_id = json.loads(response.content)['invite']['invitee']['id']
                     # Update team members list since the user was added to the team
                     team_members = json.loads(api.list_team_members(team_id, **kwargs).content)
                 if user_id is not None and not user_in_group(user_id, group_members):
-                    print 'Adding user {} to group {}'.format(user['email'], name)
+                    print('Adding user {} to group {}'.format(user['email'], name))
                     api.add_user_to_group(team_id, group_id, user_id, **kwargs)
             else:
                 if kwargs['create_accounts']:
-                    print 'Creating account for {}'.format(user['email'])
+                    print('Creating account for {}'.format(user['email']))
                     response = api.create_account(user['name'], user['email'], **kwargs)
                     user_id = json.loads(response.content)['id']
                     api.add_user_to_team(team_id, user['email'], **kwargs)
@@ -97,7 +99,7 @@ def build_groups(groups, team_id, **kwargs):
                     team_members = json.loads(api.list_team_members(team_id, **kwargs).content)
                     api.add_user_to_group(team_id, group_id, user_id, **kwargs)
                 else:
-                    print '{} cannot be added to team/group.  Account does not exist.'.format(user['email'])
+                    print('{} cannot be added to team/group.  Account does not exist.'.format(user['email']))
 
 
 def build_team(config, **kwargs):

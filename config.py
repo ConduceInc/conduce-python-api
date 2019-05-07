@@ -1,3 +1,4 @@
+from __future__ import print_function
 import yaml
 import os
 
@@ -9,7 +10,7 @@ def open_config():
     config = None
     if not os.path.isfile(config_file_path):
         with open(config_file_path, 'w') as config_file:
-            print 'creating new configuration'
+            print('creating new configuration')
             new_config = {'default-host': 'dev-app.conduce.com'}
             yaml.dump(new_config, config_file, default_flow_style=False)
 
@@ -31,7 +32,7 @@ def set_default_user(args):
 
     if args.default_user:
         config['default-user'] = args.default_user
-        print config['default-user']
+        print(config['default-user'])
 
     save_config(config)
 
@@ -41,7 +42,7 @@ def set_default_host(args):
 
     if args.default_host:
         config['default-host'] = args.default_host
-        print config['default-host']
+        print(config['default-host'])
 
     save_config(config)
 

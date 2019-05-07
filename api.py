@@ -1,7 +1,9 @@
-import util
+from __future__ import print_function
+from __future__ import absolute_import
+from . import util
 import requests
-import session
-import config
+from . import session
+from . import config
 import json
 import time
 import re
@@ -144,8 +146,8 @@ def wait_for_job(job_id, **kwargs):
             if e.response.status_code < 500:
                 return e.response
             else:
-                print "Job status check failed:", e.response.reason
-                print "Will retry after sleep period."
+                print("Job status check failed:", e.response.reason)
+                print("Will retry after sleep period.")
 
 
 def compose_uri(fragment):
@@ -680,13 +682,13 @@ def _ingest_entity_set(dataset_id, entity_set, **kwargs):
 
     if kwargs.get('debug'):
         kwargs['debug'] = False
-        print "Debug ingest"
+        print("Debug ingest")
         responses = []
         for idx, entity in enumerate(entity_set['entities'], start=1):
             single_entity = {'entities': [entity]}
-            print single_entity
+            print(single_entity)
             responses.append(_ingest_entity_set(dataset_id, single_entity, **kwargs))
-            print "{} / {} ingested".format(idx, len(entity_set['entities']))
+            print("{} / {} ingested".format(idx, len(entity_set['entities'])))
         return responses
 
     response = make_post_request(
@@ -1083,7 +1085,7 @@ def create_resource(resource_type, resource_name, content, mime_type, **kwargs):
     """
     if not (mime_type.startswith('text/') or mime_type == 'application/json'):
         if not is_base64_encoded(content):
-            print "base64 encoding content for {}".format(resource_name)
+            print("base64 encoding content for {}".format(resource_name))
             content = base64.b64encode(content)
 
     resource_def = {
@@ -1509,11 +1511,11 @@ def modify_resource_json(resource_id, content, **kwargs):
 
 def modify_resource_content(resource_id, content, mime_type, **kwargs):
     if mime_type == 'application/json':
-        print "JSON encoding content for {}".format(resource_id)
+        print("JSON encoding content for {}".format(resource_id))
         content = json.dumps(content)
     elif not (mime_type.startswith('text/') or mime_type == 'application/json'):
         if not is_base64_encoded(content):
-            print "base64 encoding content for {}".format(resource_id)
+            print("base64 encoding content for {}".format(resource_id))
             content = base64.b64encode(content)
 
     return _modify_resource_content(resource_id, content, mime_type, **kwargs)
