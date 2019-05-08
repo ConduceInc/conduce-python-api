@@ -872,6 +872,8 @@ def remove_resource(**kwargs):
     return_message = None
 
     resource_type = kwargs.get('type')
+    if resource_type is None:
+        resource_type = "resources"
 
     kwargs['id'] = kwargs.get('id')
     kwargs['regex'] = kwargs.get('regex')
