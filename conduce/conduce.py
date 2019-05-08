@@ -2,16 +2,16 @@ from __future__ import print_function
 from __future__ import absolute_import
 from builtins import str
 import requests
-import config
+from . import config
 import json
-import api
-import util
+from . import api
+from . import util
 import base64
 import tempfile
 import os
 import sys
 from subprocess import call
-import asset
+from . import asset
 import mimetypes
 
 
@@ -284,7 +284,7 @@ def add_group_user(args):
 
 def set_generic_data(args):
     if args.csv:
-        import util
+        from . import util
         data = util.csv_to_json(args.csv)
     elif args.json:
         with open(args.json) as json_file:

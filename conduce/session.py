@@ -4,7 +4,7 @@ import requests
 import getpass
 import os
 import pickle
-import config
+from . import config
 
 
 def api_key_header(api_key):
@@ -65,7 +65,7 @@ def login(host, email, password, verify):
         "email": email,
         "password": password,
         "keep": False,
-    }, verify=verify)
+        }, verify=verify)
     response.raise_for_status()
     return response.cookies
 
@@ -74,7 +74,7 @@ if __name__ == '__main__':
     import argparse
 
     arg_parser = argparse.ArgumentParser(
-        description='Get Conduce session')
+            description='Get Conduce session')
     arg_parser.add_argument('--host', help='The field to sort on', default='dev-app.conduce.com')
     arg_parser.add_argument('--user', help='Email address of user making request')
     arg_parser.add_argument('--password', help='The password of the user making the request')

@@ -2,22 +2,23 @@ from __future__ import print_function
 from __future__ import absolute_import
 from future import standard_library
 from builtins import str
-import util
 import requests
-import session
-import config
 import json
 import time
 import re
 import base64
 import warnings
-from datetime import datetime
 
+from datetime import datetime
 from retrying import retry
 
 from requests.exceptions import ConnectionError
 from requests.exceptions import HTTPError
 from requests.exceptions import Timeout
+
+from . import util
+from . import session
+from . import config
 
 standard_library.install_aliases()
 
