@@ -26,7 +26,7 @@ def get_session(host, email, password, verify=True):
     cookie_file_path = os.path.join(cookie_file_dir, 'session-cookie')
 
     try:
-        with open(cookie_file_path, 'r') as cookie_file:
+        with open(cookie_file_path, 'rb') as cookie_file:
             cookies = requests.utils.cookiejar_from_dict(pickle.load(cookie_file))
     except:
         pass
@@ -39,7 +39,7 @@ def get_session(host, email, password, verify=True):
             password = getpass.getpass()
 
         cookies = login(host, email, password, verify)
-        with open(cookie_file_path, 'w') as cookie_file:
+        with open(cookie_file_path, 'wb') as cookie_file:
             pickle.dump(requests.utils.dict_from_cookiejar(cookies), cookie_file)
 
     return cookies
