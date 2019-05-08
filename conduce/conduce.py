@@ -2,17 +2,19 @@ from __future__ import print_function
 from __future__ import absolute_import
 from builtins import str
 import requests
-from . import config
 import json
-from . import api
-from . import util
 import base64
 import tempfile
 import os
 import sys
 from subprocess import call
-from . import asset
 import mimetypes
+
+from . import config
+from . import api
+from . import util
+from . import asset
+from . import ingest
 
 
 def list_from_args(args):
@@ -199,7 +201,7 @@ def create_dataset(args):
 
     if args.json or args.csv:
         print(json.dumps(response, indent=2))
-        response = util.ingest_file(response['id'], **vars(args))
+        response = ingest.ingest_file(response['id'], **vars(args))
     elif args.raw:
         response = ingest_entities(response['id'], args)
 
@@ -212,7 +214,7 @@ def ingest_data(args):
         return ingest_entities(args.dataset_id, args)
     dataset_id = args.dataset_id
     del vars(args)['dataset_id']
-    return util.ingest_file(dataset_id, **vars(args))
+    return ingest.ingest_file(dataset_id, **vars(args))
 
 
 def ingest_entities(dataset_id, args):

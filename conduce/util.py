@@ -8,20 +8,9 @@ import os
 import uuid
 import re
 from dateutil import parser
-import copy
-from . import api
 import pytz
 import math
 import sys
-
-
-def get_dataset_id(dataset_name, **kwargs):
-    datasets = api.list_datasets(**kwargs)
-    for dataset in datasets:
-        if dataset['name'] == dataset_name:
-            return dataset['id']
-
-    return None
 
 
 def walk_up_find(search_path, start_dir=os.getcwd()):
@@ -381,23 +370,6 @@ def dict_to_entities(raw_entities, **kwargs):
 
 def csv_to_entities(infile, **kwargs):
     return dict_to_entities(csv_to_json(infile), **kwargs)
-
-
-def ingest_json(dataset_id, json_file, **kwargs):
-    api._ingest_entity_set(dataset_id, dict_to_entities(json.load(open(json_file))), **kwargs)
-
-
-def ingest_csv(dataset_id, csv_file, **kwargs):
-    api._ingest_entity_set(dataset_id, csv_to_entities(kwargs['csv'], **kwargs), **kwargs)
-
-
-def ingest_file(dataset_id, **kwargs):
-    if 'json' in kwargs and kwargs['json']:
-        return ingest_json(dataset_id, kwargs['json'], **kwargs)
-    elif 'csv' in kwargs and kwargs['csv']:
-        return ingest_csv(dataset_id, kwargs['csv'], **kwargs)
-    else:
-        raise NotImplementedError('Unrecognized file format')
 
 
 if __name__ == '__main__':
