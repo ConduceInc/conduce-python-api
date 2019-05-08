@@ -1,7 +1,6 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from future import standard_library
-standard_library.install_aliases()
 from builtins import str
 import util
 import requests
@@ -10,7 +9,6 @@ import config
 import json
 import time
 import re
-import urllib.parse
 import base64
 import warnings
 from datetime import datetime
@@ -20,6 +18,8 @@ from retrying import retry
 from requests.exceptions import ConnectionError
 from requests.exceptions import HTTPError
 from requests.exceptions import Timeout
+
+standard_library.install_aliases()
 
 # Retry transport and file IO errors.
 RETRYABLE_ERRORS = (HTTPError, ConnectionError, Timeout)
