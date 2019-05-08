@@ -1,10 +1,9 @@
 from __future__ import print_function
 import sys
-sys.path.append('..')
 
+sys.path.append('..')
 import api
 import util
-import acl
 import json
 
 
