@@ -16,6 +16,6 @@ setup(
     packages=["conduce"],
     package_dir={"conduce": ""},
     entry_points={
-            "console_scripts": ["conduce-api=conduce.conduce:main"],
+            "console_scripts": ["conduce-api=conduce.cli:main"],
     },
 )
