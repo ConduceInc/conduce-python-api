@@ -1,10 +1,8 @@
 from __future__ import print_function
-import sys
-
-sys.path.append('..')
-import api
-import util
 import json
+
+from conduce import api
+from conduce import util
 
 
 def create_world_cities(args):
