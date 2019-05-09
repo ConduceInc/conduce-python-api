@@ -14,7 +14,6 @@ setup(
     url="https://www.conduce.com",
     install_requires=required,
     packages=["conduce"],
-    package_dir={"conduce": ""},
     entry_points={
             "console_scripts": ["conduce-api=conduce.cli:main"],
     },
