@@ -1093,6 +1093,10 @@ def create_resource(resource_type, resource_name, content, mime_type, **kwargs):
         if not is_base64_encoded(content):
             print("base64 encoding content for {}".format(resource_name))
             content = base64.b64encode(content)
+        try:
+            content = content.decode('utf-8')
+        except:
+            pass
 
     resource_def = {
         'name': resource_name,
