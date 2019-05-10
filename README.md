@@ -8,7 +8,7 @@ This library implements the most commonly used Conduce API endpoints. It can be 
 
 Conduce Python API requires that you have installed the following:
 
-* Python 2.7: https://www.python.org/downloads/
+* Python 2.7 or Python 3.6: https://www.python.org/downloads/
 * pip: https://pip.pypa.io/en/stable/installing/
 
 # Installation
