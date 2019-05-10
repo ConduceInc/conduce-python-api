@@ -2,7 +2,7 @@ from __future__ import print_function
 import json
 
 from conduce import api
-from conduce import util
+from conduce import ingest
 
 
 def create_world_cities(args):
@@ -11,7 +11,7 @@ def create_world_cities(args):
     print("Creating dataset")
     dataset_meta = api.create_dataset('world-cities-data', **kwargs)
     print("Ingesting data from CSV")
-    util.ingest_file(dataset_meta['id'], csv='simplemaps-worldcities-basic.csv', kind='city', answer_yes=True, generate_ids=True, **kwargs)
+    ingest.ingest_file(dataset_meta['id'], csv='simplemaps-worldcities-basic.csv', kind='city', answer_yes=True, generate_ids=True, **kwargs)
     api.set_public_permissions(dataset_meta['id'], True, False, False, **kwargs)
 
     with open('world-cities-lens.json', 'rb') as content_stream:
