@@ -1,23 +1,16 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import input
+from builtins import str
 import csv
 import json
 import os
 import uuid
 import re
 from dateutil import parser
-import copy
-import api
 import pytz
 import math
 import sys
-
-
-def get_dataset_id(dataset_name, **kwargs):
-    datasets = api.list_datasets(**kwargs)
-    for dataset in datasets:
-        if dataset['name'] == dataset_name:
-            return dataset['id']
-
-    return None
 
 
 def walk_up_find(search_path, start_dir=os.getcwd()):
@@ -30,7 +23,7 @@ def walk_up_find(search_path, start_dir=os.getcwd()):
             break
         cwd = os.path.dirname(cwd)
 
-    print search_path, "not found"
+    print(search_path, "not found")
     return None
 
 
@@ -64,7 +57,7 @@ def string_to_timestamp_ms(datetime_string, ignoretz=True, tz=None):
             timestamp = timestamp.replace(tzinfo=pytz.timezone(tz))
         return datetime_to_timestamp_ms(timestamp)
     except ValueError as e:
-        print 'Could not parse datetime string:', datetime_string
+        print('Could not parse datetime string:', datetime_string)
         raise e
 
 
@@ -75,7 +68,7 @@ def get_csv_reader(infile, delimiter):
             infile.seek(0)
             return csv.DictReader(infile, dialect=dialect)
         except Exception as e:
-            print '{} (using default)'.format(str(e))
+            print('{} (using default)'.format(str(e)))
             infile.seek(0)
             return csv.DictReader(infile)
     else:
@@ -98,8 +91,8 @@ def csv_to_json(infile, outfile=None, toStdout=False, **kwargs):
         raise RuntimeError("No JSON output. Try again.")
     else:
         if toStdout is True:
-            print out
-            print
+            print(out)
+            print()
         if outfile is not None:
             with open(outfile, "w") as output_file:
                 json.dump(out, output_file)
@@ -128,7 +121,7 @@ def get_id_score(key, value):
         score += 500
     except:
         pass
-    if re.match("[0-9a-f]{2}([-:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", unicode(value.lower())):
+    if re.match("[0-9a-f]{2}([-:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", str(value.lower())):
         score += 400
 
     return score
@@ -278,7 +271,7 @@ def build_attribute(key, value):
             attribute['double_value'] = float_val
     except:
         attribute['type'] = 'STRING'
-        attribute['str_value'] = unicode(value)
+        attribute['str_value'] = str(value)
 
     return attribute
 
@@ -311,7 +304,7 @@ def score_fields(raw_entities, keys, **kwargs):
 
 def map_keys(key_scores, keys):
     key_map = {}
-    for score in key_scores[keys[0]].keys():
+    for score in list(key_scores[keys[0]].keys()):
         max_score = 0
         max_key = None
         for key in keys:
@@ -327,10 +320,10 @@ def map_keys(key_scores, keys):
 
 
 def generate_entities(raw_entities, key_map, **kwargs):
-    critical_keys = [d['key'] for d in key_map.values()]
+    critical_keys = [d['key'] for d in list(key_map.values())]
     entities = []
     for raw_entity in raw_entities:
-        attribute_keys = [key for key in raw_entity.keys() if key not in critical_keys]
+        attribute_keys = [key for key in list(raw_entity.keys()) if key not in critical_keys]
         timestamp = string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'timestamp_ms'))
         endtime = string_to_timestamp_ms(get_field_value(raw_entity, key_map, 'endtime_ms')) if key_map['endtime_ms']['key'] is not None else timestamp
 
@@ -357,7 +350,7 @@ def generate_entities(raw_entities, key_map, **kwargs):
 
 
 def dict_to_entities(raw_entities, **kwargs):
-    keys = raw_entities[0].keys()
+    keys = list(raw_entities[0].keys())
     fields = ['identity', 'kind', 'x', 'y', 'z', 'timestamp_ms', 'endtime_ms']
 
     key_scores = score_fields(raw_entities, keys, **kwargs)
@@ -365,8 +358,8 @@ def dict_to_entities(raw_entities, **kwargs):
     if kwargs.get('kind'):
         key_map['kind'].update({'override_value': kwargs.get('kind')})
     if not kwargs.get('answer_yes'):
-        print json.dumps(key_map, indent=2)
-        answer = raw_input("Continue with this mapping? [Y/n]: ")
+        print(json.dumps(key_map, indent=2))
+        answer = input("Continue with this mapping? [Y/n]: ")
         if 'y' not in answer.lower():
             sys.exit()
 
@@ -377,23 +370,6 @@ def dict_to_entities(raw_entities, **kwargs):
 
 def csv_to_entities(infile, **kwargs):
     return dict_to_entities(csv_to_json(infile), **kwargs)
-
-
-def ingest_json(dataset_id, json_file, **kwargs):
-    api._ingest_entity_set(dataset_id, dict_to_entities(json.load(open(json_file))), **kwargs)
-
-
-def ingest_csv(dataset_id, csv_file, **kwargs):
-    api._ingest_entity_set(dataset_id, csv_to_entities(kwargs['csv'], **kwargs), **kwargs)
-
-
-def ingest_file(dataset_id, **kwargs):
-    if 'json' in kwargs and kwargs['json']:
-        return ingest_json(dataset_id, kwargs['json'], **kwargs)
-    elif 'csv' in kwargs and kwargs['csv']:
-        return ingest_csv(dataset_id, kwargs['csv'], **kwargs)
-    else:
-        raise NotImplementedError('Unrecognized file format')
 
 
 if __name__ == '__main__':
@@ -422,5 +398,5 @@ if __name__ == '__main__':
     """
 
     entities = csv_to_entities(args.filename, **vars(args))
-    print json.dumps(entities, indent=2)
-    print len(json.dumps(entities))
+    print(json.dumps(entities, indent=2))
+    print(len(json.dumps(entities)))

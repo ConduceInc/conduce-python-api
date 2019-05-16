@@ -7,15 +7,14 @@ with open(os.path.join(os.path.dirname(__file__), 'requirements.txt'), "r") as f
 
 setup(
     name="conduce",
-    version="2.9.1",
+    version="3.0.0",
     description="Conduce Python API",
     author="Conduce",
     author_email="support@conduce.com",
     url="https://www.conduce.com",
     install_requires=required,
     packages=["conduce"],
-    package_dir={"conduce": ""},
     entry_points={
-            "console_scripts": ["conduce-api=conduce.conduce:main"],
+            "console_scripts": ["conduce-api=conduce.cli:main"],
     },
 )

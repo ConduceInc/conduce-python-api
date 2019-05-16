@@ -1,20 +1,26 @@
-import util
+from __future__ import print_function
+from __future__ import absolute_import
+from future import standard_library
+from builtins import str
 import requests
-import session
-import config
 import json
 import time
 import re
-import urlparse
 import base64
 import warnings
-from datetime import datetime
 
+from datetime import datetime
 from retrying import retry
 
 from requests.exceptions import ConnectionError
 from requests.exceptions import HTTPError
 from requests.exceptions import Timeout
+
+from . import util
+from . import session
+from . import config
+
+standard_library.install_aliases()
 
 # Retry transport and file IO errors.
 RETRYABLE_ERRORS = (HTTPError, ConnectionError, Timeout)
@@ -144,8 +150,8 @@ def wait_for_job(job_id, **kwargs):
             if e.response.status_code < 500:
                 return e.response
             else:
-                print "Job status check failed:", e.response.reason
-                print "Will retry after sleep period."
+                print("Job status check failed:", e.response.reason)
+                print("Will retry after sleep period.")
 
 
 def compose_uri(fragment):
@@ -539,7 +545,7 @@ def _convert_samples_to_entity_set(sample_list):
             raise ValueError('Error processing sample at index {}.  Samples must define a location (point, path, or polygon)'.format(idx), sample)
 
         sample['_kind'] = sample['kind']
-        attribute_keys = [key for key in sample.keys() if key not in conduce_keys]
+        attribute_keys = [key for key in list(sample.keys()) if key not in conduce_keys]
         attributes = util.get_attributes(attribute_keys, sample)
 
         entities.append({
@@ -613,7 +619,7 @@ def convert_entities_to_entity_set(entity_list):
 
         ids.add(ent['id'])
         ent['_kind'] = ent['kind']
-        attribute_keys = [key for key in ent.keys() if key not in conduce_keys]
+        attribute_keys = [key for key in list(ent.keys()) if key not in conduce_keys]
         attributes = util.get_attributes(attribute_keys, ent)
 
         entities.append({
@@ -680,13 +686,13 @@ def _ingest_entity_set(dataset_id, entity_set, **kwargs):
 
     if kwargs.get('debug'):
         kwargs['debug'] = False
-        print "Debug ingest"
+        print("Debug ingest")
         responses = []
         for idx, entity in enumerate(entity_set['entities'], start=1):
             single_entity = {'entities': [entity]}
-            print single_entity
+            print(single_entity)
             responses.append(_ingest_entity_set(dataset_id, single_entity, **kwargs))
-            print "{} / {} ingested".format(idx, len(entity_set['entities']))
+            print("{} / {} ingested".format(idx, len(entity_set['entities'])))
         return responses
 
     response = make_post_request(
@@ -867,6 +873,8 @@ def remove_resource(**kwargs):
     return_message = None
 
     resource_type = kwargs.get('type')
+    if resource_type is None:
+        resource_type = "resources"
 
     kwargs['id'] = kwargs.get('id')
     kwargs['regex'] = kwargs.get('regex')
@@ -1083,8 +1091,12 @@ def create_resource(resource_type, resource_name, content, mime_type, **kwargs):
     """
     if not (mime_type.startswith('text/') or mime_type == 'application/json'):
         if not is_base64_encoded(content):
-            print "base64 encoding content for {}".format(resource_name)
+            print("base64 encoding content for {}".format(resource_name))
             content = base64.b64encode(content)
+        try:
+            content = content.decode('utf-8')
+        except:
+            pass
 
     resource_def = {
         'name': resource_name,
@@ -1509,11 +1521,11 @@ def modify_resource_json(resource_id, content, **kwargs):
 
 def modify_resource_content(resource_id, content, mime_type, **kwargs):
     if mime_type == 'application/json':
-        print "JSON encoding content for {}".format(resource_id)
+        print("JSON encoding content for {}".format(resource_id))
         content = json.dumps(content)
     elif not (mime_type.startswith('text/') or mime_type == 'application/json'):
         if not is_base64_encoded(content):
-            print "base64 encoding content for {}".format(resource_id)
+            print("base64 encoding content for {}".format(resource_id))
             content = base64.b64encode(content)
 
     return _modify_resource_content(resource_id, content, mime_type, **kwargs)

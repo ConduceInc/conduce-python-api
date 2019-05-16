@@ -1,36 +1,34 @@
-import sys
-sys.path.append('..')
-
-import api
-import util
-import acl
+from __future__ import print_function
 import json
+
+from conduce import api
+from conduce import ingest
 
 
 def create_world_cities(args):
     kwargs = vars(args)
     kwargs['tags'] = ['conduce', 'getting-started']
-    print "Creating dataset"
+    print("Creating dataset")
     dataset_meta = api.create_dataset('world-cities-data', **kwargs)
-    print "Ingesting data from CSV"
-    util.ingest_file(dataset_meta['id'], csv='simplemaps-worldcities-basic.csv', kind='city', answer_yes=True, generate_ids=True, **kwargs)
+    print("Ingesting data from CSV")
+    ingest.ingest_file(dataset_meta['id'], csv='simplemaps-worldcities-basic.csv', kind='city', answer_yes=True, generate_ids=True, **kwargs)
     api.set_public_permissions(dataset_meta['id'], True, False, False, **kwargs)
 
     with open('world-cities-lens.json', 'rb') as content_stream:
-        print "Creating dot lens"
+        print("Creating dot lens")
         content = json.load(content_stream)
         content['dataset_id'] = dataset_meta['id']
         lens_meta = api.create_template('world-cities', content, **kwargs)
         api.set_public_permissions(lens_meta['id'], True, False, False, **kwargs)
 
     with open('world-cities-heat.json', 'rb') as content_stream:
-        print "Creating heatmap lens"
+        print("Creating heatmap lens")
         content = json.load(content_stream)
         content['dataset_id'] = dataset_meta['id']
         lens_meta = api.create_template('world-cities-heat', content, **kwargs)
         api.set_public_permissions(lens_meta['id'], True, False, False, **kwargs)
 
-    print "Done."
+    print("Done.")
 
 
 def main():

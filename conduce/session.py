@@ -1,8 +1,10 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import requests
 import getpass
 import os
 import pickle
-import config
+from . import config
 
 
 def api_key_header(api_key):
@@ -24,20 +26,20 @@ def get_session(host, email, password, verify=True):
     cookie_file_path = os.path.join(cookie_file_dir, 'session-cookie')
 
     try:
-        with open(cookie_file_path, 'r') as cookie_file:
+        with open(cookie_file_path, 'rb') as cookie_file:
             cookies = requests.utils.cookiejar_from_dict(pickle.load(cookie_file))
     except:
         pass
 
     if cookies is None or not validate_session(host, cookies, verify):
         if password is None:
-            print
-            print "host: {}".format(host)
-            print "user: {}".format(email)
+            print()
+            print("host: {}".format(host))
+            print("user: {}".format(email))
             password = getpass.getpass()
 
         cookies = login(host, email, password, verify)
-        with open(cookie_file_path, 'w') as cookie_file:
+        with open(cookie_file_path, 'wb') as cookie_file:
             pickle.dump(requests.utils.dict_from_cookiejar(cookies), cookie_file)
 
     return cookies
@@ -46,7 +48,7 @@ def get_session(host, email, password, verify=True):
 def validate_session(host, cookies, verify):
     response = requests.get("https://{}/conduce/api/v1/user/validate-session".format(host), cookies=cookies, verify=verify)
     if response.status_code == 401:
-        print "Session expired"
+        print("Session expired")
         cookies = None
     elif response.status_code != requests.codes.ok:
         response.raise_for_status()
@@ -90,4 +92,4 @@ if __name__ == '__main__':
     else:
         verify = True
 
-    print get_session(args.host, email, args.password, verify)
+    print(get_session(args.host, email, args.password, verify))

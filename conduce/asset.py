@@ -1,11 +1,13 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import mimetypes
-import api
-import util
+from . import api
+from . import util
 import os
 
 
 def initialize_binary_asset(path, **kwargs):
-    with open(util.walk_up_find(path, 'rb')) as image_stream:
+    with open(util.walk_up_find(path), 'rb') as image_stream:
         mime = mimetypes.guess_type(path)[0]
         image = image_stream.read()
 
