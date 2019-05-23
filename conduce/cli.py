@@ -17,6 +17,30 @@ from . import asset
 from . import ingest
 
 
+def isstr(arg):
+    return isinstance(arg, ("".__class__, u"".__class__))
+
+
+def print_response(response):
+    responseStr = response
+    try:
+        if isinstance(response, bytes):
+            responseStr = response.decode()
+    except:
+        pass
+    # if isinstance(response, str):
+    if isstr(responseStr):
+        try:
+            print(json.dumps(json.loads(responseStr), indent=2))
+        except:
+            print(responseStr)
+    else:
+        try:
+            print(json.dumps(responseStr, indent=2))
+        except:
+            print(responseStr)
+
+
 def list_from_args(args):
     object_to_list = args.object_to_list
     del vars(args)['object_to_list']
@@ -852,27 +876,9 @@ def main():
             if hasattr(result, 'headers'):
                 print(result.headers)
             if hasattr(result, 'content'):
-                if isinstance(result.content, str):
-                    try:
-                        print(json.dumps(json.loads(result.content), indent=2))
-                    except:
-                        print(result.content)
-                else:
-                    try:
-                        print(json.dumps(result.content, indent=2))
-                    except:
-                        print(result.content)
+                print_response(result.content)
             else:
-                if isinstance(result, str):
-                    try:
-                        print(json.dumps(json.loads(result), indent=2))
-                    except:
-                        print(result)
-                else:
-                    try:
-                        print(json.dumps(result, indent=2))
-                    except:
-                        print(result)
+                print_response(result)
     except requests.exceptions.HTTPError as e:
         print(e)
         print(e.response.text)
