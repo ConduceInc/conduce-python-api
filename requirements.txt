@@ -3,4 +3,4 @@ requests
 retrying
 python-dateutil
 pytz
-pyyaml
+pyyaml>=5.1
