@@ -114,11 +114,19 @@ def get_default_host(args):
     return config['default-host']
 
 
+def get_config(config_parameter):
+    config = open_config()
+    if not config:
+        return "Error opening configuration file"
+
+    return config[config_parameter]
+
+
 def config(command):
     if command[0] == 'set':
         set_config(command[1:])
     elif command[0] == 'get':
-        get_config(command[1:])
+        print(get_config(command[1]))
     else:
         raise Exception("Invalid command", command[0])
 
@@ -132,4 +140,4 @@ if __name__ == '__main__':
 
     args = arg_parser.parse_args()
 
-    config(command)
+    config(args.command)
