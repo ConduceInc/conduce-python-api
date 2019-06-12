@@ -4,3 +4,4 @@ retrying
 python-dateutil
 pytz
 pyyaml>=5.1
+mock
