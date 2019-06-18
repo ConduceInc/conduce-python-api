@@ -152,5 +152,7 @@ Official Conduce Python API documentation can be found online at: https://conduc
 To run unit tests
 
 ```
+python3 -m venv venv3
+./venv3/bin/pip install -r requirements-dev.txt
 ./venv3/bin/python -m unittest discover -v test/
 ```
