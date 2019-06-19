@@ -146,3 +146,13 @@ doc/build/html/
 Finally, navigate to `index.html` with a web browser to view the local copy of the documentation.
 
 Official Conduce Python API documentation can be found online at: https://conduce-conduce-python-api.readthedocs-hosted.com/en/latest/
+
+## Unit testing
+
+To run unit tests
+
+```
+python3 -m venv venv3
+./venv3/bin/pip install -r requirements-dev.txt
+./venv3/bin/python -m unittest discover -v test/
+```
