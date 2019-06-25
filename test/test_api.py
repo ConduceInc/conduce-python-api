@@ -72,6 +72,7 @@ class Test(unittest.TestCase):
 
         api.create_resource(test_resource_type, test_resource_name,
                             test_content, test_mime_type, **test_kwargs)
+
         expected_resource_def = {
             'name': "test_resource_name",
             'tags': None,
@@ -300,6 +301,6 @@ class Test(unittest.TestCase):
         }
         mock_make_put_request.assert_called_once_with(
             expected_resource_def, 'conduce/api/v2/resources/{}'.format(test_resource_def['id']), **test_kwargs)
-			
+
 if __name__ == '__main__':
     unittest.main()
