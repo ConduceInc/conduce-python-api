@@ -435,43 +435,47 @@ def parse_permissions(permissions):
 
 
 def set_public_permissions(args):
-    resource_id = args.resource_id
+    id_list = args.resource_id.split(',')
     del vars(args)['resource_id']
 
     p = parse_permissions(args.permissions)
 
-    api.set_public_permissions(resource_id, p['read'], p['write'], p['share'], **vars(args))
+    for id in id_list:
+        api.set_public_permissions(id, p['read'], p['write'], p['share'], **vars(args))
 
 
 def set_team_permissions(args):
-    resource_id = args.resource_id
+    id_list = args.resource_id.split(',')
     del vars(args)['resource_id']
 
     p = parse_permissions(args.permissions)
 
-    api.set_team_permissions(resource_id, p['read'], p['write'], p['share'], **vars(args))
+    for id in id_list:
+        api.set_team_permissions(id, p['read'], p['write'], p['share'], **vars(args))
 
 
 def set_group_permissions(args):
     group_id = args.group_id
     del vars(args)['group_id']
-    resource_id = args.resource_id
+    id_list = args.resource_id.split(',')
     del vars(args)['resource_id']
 
     p = parse_permissions(args.permissions)
 
-    api.set_group_permissions(group_id, resource_id, p['read'], p['write'], p['share'], **vars(args))
+    for id in id_list:
+        api.set_group_permissions(group_id, id, p['read'], p['write'], p['share'], **vars(args))
 
 
 def set_user_permissions(args):
     user_id = args.user_id
     del vars(args)['user_id']
-    resource_id = args.resource_id
+    id_list = args.resource_id.split(',')
     del vars(args)['resource_id']
 
     p = parse_permissions(args.permissions)
 
-    api.set_user_permissions(user_id, resource_id, p['read'], p['write'], p['share'], **vars(args))
+    for id in id_list:
+        api.set_user_permissions(user_id, id, p['read'], p['write'], p['share'], **vars(args))
 
 
 def send_get_request(args):
@@ -826,7 +830,7 @@ def main():
 
     parser_set_permissions = parser_permissions_subparsers.add_parser('set', parents=[api_cmd_parser], help='Set permissions of a resource')
     parser_set_permissions.add_argument('permissions', help='The permissions to enable [r|w|s]')
-    parser_set_permissions.add_argument('resource_id', help='The UUID of the resource to be listed')
+    parser_set_permissions.add_argument('resource_id', type=str, help='The UUID of the resource to be updated (or comma separated list)')
     parser_set_permissions_subparsers = parser_set_permissions.add_subparsers(help='set permissions subcommands', dest='see subcommands')
     parser_set_permissions.required = True
 
@@ -837,11 +841,11 @@ def main():
     parser_set_team_permissions = parser_set_permissions_subparsers.add_parser('team', parents=[api_cmd_parser], help='Set team permissions of a resource')
     parser_set_team_permissions.set_defaults(func=set_team_permissions)
 
-    parser_set_group_permissions = parser_set_permissions_subparsers.add_parser('group', parents=[api_cmd_parser], help='Set team permissions of a resource')
+    parser_set_group_permissions = parser_set_permissions_subparsers.add_parser('group', parents=[api_cmd_parser], help='Set group permissions of a resource')
     parser_set_group_permissions.add_argument('group_id', help='The group UUID')
     parser_set_group_permissions.set_defaults(func=set_group_permissions)
 
-    parser_set_user_permissions = parser_set_permissions_subparsers.add_parser('user', parents=[api_cmd_parser], help='Set team permissions of a resource')
+    parser_set_user_permissions = parser_set_permissions_subparsers.add_parser('user', parents=[api_cmd_parser], help='Set user permissions of a resource')
     parser_set_user_permissions.add_argument('user_id', help='The user UUID')
     parser_set_user_permissions.set_defaults(func=set_user_permissions)
 
