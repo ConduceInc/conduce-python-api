@@ -179,7 +179,7 @@ def edit_resource(args):
 
     for resource in resources:
         EDITOR = os.environ.get('EDITOR', 'vim')
-        with tempfile.NamedTemporaryFile(suffix='.tmp') as resource_file:
+        with tempfile.NamedTemporaryFile(suffix='.tmp', mode='wt') as resource_file:
             resource_file.write(str(resource['content']))
             resource_file.flush()
             call([EDITOR, resource_file.name])
