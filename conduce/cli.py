@@ -142,6 +142,9 @@ def find_resource(args):
                 elif not resource.get('mime', 'invalid-mime').startswith('text/'):
                     resource['content'] = base64.b64decode(resource['content'])
 
+    if args.one_line:
+        return list(map((lambda x: "{}: {}".format(x['name'], x['id'])), resources))
+
     return resources
 
 
@@ -610,6 +613,7 @@ def main():
     parser_find.add_argument('--content', help='Content to retrieve: id,full,meta')
     parser_find.add_argument('--decode', action='store_true', help='Decode base64 and JSON for full content requests')
     parser_find.add_argument('--no-name', action='store_true', help='Match resources with no name')
+    parser_find.add_argument('-1', '--one-line', action='store_true', help='Return only names and IDs')
     parser_find.add_argument('--tags', type=str, nargs='+', help='Match resources with the specified tag')
     parser_find.set_defaults(func=find_resource)
 
