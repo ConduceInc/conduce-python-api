@@ -836,9 +836,8 @@ def find_resource(**kwargs):
     payload = {}
     if kwargs.get('type') is not None:
         payload.update({'type': kwargs.get('type')})
-    # TODO: uncomment when fix is pushed to PRD
-    # if kwargs.get('name') is not None:
-    #    payload.update({'name': kwargs.get('name')})
+    if kwargs.get('name') is not None:
+        payload.update({'name': kwargs.get('name')})
     if kwargs.get('mime') is not None:
         payload.update({'mime': kwargs.get('mime')})
     if kwargs.get('tags') is not None:
