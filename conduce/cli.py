@@ -160,7 +160,7 @@ def rename_resource(args):
         print('Resources must be renamed one-at-a-time')
         return
 
-    api.make_patch_request([{"path": "/name", "value": args.new_name, "op": "replace"}],
+    api.make_patch_request([{"path": "/name", "value": args.new_name, "op": "add"}],
                            '/api/v2/resources/{}'.format(resources[0]['id']), host=args.host, user=args.user, api_key=args.api_key)
 
     if args.verbose:
