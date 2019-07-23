@@ -163,7 +163,10 @@ def rename_resource(args):
     api.make_patch_request([{"path": "/name", "value": args.new_name, "op": "replace"}],
                            '/api/v2/resources/{}'.format(resources[0]['id']), host=args.host, user=args.user, api_key=args.api_key)
 
-    return api.find_resource(id=resources[0]['id'], host=args.host, user=args.user, api_key=args.api_key)
+    if args.verbose:
+        return api.find_resource(id=resources[0]['id'], host=args.host, user=args.user, api_key=args.api_key)
+    else:
+        return
 
 
 def open_in_editor(content):
@@ -665,6 +668,7 @@ def main():
     parser_rename_resource.add_argument('--name', help='The name of the resource to rename')
     parser_rename_resource.add_argument('--id', help='The ID of the resource to rename')
     parser_rename_resource.add_argument('--regex', help='An expression matching resources to rename')
+    parser_rename_resource.add_argument('-v', '--verbose', action='store_true', help='Find and print metadata for resource after rename')
     parser_rename_resource.set_defaults(func=rename_resource)
 
     parser_copy_resource = subparsers.add_parser('copy',  parents=[api_cmd_parser], help='Copy resource that matches the given parameters')
