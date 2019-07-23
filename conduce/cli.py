@@ -143,7 +143,7 @@ def find_resource(args):
                     resource['content'] = base64.b64decode(resource['content'])
 
     if args.one_line:
-        return list(map((lambda x: "{}: {}".format(x['name'], x['id'])), resources))
+        return list(map((lambda x: "{}: {}".format(x.get('name', ''), x.get('id'))), resources))
 
     return resources
 
