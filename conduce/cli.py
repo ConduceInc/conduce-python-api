@@ -162,7 +162,7 @@ def rename_resource(args):
 
     api.make_patch_request([{"path": "/name", "value": args.new_name, "op": "replace"}], '/api/v2/resources/{}'.format(resources[0]['id']))
 
-    return resources
+    return
 
 
 def open_in_editor(content):
