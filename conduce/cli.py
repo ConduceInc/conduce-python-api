@@ -148,6 +148,27 @@ def find_resource(args):
     return resources
 
 
+def rename_resource(args):
+    if args.type is not None:
+        args.type = format_resource_type(args.type)
+
+    resources = api.find_resource(**vars(args))
+    if len(resources) == 0:
+        print('No resource found')
+        return
+    if len(resources) != 1:
+        print('Resources must be renamed one-at-a-time')
+        return
+
+    api.make_patch_request([{"path": "/name", "value": args.new_name, "op": "add"}],
+                           '/api/v2/resources/{}'.format(resources[0]['id']), host=args.host, user=args.user, api_key=args.api_key)
+
+    if args.verbose:
+        return api.find_resource(id=resources[0]['id'], host=args.host, user=args.user, api_key=args.api_key)
+    else:
+        return
+
+
 def open_in_editor(content):
     EDITOR = os.environ.get('EDITOR', 'vim')
     with tempfile.NamedTemporaryFile(suffix='.tmp') as resource_file:
@@ -640,6 +661,15 @@ def main():
     parser_edit_resource.add_argument('--id', help='The ID of the resource to edit')
     parser_edit_resource.add_argument('--regex', help='An expression matching resources to edit')
     parser_edit_resource.set_defaults(func=edit_resource)
+
+    parser_rename_resource = subparsers.add_parser('rename', parents=[api_cmd_parser], help='Rename the resource that matches the given parameters')
+    parser_rename_resource.add_argument('new_name', help='The resource\'s new name')
+    parser_rename_resource.add_argument('--type', help='Conduce resource type to rename')
+    parser_rename_resource.add_argument('--name', help='The name of the resource to rename')
+    parser_rename_resource.add_argument('--id', help='The ID of the resource to rename')
+    parser_rename_resource.add_argument('--regex', help='An expression matching resources to rename')
+    parser_rename_resource.add_argument('-v', '--verbose', action='store_true', help='Find and print metadata for resource after rename')
+    parser_rename_resource.set_defaults(func=rename_resource)
 
     parser_copy_resource = subparsers.add_parser('copy',  parents=[api_cmd_parser], help='Copy resource that matches the given parameters')
     parser_copy_resource.add_argument('resource_name', help='Name of newly copied resource')
