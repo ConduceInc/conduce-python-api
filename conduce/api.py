@@ -1318,12 +1318,17 @@ def make_patch_request(payload, fragment, **kwargs):
 
 @retry(retry_on_exception=_retry_on_retryable_error, wait_exponential_multiplier=WAIT_EXPONENTIAL_MULTIPLIER, stop_max_attempt_number=NUM_RETRIES)
 def _make_request(request_func, payload, uri, **kwargs):
-    cfg = config.get_full_config()
+    USER_CONFIG = {}
+
+    def cfg(USER_CONFIG, key):
+        if USER_CONFIG == {}:
+            USER_CONFIG.update(config.get_full_config())
+        return USER_CONFIG[key]
 
     if 'host' in kwargs and kwargs['host']:
         host = kwargs['host']
     else:
-        host = cfg['default-host']
+        host = cfg(USER_CONFIG, 'default-host')
 
     if 'password' in kwargs and kwargs['password']:
         password = kwargs['password']
@@ -1341,7 +1346,7 @@ def _make_request(request_func, payload, uri, **kwargs):
         if 'user' in kwargs and kwargs['user']:
             user = kwargs['user']
         else:
-            user = cfg['default-user']
+            user = cfg(USER_CONFIG, 'default-user')
         auth = session.get_session(host, user, password, verify)
 
     headers = {}
