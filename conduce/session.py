@@ -71,26 +71,25 @@ def login(host, email, password, verify):
     return response.cookies
 
 
-if __name__ == '__main__':
+def main():
     import argparse
 
     arg_parser = argparse.ArgumentParser(
         description='Get Conduce session')
     arg_parser.add_argument('--host', help='The field to sort on', default='dev-app.conduce.com')
-    arg_parser.add_argument('--user', help='Email address of user making request')
+    arg_parser.add_argument('--user', help='Email address of user making request', default='enterprise_test@conduce.com')
     arg_parser.add_argument('--password', help='The password of the user making the request')
-    arg_parser.add_argument('--api-key', help='API key used to authenticate')
     arg_parser.add_argument('--no-verify', action='store_true', help='If passed, the SSL certificate of the host will not be verified')
 
     args = arg_parser.parse_args()
-
-    email = args.user
-    if email is None:
-        email = "dhl-dev@conduce.com"
 
     if args.no_verify:
         verify = False
     else:
         verify = True
 
-    print(get_session(args.host, email, args.password, verify))
+    print(get_session(args.host, args.user, args.password, verify))
+
+
+if __name__ == '__main__':
+    main()
