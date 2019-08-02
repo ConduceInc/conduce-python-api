@@ -598,6 +598,60 @@ def ingest_entities(dataset_id, entity_list, **kwargs):
     return _ingest_entity_set(dataset_id, entity_set, **kwargs)
 
 
+def insert_transaction(dataset_id, entity_set, **kwargs):
+    """
+    Add records to a dataset.
+
+    Inserts unique records at the beginning, middle, or end of a dataset.
+
+    The operation will fail if the records are not unique.  Uniqueness is determined by the combination of a record's ID and timestamp.
+    """
+    return _post_transaction(dataset_id, entity_set, operation='INSERT', **kwargs)
+
+
+def append_transaction(dataset_id, entity_set, **kwargs):
+    """
+    Add new records to the end of the dataset.
+
+    Append is an optimization over insert in that it only checks to see that all records in the transaction are newer than the newest record in the transaction log.
+
+    Append may fail to add valid records that occur between the end of an entity stream and the end of a dataset.
+    """
+    return _post_transaction(dataset_id, entity_set, operation='APPEND', **kwargs)
+
+
+def _post_transaction(dataset_id, entity_set, **kwargs):
+    if 'entities' not in entity_set:
+        raise ValueError('parameter entity_set is not an \'entities\' dict')
+
+    if kwargs.get('debug'):
+        kwargs['debug'] = False
+        print("Debug ingest")
+        responses = []
+        for idx, entity in enumerate(entity_set['entities'], start=1):
+            single_entity = {'entities': [entity]}
+            print(single_entity)
+            responses.append(_post_transaction(dataset_id, single_entity, **kwargs))
+            print("{} / {} ingested".format(idx, len(entity_set['entities'])))
+        return responses
+
+    payload = {
+        'data': entity_set,
+        'op': kwargs.get('operation', 'INSERT'),
+    }
+    response = make_post_request(
+        payload, '/api/v2/data/{}/transactions?process={}'.format(dataset_id, kwargs.get('process', False)), **kwargs)
+    response.raise_for_status()
+
+    if kwargs.get('process', False):
+        if response.status_code == 202:
+            if 'location' in response.headers:
+                job_id = response.headers['location']
+                response = wait_for_job(job_id, **kwargs)
+
+    return response
+
+
 def _ingest_entity_set(dataset_id, entity_set, **kwargs):
     if 'entities' not in entity_set:
         raise ValueError('parameter entity_set is not an \'entities\' dict')

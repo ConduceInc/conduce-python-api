@@ -278,6 +278,27 @@ def create_dataset(args):
     return response
 
 
+def insert_transaction(args):
+    from dateutil import parser
+    sample_list = None
+    if args.csv:
+        sample_list = util.csv_to_json(args.csv)
+    if args.json:
+        sample_list = json.load(open(args.json))
+
+    for sample in sample_list:
+        sample['time'] = parser.parse(sample['time'])
+
+    entity_set = api._convert_samples_to_entity_set(sample_list)
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+
+    response = api.insert_transaction(dataset_id, entity_set, **vars(args))
+    print(response.headers)
+    print(response.status_code)
+    return response
+
+
 def ingest_data(args):
     if args.raw:
         del vars(args)['dataset_id']
@@ -652,7 +673,7 @@ def main():
 
     parser_config_list.set_defaults(func=list_from_args)
 
-    parser_find = subparsers.add_parser('find',  parents=[api_cmd_parser], help='Find resources that match the given parameters')
+    parser_find = subparsers.add_parser('find', parents=[api_cmd_parser], help='Find resources that match the given parameters')
     parser_find.add_argument('--type', help='Conduce resource type to find')
     parser_find.add_argument('--name', help='The name of the resource to find')
     parser_find.add_argument('--id', help='The ID of the resource to find')
@@ -669,19 +690,39 @@ def main():
     parser_dataset_subparsers.required = True
 
     parser_dataset_get_metadata = parser_dataset_subparsers.add_parser(
-        'metadata',  parents=[api_cmd_parser], help='List dataset metadata for resources that match the given parameters')
+        'metadata', parents=[api_cmd_parser], help='List dataset metadata for resources that match the given parameters')
     parser_dataset_get_metadata.add_argument('--name', help='The name of the dataset to query')
     parser_dataset_get_metadata.add_argument('--id', help='The ID of the dataset to query')
     parser_dataset_get_metadata.add_argument('--regex', help='An expression to match datasets and query')
     parser_dataset_get_metadata.set_defaults(func=get_dataset_metadata)
 
-    parser_create_resource = subparsers.add_parser('create',  parents=[api_cmd_parser], help='Create a new resource')
+    dataset_post_transaction_parser = ConduceCommandLineParser(add_help=False)
+    dataset_post_transaction_parser.add_argument('--json', help='Optional: A JSON file that can parsed into Conduce entities')
+    dataset_post_transaction_parser.add_argument('--csv', help='Optional: A CSV file that can be parsed as Conduce data')
+    dataset_post_transaction_parser.add_argument(
+        '--raw', help='Optional: A well formatted Conduce entities JSON file. Ignores --kind, --generate-ids and --answer-yes')
+    dataset_post_transaction_parser.add_argument('--generate-ids', help='Set this flag if the data does not contain an ID field', action='store_true')
+    dataset_post_transaction_parser.add_argument('--kind', help='Use this value as the kind for all entities')
+    dataset_post_transaction_parser.add_argument('--answer-yes', help='Set this flag to answer yes at all prompts', action='store_true')
+    dataset_post_transaction_parser.add_argument('--debug', help='Get better information about errors', action='store_true')
+
+    parser_dataset_create = parser_dataset_subparsers.add_parser(
+        'create', parents=[api_cmd_parser, dataset_post_transaction_parser], help='Create a new dataset with optional data')
+    parser_dataset_create.add_argument('name', help='The name to be given to the new dataset')
+    parser_dataset_create.set_defaults(func=create_dataset)
+
+    parser_dataset_insert = parser_dataset_subparsers.add_parser(
+        'insert', parents=[api_cmd_parser, dataset_post_transaction_parser], help='Insert records into a dataset')
+    parser_dataset_insert.add_argument('dataset_id', help='Unique identifier of the dataset in which data will be inserted')
+    parser_dataset_insert.set_defaults(func=insert_transaction)
+
+    parser_create_resource = subparsers.add_parser('create', parents=[api_cmd_parser], help='Create a new resource')
     parser_create_resource.add_argument('name', help='The name of the resource to create')
     parser_create_resource.add_argument('type', help='Conduce resource type to create')
     parser_create_resource.add_argument('--content', help='The content of the new resource')
     parser_create_resource.set_defaults(func=create_resource)
 
-    parser_edit_resource = subparsers.add_parser('edit',  parents=[api_cmd_parser], help='Edit resources that match the given parameters')
+    parser_edit_resource = subparsers.add_parser('edit', parents=[api_cmd_parser], help='Edit resources that match the given parameters')
     parser_edit_resource.add_argument('--type', help='Conduce resource type to edit')
     parser_edit_resource.add_argument('--name', help='The name of the resource to edit')
     parser_edit_resource.add_argument('--id', help='The ID of the resource to edit')
@@ -698,7 +739,7 @@ def main():
     parser_rename_resource.add_argument('-v', '--verbose', action='store_true', help='Find and print metadata for resource after rename')
     parser_rename_resource.set_defaults(func=rename_resource)
 
-    parser_copy_resource = subparsers.add_parser('copy',  parents=[api_cmd_parser], help='Copy resource that matches the given parameters')
+    parser_copy_resource = subparsers.add_parser('copy', parents=[api_cmd_parser], help='Copy resource that matches the given parameters')
     parser_copy_resource.add_argument('resource_name', help='Name of newly copied resource')
     parser_copy_resource.add_argument('--type', help='Conduce resource type to copy')
     parser_copy_resource.add_argument('--name', help='The name of the resource to copy')
@@ -706,7 +747,7 @@ def main():
     parser_copy_resource.add_argument('--regex', help='An expression matching a single resource to copy')
     parser_copy_resource.set_defaults(func=copy_resource)
 
-    parser_edit_entity_entity = subparsers.add_parser('edit-entity',  parents=[api_cmd_parser], help='Edit a dataset entity that match the given parameters')
+    parser_edit_entity_entity = subparsers.add_parser('edit-entity', parents=[api_cmd_parser], help='Edit a dataset entity that match the given parameters')
     parser_edit_entity_entity.add_argument('--id', help='The ID of the entity to edit')
     parser_edit_entity_entity.add_argument('--dataset-id', help='The ID of the dataset that contains the entity')
     parser_edit_entity_entity.add_argument('--date', help='The date at which the entity occurred (optional, if not specified the newest will be selected.)')
