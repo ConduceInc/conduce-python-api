@@ -57,6 +57,46 @@ def list_object(object_to_list, **kwargs):
     return list_resources(object_to_list.upper().rstrip('S'), **kwargs)
 
 
+@_deprecated
+def _make_delete_request(uri, **kwargs):
+    """
+    This function is deprecated.  Call :py:func:`_make_request` instead.
+    """
+    return _make_request(requests.delete, None, uri, **kwargs)
+
+
+@_deprecated
+def _make_get_request(uri, **kwargs):
+    """
+    This function is deprecated.  Call :py:func:`_make_request` instead.
+    """
+    return _make_request(requests.get, None, uri, **kwargs)
+
+
+@_deprecated
+def _make_post_request(payload, uri, **kwargs):
+    """
+    This function is deprecated.  Call :py:func:`_make_request` instead.
+    """
+    return _make_request(requests.post, payload, uri, **kwargs)
+
+
+@_deprecated
+def _make_put_request(payload, uri, **kwargs):
+    """
+    This function is deprecated.  Call :py:func:`_make_request` instead.
+    """
+    return _make_request(requests.put, payload, uri, **kwargs)
+
+
+@_deprecated
+def _make_patch_request(payload, uri, **kwargs):
+    """
+    This function is deprecated.  Call :py:func:`_make_request` instead.
+    """
+    return _make_request(requests.patch, payload, uri, **kwargs)
+
+
 def list_resources(resource_type, **kwargs):
     """
     List all resources of the given type.
@@ -187,148 +227,6 @@ def _get_entity(dataset_id, entity_id, **kwargs):
 
 def get_dataset_metadata(dataset_id, **kwargs):
     return json.loads(make_get_request('datasets/metadata/{}'.format(dataset_id), **kwargs).content)
-
-
-@retry(retry_on_exception=_retry_on_retryable_error, wait_exponential_multiplier=WAIT_EXPONENTIAL_MULTIPLIER, stop_max_attempt_number=NUM_RETRIES)
-def _make_delete_request(uri, **kwargs):
-    cfg = config.get_full_config()
-
-    if 'host' in kwargs and kwargs['host']:
-        host = kwargs['host']
-    else:
-        host = cfg['default-host']
-    if 'password' in kwargs and kwargs['password']:
-        password = kwargs['password']
-    else:
-        password = None
-    if 'no_verify' in kwargs and kwargs['no_verify']:
-        verify = False
-    else:
-        verify = True
-
-    if 'api_key' in kwargs and kwargs['api_key']:
-        auth = session.api_key_header(kwargs['api_key'])
-    else:
-        if 'user' in kwargs and kwargs['user']:
-            user = kwargs['user']
-        else:
-            user = cfg['default-user']
-        auth = session.get_session(host, user, password, verify)
-
-    url = 'https://{}/{}'.format(host, uri)
-    if 'Authorization' in auth:
-        response = requests.delete(url, headers=auth, verify=verify)
-    else:
-        response = requests.delete(url, cookies=auth, verify=verify)
-    response.raise_for_status()
-    return response
-
-
-def make_delete_request(fragment, **kwargs):
-    """
-    Send an HTTP DELETE request to a Conduce server.
-
-    Sends an HTTP DELETE request for the specified endpoint to a Conduce server.
-
-    Parameters
-    ----------
-    fragment : string
-        The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
-
-    **kwargs : key-value
-        Target host and user authorization parameters used to make the request.
-
-        host : string
-            The Conduce server's hostname (ex. app.conduce.com)
-        api_key : string
-            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
-        user : string
-            The user's email address.  Used to look up an API key from the Conduce configuration or, if not found, authenticate via password.  Ignored if `api_key` is provided.
-
-    Returns
-    -------
-    requests.Response
-        The HTTP response from the server.
-
-    Raises
-    ------
-    requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
-
-    """
-    return _make_delete_request(compose_uri(fragment), **kwargs)
-
-
-def make_get_request(fragment, **kwargs):
-    """
-    Send an HTTP GET request to a Conduce server.
-
-    Sends an HTTP GET request for the specified endpoint to a Conduce server.
-
-    Parameters
-    ----------
-    fragment : string
-        The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
-
-    **kwargs : key-value
-        Target host and user authorization parameters used to make the request.
-
-        host : string
-            The Conduce server's hostname (ex. app.conduce.com)
-        api_key : string
-            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
-        user : string
-            The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
-
-    Returns
-    -------
-    requests.Response
-        The HTTP response from the server.
-
-    Raises
-    ------
-    requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
-
-    """
-    return _make_get_request(compose_uri(fragment), **kwargs)
-
-
-@retry(retry_on_exception=_retry_on_retryable_error, wait_exponential_multiplier=WAIT_EXPONENTIAL_MULTIPLIER, stop_max_attempt_number=NUM_RETRIES)
-def _make_get_request(uri, **kwargs):
-    cfg = config.get_full_config()
-
-    if 'host' in kwargs and kwargs['host']:
-        host = kwargs['host']
-    else:
-        host = cfg['default-host']
-
-    if 'password' in kwargs and kwargs['password']:
-        password = kwargs['password']
-    else:
-        password = None
-
-    if 'no_verify' in kwargs and kwargs['no_verify']:
-        verify = False
-    else:
-        verify = True
-
-    if 'api_key' in kwargs and kwargs['api_key']:
-        auth = session.api_key_header(kwargs['api_key'])
-    else:
-        if 'user' in kwargs and kwargs['user']:
-            user = kwargs['user']
-        else:
-            user = cfg['default-user']
-        auth = session.get_session(host, user, password, verify)
-
-    url = 'https://{}/{}'.format(host, uri)
-    if 'Authorization' in auth:
-        response = requests.get(url, headers=auth, verify=verify)
-    else:
-        response = requests.get(url, cookies=auth, verify=verify)
-    response.raise_for_status()
-    return response
 
 
 def create_team(team_name, **kwargs):
@@ -1231,6 +1129,76 @@ def remove_api_key(key, **kwargs):
     response.raise_for_status()
 
 
+def make_delete_request(fragment, **kwargs):
+    """
+    Send an HTTP DELETE request to a Conduce server.
+
+    Sends an HTTP DELETE request for the specified endpoint to a Conduce server.
+
+    Parameters
+    ----------
+    fragment : string
+        The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
+
+    **kwargs : key-value
+        Target host and user authorization parameters used to make the request.
+
+        host : string
+            The Conduce server's hostname (ex. app.conduce.com)
+        api_key : string
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
+        user : string
+            The user's email address.  Used to look up an API key from the Conduce configuration or, if not found, authenticate via password.  Ignored if `api_key` is provided.
+
+    Returns
+    -------
+    requests.Response
+        The HTTP response from the server.
+
+    Raises
+    ------
+    requests.HTTPError
+        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
+
+    """
+    return _make_request(requests.delete, None, compose_uri(fragment), **kwargs)
+
+
+def make_get_request(fragment, **kwargs):
+    """
+    Send an HTTP GET request to a Conduce server.
+
+    Sends an HTTP GET request for the specified endpoint to a Conduce server.
+
+    Parameters
+    ----------
+    fragment : string
+        The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
+
+    **kwargs : key-value
+        Target host and user authorization parameters used to make the request.
+
+        host : string
+            The Conduce server's hostname (ex. app.conduce.com)
+        api_key : string
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
+        user : string
+            The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
+
+    Returns
+    -------
+    requests.Response
+        The HTTP response from the server.
+
+    Raises
+    ------
+    requests.HTTPError
+        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
+
+    """
+    return _make_request(requests.get, None, compose_uri(fragment), **kwargs)
+
+
 def make_post_request(payload, fragment, **kwargs):
     """
     Send an HTTP POST request to a Conduce server.
@@ -1240,7 +1208,8 @@ def make_post_request(payload, fragment, **kwargs):
     Parameters
     ----------
     payload : dictionary
-        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/#more-complicated-post-requests>`_ for more information.
+        #more-complicated-post-requests>`_ for more information.
+        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
 
     fragment : string
         The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
@@ -1266,52 +1235,7 @@ def make_post_request(payload, fragment, **kwargs):
         Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
 
     """
-    return _make_post_request(payload, compose_uri(fragment), **kwargs)
-
-
-@retry(retry_on_exception=_retry_on_retryable_error, wait_exponential_multiplier=WAIT_EXPONENTIAL_MULTIPLIER, stop_max_attempt_number=NUM_RETRIES)
-def _make_post_request(payload, uri, **kwargs):
-    cfg = config.get_full_config()
-
-    if 'host' in kwargs and kwargs['host']:
-        host = kwargs['host']
-    else:
-        host = cfg['default-host']
-
-    if 'password' in kwargs and kwargs['password']:
-        password = kwargs['password']
-    else:
-        password = None
-
-    if 'no_verify' in kwargs and kwargs['no_verify']:
-        verify = False
-    else:
-        verify = True
-
-    if 'api_key' in kwargs and kwargs['api_key']:
-        auth = session.api_key_header(kwargs['api_key'])
-    else:
-        if 'user' in kwargs and kwargs['user']:
-            user = kwargs['user']
-        else:
-            user = cfg['default-user']
-        auth = session.get_session(host, user, password, verify)
-
-    headers = {}
-    url = 'https://{}/{}'.format(host, uri)
-    if 'Authorization' in auth:
-        if 'headers' in kwargs and kwargs['headers']:
-            headers = kwargs['headers']
-            headers.update(auth)
-        else:
-            headers = auth
-
-        response = requests.post(url, json=payload, headers=headers, verify=verify)
-    else:
-        response = requests.post(url, json=payload, cookies=auth, headers=headers, verify=verify)
-
-    response.raise_for_status()
-    return response
+    return _make_request(requests.post, payload, compose_uri(fragment), **kwargs)
 
 
 def make_put_request(payload, fragment, **kwargs):
@@ -1323,7 +1247,8 @@ def make_put_request(payload, fragment, **kwargs):
     Parameters
     ----------
     payload : dictionary
-        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/#more-complicated-post-requests>`_ for more information.
+        #more-complicated-post-requests>`_ for more information.
+        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
 
     fragment : string
         The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
@@ -1349,52 +1274,7 @@ def make_put_request(payload, fragment, **kwargs):
         Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
 
     """
-    return _make_put_request(payload, compose_uri(fragment), **kwargs)
-
-
-@retry(retry_on_exception=_retry_on_retryable_error, wait_exponential_multiplier=WAIT_EXPONENTIAL_MULTIPLIER, stop_max_attempt_number=NUM_RETRIES)
-def _make_put_request(payload, uri, **kwargs):
-    cfg = config.get_full_config()
-
-    if 'host' in kwargs and kwargs['host']:
-        host = kwargs['host']
-    else:
-        host = cfg['default-host']
-
-    if 'password' in kwargs and kwargs['password']:
-        password = kwargs['password']
-    else:
-        password = None
-
-    if 'no_verify' in kwargs and kwargs['no_verify']:
-        verify = False
-    else:
-        verify = True
-
-    if 'api_key' in kwargs and kwargs['api_key']:
-        auth = session.api_key_header(kwargs['api_key'])
-    else:
-        if 'user' in kwargs and kwargs['user']:
-            user = kwargs['user']
-        else:
-            user = cfg['default-user']
-        auth = session.get_session(host, user, password, verify)
-
-    headers = {}
-    url = 'https://{}/{}'.format(host, uri)
-    if 'Authorization' in auth:
-        if 'headers' in kwargs and kwargs['headers']:
-            headers = kwargs['headers']
-            headers.update(auth)
-        else:
-            headers = auth
-
-        response = requests.put(url, json=payload, headers=headers, verify=verify)
-    else:
-        response = requests.put(url, json=payload, cookies=auth, headers=headers, verify=verify)
-
-    response.raise_for_status()
-    return response
+    return _make_request(requests.put, payload, compose_uri(fragment), **kwargs)
 
 
 def make_patch_request(payload, fragment, **kwargs):
@@ -1406,7 +1286,8 @@ def make_patch_request(payload, fragment, **kwargs):
     Parameters
     ----------
     payload : dictionary
-        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/#more-complicated-post-requests>`_ for more information.
+        #more-complicated-post-requests>`_ for more information.
+        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
 
     fragment : string
         The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
@@ -1432,17 +1313,22 @@ def make_patch_request(payload, fragment, **kwargs):
         Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
 
     """
-    return _make_patch_request(payload, compose_uri(fragment), **kwargs)
+    return _make_request(requests.patch, payload, compose_uri(fragment), **kwargs)
 
 
 @retry(retry_on_exception=_retry_on_retryable_error, wait_exponential_multiplier=WAIT_EXPONENTIAL_MULTIPLIER, stop_max_attempt_number=NUM_RETRIES)
-def _make_patch_request(payload, uri, **kwargs):
-    cfg = config.get_full_config()
+def _make_request(request_func, payload, uri, **kwargs):
+    USER_CONFIG = {}
+
+    def cfg(USER_CONFIG, key):
+        if USER_CONFIG == {}:
+            USER_CONFIG.update(config.get_full_config())
+        return USER_CONFIG[key]
 
     if 'host' in kwargs and kwargs['host']:
         host = kwargs['host']
     else:
-        host = cfg['default-host']
+        host = cfg(USER_CONFIG, 'default-host')
 
     if 'password' in kwargs and kwargs['password']:
         password = kwargs['password']
@@ -1460,7 +1346,7 @@ def _make_patch_request(payload, uri, **kwargs):
         if 'user' in kwargs and kwargs['user']:
             user = kwargs['user']
         else:
-            user = cfg['default-user']
+            user = cfg(USER_CONFIG, 'default-user')
         auth = session.get_session(host, user, password, verify)
 
     headers = {}
@@ -1472,9 +1358,9 @@ def _make_patch_request(payload, uri, **kwargs):
         else:
             headers = auth
 
-        response = requests.patch(url, json=payload, headers=headers, verify=verify)
+        response = request_func(url, json=payload, headers=headers, verify=verify)
     else:
-        response = requests.patch(url, json=payload, cookies=auth, headers=headers, verify=verify)
+        response = request_func(url, json=payload, cookies=auth, headers=headers, verify=verify)
 
     response.raise_for_status()
     return response
