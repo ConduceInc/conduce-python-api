@@ -824,16 +824,16 @@ def main():
     parser_create_account.add_argument('email', help='The email address associated with the new user')
     parser_create_account.set_defaults(func=create_account)
 
-    parser_set_generic_data = subparsers.add_parser('set-generic-data',  parents=[api_cmd_parser], help='Add generic data to Conduce dataset')
+    parser_set_generic_data = subparsers.add_parser('set-generic-data', parents=[api_cmd_parser], help='Add generic data to Conduce dataset')
+    parser_set_generic_data.add_argument('dataset_id', help='The ID of the dataset to send data to')
+    parser_set_generic_data.add_argument('key', help='Unique name with which to lookup data')
     parser_set_generic_data.add_argument('--json', help='The data to be consumed')
     parser_set_generic_data.add_argument('--csv', help='The data to be consumed')
-    parser_set_generic_data.add_argument('--dataset-id', help='The ID of the dataset to send data to')
-    parser_set_generic_data.add_argument('--key', help='Unique name with which to lookup data')
     parser_set_generic_data.set_defaults(func=set_generic_data)
 
     parser_get_generic_data = subparsers.add_parser('get-generic-data', parents=[api_cmd_parser], help='Retrieve generic data from Conduce dataset')
-    parser_get_generic_data.add_argument('--dataset-id', help='The ID of the dataset to get the data from')
-    parser_get_generic_data.add_argument('--key', help='Unique ID of entity to retrieve data from')
+    parser_get_generic_data.add_argument('dataset_id', help='The ID of the dataset to get the data from')
+    parser_get_generic_data.add_argument('key', help='Unique ID of entity to retrieve data from')
     parser_get_generic_data.set_defaults(func=get_generic_data)
 
     parser_clear_dataset = subparsers.add_parser('clear-dataset', parents=[api_cmd_parser], help='Remove all records from a Conduce dataset')
