@@ -116,6 +116,28 @@ email@example.com:
 
 and is stored at `~/.conduceconfig`
 
+# Development
+
+## Python environment
+
+Setup a Python 3 development environment. It is recommended that you not use the Python installed on your system, but rather manage your development environment with pyenv.
+
+https://opensource.com/article/19/5/python-3-default-macos
+
+Once commands `python` and `pip` point to version 3 you are ready to continue.
+
+## Virtual environment
+
+Clone this repository setup a virtual environment
+
+```
+$ git clone git@github.com:ConduceInc/conduce-python-api.git
+$ cd conduce-python-api
+$ python -m venv venv
+$ . venv/bin/activate
+$ pip install -r requirements-dev.txt
+```
+
 ## Building documentation
 
 Documentation is built with Sphinx. To install Sphinx and Sphinx extensions, run:
@@ -149,10 +171,8 @@ Official Conduce Python API documentation can be found online at: https://conduc
 
 ## Unit testing
 
-To run unit tests
+To run unit tests (from an activated virtual environment):
 
 ```
-python3 -m venv venv3
-./venv3/bin/pip install -r requirements-dev.txt
-./venv3/bin/python -m unittest discover -v test/
+$ python -m unittest discover -v test/
 ```
