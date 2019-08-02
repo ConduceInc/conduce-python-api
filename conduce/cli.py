@@ -189,32 +189,54 @@ def edit_resource(args):
 
         args.type = resource_type.upper().rstrip('S')
 
-    args.content = 'full'
-    resources = api.find_resource(**vars(args))
-    for resource in resources:
-        if resource.get('mime', 'invalid-mime') == 'application/json':
-            resource['content'] = json.dumps(json.loads(resource['content']), indent=2)
-        elif not resource.get('mime', 'invalid-mime').startswith('text/'):
-            resources.remove(resource)
-
-    if len(resources) == 0:
-        print("No text editable resources found")
-        return
-
-    for resource in resources:
-        EDITOR = os.environ.get('EDITOR', 'vim')
-        with tempfile.NamedTemporaryFile(suffix='.tmp', mode='wt') as resource_file:
-            resource_file.write(str(resource['content']))
-            resource_file.flush()
-            call([EDITOR, resource_file.name])
-
-            with open(resource_file.name, 'r') as edited_resource_file:
+    if args.file:
+        mime_type = mimetypes.guess_type(args.file)[0]
+        resources = api.find_resource(**vars(args))
+        for resource in resources:
+            if resource.get('mime', 'invalid-mime') != mime_type:
+                resources.remove(resource)
+        if len(resources) == 1:
+            with open(args.file, 'r') as edited_resource_file:
                 edited_resource_content = edited_resource_file.read()
+                print("Updating resource")
+                resource['content'] = json.dumps(json.loads(edited_resource_content))
+                api.update_resource(resource, **vars(args))
+        elif len(resources) > 1:
+            print("Multiple resources found, please specify a single resource")
+            print(resources)
+            print("Aborting...")
+            return
+        else:
+            print("No text editable resources found")
+            return
 
-                if edited_resource_content != str(resource['content']):
-                    print("Updating modified resource")
-                    resource['content'] = json.dumps(json.loads(edited_resource_content))
-                    api.update_resource(resource, **vars(args))
+    else:
+        args.content = 'full'
+        resources = api.find_resource(**vars(args))
+        for resource in resources:
+            if resource.get('mime', 'invalid-mime') == 'application/json':
+                resource['content'] = json.dumps(json.loads(resource['content']), indent=2)
+            elif not resource.get('mime', 'invalid-mime').startswith('text/'):
+                resources.remove(resource)
+
+        if len(resources) == 0:
+            print("No text editable resources found")
+            return
+
+        for resource in resources:
+            EDITOR = os.environ.get('EDITOR', 'vim')
+            with tempfile.NamedTemporaryFile(suffix='.tmp', mode='wt') as resource_file:
+                resource_file.write(str(resource['content']))
+                resource_file.flush()
+                call([EDITOR, resource_file.name])
+
+                with open(resource_file.name, 'r') as edited_resource_file:
+                    edited_resource_content = edited_resource_file.read()
+
+                    if edited_resource_content != str(resource['content']):
+                        print("Updating modified resource")
+                        resource['content'] = json.dumps(json.loads(edited_resource_content))
+                        api.update_resource(resource, **vars(args))
 
 
 def edit_entity(args):
@@ -664,6 +686,7 @@ def main():
     parser_edit_resource.add_argument('--name', help='The name of the resource to edit')
     parser_edit_resource.add_argument('--id', help='The ID of the resource to edit')
     parser_edit_resource.add_argument('--regex', help='An expression matching resources to edit')
+    parser_edit_resource.add_argument('--file', help='Replace the resource content with the file contents')
     parser_edit_resource.set_defaults(func=edit_resource)
 
     parser_rename_resource = subparsers.add_parser('rename', parents=[api_cmd_parser], help='Rename the resource that matches the given parameters')
