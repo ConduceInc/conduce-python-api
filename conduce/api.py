@@ -495,6 +495,7 @@ def ingest_samples(dataset_id, sample_list, **kwargs):
     return _ingest_entity_set(dataset_id, entity_set, **kwargs)
 
 
+@_deprecated
 def convert_entities_to_entity_set(entity_list):
     conduce_keys = ['id', 'kind', 'point', 'path', 'polygon']
     entities = []
@@ -576,7 +577,7 @@ def ingest_entities(dataset_id, entity_list, **kwargs):
         Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
     """
 
-    entity_set = convert_entities_to_entity_set(entity_list)
+    entity_set = util.entities_to_entity_set(entity_list)
 
     return _ingest_entity_set(dataset_id, entity_set, **kwargs)
 

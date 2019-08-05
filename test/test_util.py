@@ -5,6 +5,11 @@ from conduce import util
 import datetime
 
 
+GOOD_POINT_ENTITY = {
+    'id': 'fake ID',
+    'kind': 'fake kind',
+    'point': 'fake point'
+}
 GOOD_POINT_SAMPLE = {
     'id': 'fake ID',
     'kind': 'fake kind',
@@ -317,6 +322,85 @@ class Test(unittest.TestCase):
         mock_get_attributes.assert_called_once_with(['_kind'], GOOD_POINT_SAMPLE)
         mock_datetime_to_timestamp.assert_called_with(GOOD_POINT_SAMPLE['time'])
         self.assertEqual(len(mock_datetime_to_timestamp.call_args_list), 2)
+
+    def test_entities_to_entity_set__no_id(self):
+        NO_ID_entity = {
+            'kind': 'fake kind',
+            'point': 'fake point'
+        }
+
+        fake_entity_list = [NO_ID_entity]
+        with self.assertRaisesRegex(ValueError, 'Error processing entity at index 0. Entities must include an ID.'):
+            util.entities_to_entity_set(fake_entity_list)
+
+    def test_entities_to_entity_set__no_kind(self):
+        NO_ID_entity = {
+            'id': 'fake ID',
+            'point': 'fake point'
+        }
+
+        fake_entity_list = [NO_ID_entity]
+        with self.assertRaisesRegex(ValueError, 'Error processing entity at index 0. Entities must include a kind field.'):
+            util.entities_to_entity_set(fake_entity_list)
+
+    def test_entities_to_entity_set__invalid_id(self):
+        NO_ID_entity = {
+            'id': '',
+            'kind': 'fake kind',
+            'point': 'fake point'
+        }
+
+        fake_entity_list = [NO_ID_entity]
+        with self.assertRaisesRegex(ValueError, 'Error processing entity at index 0. Invalid ID.'):
+            util.entities_to_entity_set(fake_entity_list)
+
+    def test_entities_to_entity_set__invalid_kind(self):
+        NO_ID_entity = {
+            'id': 'fake ID',
+            'kind': '',
+            'point': 'fake point'
+        }
+
+        fake_entity_list = [NO_ID_entity]
+        with self.assertRaisesRegex(ValueError, 'Error processing entity at index 0. Invalid kind.'):
+            util.entities_to_entity_set(fake_entity_list)
+
+    def test_entities_to_entity_set__has_time(self):
+        NO_ID_entity = {
+            'id': 'fake ID',
+            'kind': 'fake kind',
+            'point': 'fake point',
+            'time': 'fake time'
+        }
+
+        fake_entity_list = [NO_ID_entity]
+        with self.assertRaisesRegex(KeyError, 'Error processing entity at index 0. Timeless entities should not set time.'):
+            util.entities_to_entity_set(fake_entity_list)
+
+    @mock.patch('conduce.util._convert_geometries', return_value=[])
+    def test_entities_to_entity_set__invalid_location(self, mock_convert_geometries):
+        fake_entity_list = [GOOD_POINT_ENTITY]
+        with self.assertRaisesRegex(ValueError, 'Error processing entity at index 0. Entities must define a location \(point, path, or polygon\).'):
+            util.entities_to_entity_set(fake_entity_list)
+
+    @mock.patch('conduce.util.get_default', return_value="fake default")
+    @mock.patch('conduce.util.get_attributes', return_value="fake attributes")
+    @mock.patch('conduce.util._convert_geometries', return_value="fake converted geometries")
+    def test_entities_to_entity_set(self, mock_convert_geometries, mock_get_attributes, mock_get_default):
+
+        fake_sample_list = [GOOD_POINT_ENTITY]
+        expected_entity_set = {'entities': [{
+            'identity': GOOD_POINT_ENTITY['id'],
+            'kind': GOOD_POINT_ENTITY['kind'],
+            'timestamp_ms': 'fake default',
+            'endtime_ms': 'fake default',
+            'path': 'fake converted geometries',
+            'attrs': 'fake attributes',
+        }]}
+        self.assertEqual(util.entities_to_entity_set(fake_sample_list), expected_entity_set)
+        mock_convert_geometries.assert_called_once_with(GOOD_POINT_ENTITY)
+        mock_get_attributes.assert_called_once_with(['_kind'], GOOD_POINT_ENTITY)
+        self.assertEqual(mock_get_default.call_args_list, ([mock.call('timestamp_ms'), mock.call('endtime_ms')]))
 
     @mock.patch('dateutil.parser.parse', return_value="fake datetime object")
     def test_parse_samples(self, mock_dateutil_parser_parse):

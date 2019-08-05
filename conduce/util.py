@@ -457,6 +457,46 @@ def samples_to_entity_set(sample_list):
     return {'entities': entities}
 
 
+def entities_to_entity_set(entity_list):
+    conduce_keys = ['id', 'kind', 'point', 'path', 'polygon']
+    entities = []
+    ids = set()
+    for idx, ent in enumerate(entity_list):
+        if 'id' not in ent:
+            raise ValueError('Error processing entity at index {}. Entities must include an ID.'.format(idx), ent)
+        if 'kind' not in ent:
+            raise ValueError('Error processing entity at index {}. Entities must include a kind field.'.format(idx), ent)
+
+        if ent['id'] is None or len(str(ent['id'])) == 0:
+            raise ValueError('Error processing entity at index {}. Invalid ID.'.format(idx), ent)
+        if ent['id'] in ids:
+            raise ValueError('Error processing entity at index{}. Non-Unique ID'.format(idx), ent)
+        if ent['kind'] is None or len(ent['kind']) == 0:
+            raise ValueError('Error processing entity at index {}. Invalid kind.'.format(idx), ent)
+        if ent.get('time') is not None:
+            raise KeyError('Error processing entity at index {}. Timeless entities should not set time.'.format(idx), ent)
+
+        coordinates = _convert_geometries(ent)
+        if coordinates == []:
+            raise ValueError('Error processing entity at index {}. Entities must define a location (point, path, or polygon).'.format(idx), ent)
+
+        ids.add(ent['id'])
+        ent['_kind'] = ent['kind']
+        attribute_keys = [key for key in list(ent.keys()) if key not in conduce_keys]
+        attributes = get_attributes(attribute_keys, ent)
+
+        entities.append({
+            'identity': str(ent['id']),
+            'kind': ent['kind'],
+            'timestamp_ms': get_default('timestamp_ms'),
+            'endtime_ms': get_default('endtime_ms'),
+            'path': coordinates,
+            'attrs': attributes
+        })
+
+    return {'entities': entities}
+
+
 def parse_samples(samples):
     for sample in samples:
         if 'time' in sample:
