@@ -9,6 +9,7 @@ import os
 import sys
 from subprocess import call
 import mimetypes
+from dateutil import parser
 
 from . import config
 from . import api
@@ -278,8 +279,7 @@ def create_dataset(args):
     return response
 
 
-def insert_transaction(args):
-    from dateutil import parser
+def read_entity_set_from_samples_file(args):
     sample_list = None
     if args.csv:
         sample_list = util.csv_to_json(args.csv)
@@ -289,7 +289,22 @@ def insert_transaction(args):
     for sample in sample_list:
         sample['time'] = parser.parse(sample['time'])
 
-    entity_set = api._convert_samples_to_entity_set(sample_list)
+    return api._convert_samples_to_entity_set(sample_list)
+
+
+def append_transaction(args):
+    entity_set = read_entity_set_from_samples_file(args)
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+
+    response = api.append_transaction(dataset_id, entity_set, **vars(args))
+    print(response.headers)
+    print(response.status_code)
+    return response
+
+
+def insert_transaction(args):
+    entity_set = read_entity_set_from_samples_file(args)
     dataset_id = args.dataset_id
     del vars(args)['dataset_id']
 
@@ -710,6 +725,11 @@ def main():
         'create', parents=[api_cmd_parser, dataset_post_transaction_parser], help='Create a new dataset with optional data')
     parser_dataset_create.add_argument('name', help='The name to be given to the new dataset')
     parser_dataset_create.set_defaults(func=create_dataset)
+
+    parser_dataset_append = parser_dataset_subparsers.add_parser(
+        'append', parents=[api_cmd_parser, dataset_post_transaction_parser], help='Append records to a dataset')
+    parser_dataset_append.add_argument('dataset_id', help='Unique identifier of the dataset to which data will be appended')
+    parser_dataset_append.set_defaults(func=append_transaction)
 
     parser_dataset_insert = parser_dataset_subparsers.add_parser(
         'insert', parents=[api_cmd_parser, dataset_post_transaction_parser], help='Insert records into a dataset')
