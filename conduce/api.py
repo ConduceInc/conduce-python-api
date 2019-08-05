@@ -622,7 +622,7 @@ def append_transaction(dataset_id, entity_set, **kwargs):
 
 def _post_transaction(dataset_id, entity_set, **kwargs):
     if 'entities' not in entity_set:
-        raise ValueError('parameter entity_set is not an \'entities\' dict')
+        raise ValueError("Parameter entity_set is not an 'entities' dict.")
 
     if kwargs.get('debug'):
         kwargs['debug'] = False
@@ -640,7 +640,7 @@ def _post_transaction(dataset_id, entity_set, **kwargs):
         'op': kwargs.get('operation', 'INSERT'),
     }
     response = make_post_request(
-        payload, '/api/v2/data/{}/transactions?process={}'.format(dataset_id, kwargs.get('process', False)), **kwargs)
+        payload, '/api/v2/data/{}/transactions?process={}'.format(dataset_id, bool(kwargs.get('process', False))), **kwargs)
     response.raise_for_status()
 
     if kwargs.get('process', False):

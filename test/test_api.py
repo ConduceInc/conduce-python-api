@@ -4,6 +4,20 @@ import mock
 from conduce import api
 
 
+class ResultMock_201:
+    status_code = 201
+
+    def raise_for_status(response):
+        return None
+
+
+class ResultMock_202:
+    status_code = 202
+
+    def raise_for_status(response):
+        return None
+
+
 class ResultMock:
     content = "{\"apikey\": \"fake json content\"}"
 
@@ -14,6 +28,68 @@ class CustomHTTPException:
 
 
 class Test(unittest.TestCase):
+    @mock.patch('conduce.api._post_transaction', return_value=ResultMock())
+    def test_append_transaction(self, mock_post_transaction):
+        fake_id = 'fake id'
+        fake_set = 'fake entities'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        api.append_transaction(fake_id, fake_set, **fake_kwargs)
+        mock_post_transaction.assert_called_once_with(fake_id, fake_set, operation='APPEND', **fake_kwargs)
+
+    @mock.patch('conduce.api._post_transaction', return_value=ResultMock())
+    def test_insert_transaction(self, mock_post_transaction):
+        fake_id = 'fake id'
+        fake_set = 'fake entities'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        api.insert_transaction(fake_id, fake_set, **fake_kwargs)
+        mock_post_transaction.assert_called_once_with(fake_id, fake_set, operation='INSERT', **fake_kwargs)
+
+    def test__post_transaction__invalid_entity_set(self):
+        with self.assertRaisesRegex(ValueError, "Parameter entity_set is not an 'entities' dict."):
+            api._post_transaction('id', {'invalid_set': 'set'})
+
+    @mock.patch('conduce.api.make_post_request', return_value=ResultMock_201())
+    def test__post_transaction__default_operation(self, mock_make_post_request):
+        fake_id = 'fake_id'
+        fake_entities = {'entities': 'fake entities'}
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        self.assertIsInstance(api._post_transaction(fake_id, fake_entities, **fake_kwargs), ResultMock_201)
+
+        expected_payload = {
+            'data': fake_entities,
+            'op': 'INSERT'
+        }
+        expected_uri = '/api/v2/data/fake_id/transactions?process=False'
+        mock_make_post_request.assert_called_once_with(expected_payload, expected_uri, **fake_kwargs)
+
+    @mock.patch('conduce.api.make_post_request', return_value=ResultMock_201())
+    def test__post_transaction__process_true(self, mock_make_post_request):
+        fake_id = 'fake_id'
+        fake_entities = {'entities': 'fake entities'}
+        fake_kwargs = {'arg1': 'arg1', 'process': True}
+        self.assertIsInstance(api._post_transaction(fake_id, fake_entities, **fake_kwargs), ResultMock_201)
+
+        expected_payload = {
+            'data': fake_entities,
+            'op': 'INSERT'
+        }
+        expected_uri = '/api/v2/data/fake_id/transactions?process=True'
+        mock_make_post_request.assert_called_once_with(expected_payload, expected_uri, **fake_kwargs)
+
+    @mock.patch('conduce.api.make_post_request', return_value=ResultMock_201())
+    def test__post_transaction__kwargs_operation(self, mock_make_post_request):
+        fake_id = 'fake_id'
+        fake_entities = {'entities': 'fake entities'}
+        fake_kwargs = {'arg1': 'arg1', 'operation': 'fake_op'}
+        self.assertIsInstance(api._post_transaction(fake_id, fake_entities, **fake_kwargs), ResultMock_201)
+
+        expected_payload = {
+            'data': fake_entities,
+            'op': 'fake_op'
+        }
+        expected_uri = '/api/v2/data/fake_id/transactions?process=False'
+        mock_make_post_request.assert_called_once_with(expected_payload, expected_uri, **fake_kwargs)
+
     @mock.patch('conduce.api.make_post_request', return_value=ResultMock())
     def test_create_resource_mime_type_json(self, mock_make_post_request):
         test_resource_type = "test_resource_type"
