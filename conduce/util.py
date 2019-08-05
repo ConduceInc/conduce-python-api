@@ -375,7 +375,7 @@ def csv_to_entities(infile, **kwargs):
 
 def _convert_coordinates(point):
     if len(point) != 2:
-        raise KeyError('A point should only have two dimensions', point)
+        raise KeyError('A point should only have two dimensions.', point)
     if 'lat' and 'lon' in point:
         coord = {
             'x': float(point['lon']),
@@ -387,7 +387,7 @@ def _convert_coordinates(point):
             'y': float(point['y'])
         }
     else:
-        raise KeyError('invalid coordinate', point)
+        raise KeyError('Invalid coordinate.', point)
 
     coord['z'] = 0
 
@@ -400,16 +400,16 @@ def _convert_geometries(sample):
         coordinates = [_convert_coordinates(sample['point'])]
     if 'path' in sample:
         if len(coordinates) > 0:
-            raise KeyError('A sample may only contain one of point, path or polygon', sample)
+            raise KeyError('A sample may only contain one of point, path or polygon.', sample)
         if len(sample['path']) < 2:
-            raise KeyError('paths must have at least two points')
+            raise KeyError('Paths must have at least two points.')
         for point in sample['path']:
             coordinates.append(_convert_coordinates(point))
     if 'polygon' in sample:
         if len(coordinates) > 0:
-            raise KeyError('A sample may only contain one of point, path or polygon', sample)
+            raise KeyError('A sample may only contain one of point, path or polygon.', sample)
         if len(sample['polygon']) < 3:
-            raise KeyError('polygons must have at least three points')
+            raise KeyError('Polygons must have at least three points.')
         for point in sample['polygon']:
             coordinates.append(_convert_coordinates(point))
 
@@ -439,7 +439,7 @@ def samples_to_entity_set(sample_list):
 
         coordinates = _convert_geometries(sample)
         if coordinates == []:
-            raise ValueError('Error processing sample at index {}.  Samples must define a location (point, path, or polygon)'.format(idx), sample)
+            raise ValueError('Error processing sample at index {}. Samples must define a location (point, path, or polygon).'.format(idx), sample)
 
         sample['_kind'] = sample['kind']
         attribute_keys = [key for key in list(sample.keys()) if key not in conduce_keys]
