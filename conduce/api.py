@@ -374,6 +374,7 @@ def set_generic_data(dataset_id, key, data_string, **kwargs):
     return ingest_samples(dataset_id, [entity], **kwargs)
 
 
+@_deprecated
 def _convert_coordinates(point):
     if len(point) != 2:
         raise KeyError('A point should only have two dimensions', point)
@@ -395,6 +396,7 @@ def _convert_coordinates(point):
     return coord
 
 
+@_deprecated
 def _convert_geometries(sample):
     coordinates = []
     if 'point' in sample:
@@ -417,6 +419,7 @@ def _convert_geometries(sample):
     return coordinates
 
 
+@_deprecated
 def _convert_samples_to_entity_set(sample_list):
     conduce_keys = ['id', 'kind', 'time', 'point', 'path', 'polygon']
     entities = []

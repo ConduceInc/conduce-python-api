@@ -8,6 +8,7 @@ import os
 import uuid
 import re
 from dateutil import parser
+from datetime import datetime
 import pytz
 import math
 import sys
@@ -370,6 +371,102 @@ def dict_to_entities(raw_entities, **kwargs):
 
 def csv_to_entities(infile, **kwargs):
     return dict_to_entities(csv_to_json(infile), **kwargs)
+
+
+def _convert_coordinates(point):
+    if len(point) != 2:
+        raise KeyError('A point should only have two dimensions', point)
+    if 'lat' and 'lon' in point:
+        coord = {
+            'x': float(point['lon']),
+            'y': float(point['lat'])
+        }
+    elif 'x' and 'y' in point:
+        coord = {
+            'x': float(point['x']),
+            'y': float(point['y'])
+        }
+    else:
+        raise KeyError('invalid coordinate', point)
+
+    coord['z'] = 0
+
+    return coord
+
+
+def _convert_geometries(sample):
+    coordinates = []
+    if 'point' in sample:
+        coordinates = [_convert_coordinates(sample['point'])]
+    if 'path' in sample:
+        if len(coordinates) > 0:
+            raise KeyError('A sample may only contain one of point, path or polygon', sample)
+        if len(sample['path']) < 2:
+            raise KeyError('paths must have at least two points')
+        for point in sample['path']:
+            coordinates.append(_convert_coordinates(point))
+    if 'polygon' in sample:
+        if len(coordinates) > 0:
+            raise KeyError('A sample may only contain one of point, path or polygon', sample)
+        if len(sample['polygon']) < 3:
+            raise KeyError('polygons must have at least three points')
+        for point in sample['polygon']:
+            coordinates.append(_convert_coordinates(point))
+
+    return coordinates
+
+
+def samples_to_entity_set(sample_list):
+    conduce_keys = ['id', 'kind', 'time', 'point', 'path', 'polygon']
+    entities = []
+    for idx, sample in enumerate(sample_list):
+        if 'id' not in sample:
+            raise ValueError('Error processing sample at index {}. Samples must include an ID.'.format(idx), sample)
+        if 'kind' not in sample:
+            raise ValueError('Error processing sample at index {}. Samples must include a kind field.'.format(idx), sample)
+        if 'time' not in sample:
+            raise ValueError('Error processing sample at index {}. Samples must include a time field.'.format(idx), sample)
+
+        if sample['id'] is None or len(str(sample['id'])) == 0:
+            raise ValueError('Error processing sample at index {}. Invalid ID.'.format(idx), sample)
+        if sample['kind'] is None or len(sample['kind']) == 0:
+            raise ValueError('Error processing sample at index {}. Invalid kind.'.format(idx), sample)
+        if sample['time'] is None:
+            raise ValueError('Error processing sample at index {}. Invalid time.'.format(idx), sample)
+
+        if not isinstance(sample['time'], datetime):
+            raise TypeError('Error processing sample at index {}. Time must be a datetime object.'.format(idx), sample['time'])
+
+        coordinates = _convert_geometries(sample)
+        if coordinates == []:
+            raise ValueError('Error processing sample at index {}.  Samples must define a location (point, path, or polygon)'.format(idx), sample)
+
+        sample['_kind'] = sample['kind']
+        attribute_keys = [key for key in list(sample.keys()) if key not in conduce_keys]
+        attributes = get_attributes(attribute_keys, sample)
+
+        entities.append({
+            'identity': str(sample['id']),
+            'kind': sample['kind'],
+            'timestamp_ms': datetime_to_timestamp_ms(sample['time']),
+            'endtime_ms': datetime_to_timestamp_ms(sample['time']),
+            'path': coordinates,
+            'attrs': attributes
+        })
+
+    return {'entities': entities}
+
+
+def parse_samples(samples):
+    for sample in samples:
+        if 'time' in sample:
+            sample['time'] = parser.parse(sample['time'])
+    return samples
+
+
+def json_to_samples(json_file):
+
+    return json.load(parse_samples, open(json_file))
 
 
 if __name__ == '__main__':
