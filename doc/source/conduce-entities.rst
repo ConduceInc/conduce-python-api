@@ -102,7 +102,7 @@ A source data record maps to a sample as follows::
     {
         "id": <ID>,
         "kind": <Method>,
-        "time": <Date> (converted to a datetime object)
+        "time": <Date> (converted to a datetime object),
         "point": {
             "lat": <Longitude>,
             "lon": <Latitude>
@@ -135,7 +135,7 @@ Ingesting entities
 
 In order to ingest our source data we must first convert each record into an entity sample as described above.  Once converted, the samples are added to a list.  The list may contain samples for multiple entities.  Once we have created our sample list we call :py:func:`api.ingest_samples`::
 
-    conduce.api.ingest_samples(dataset_id, 
+    conduce.api.ingest_samples(dataset_id,
         sample_list, host='app.conduce.com',
         api-key='00000000-0000-0000-0000-000000000000')
 
@@ -174,5 +174,5 @@ Particulars
 
 + The **kind** of an entity may change.
 + Conduce will not allow an entity to exist in two different states at the same time.  That is to say that two samples describing the same entity cannot have the same timestamp.
-+ A dataset should contain only static or dynamic entities, not both  
++ A dataset should contain only static or dynamic entities, not both
 

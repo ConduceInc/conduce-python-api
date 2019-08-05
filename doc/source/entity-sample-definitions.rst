@@ -39,7 +39,7 @@ A point sample defines an entity as a point in space.  Point samples are best us
     {
         "id": 1,
         "kind": "ball",
-        "time": datetime.datetime.now()
+        "time": datetime.datetime.now(),
         "point": {
             "x": 571045,
             "y": 22131
@@ -55,7 +55,7 @@ A geopoint sample defines an entity at a point in space.  Coordinates are define
     {
         "id": 1,
         "kind": "truck",
-        "time": datetime.datetime.now()
+        "time": datetime.datetime.now(),
         "point": {
             "lon": -91.571045,
             "lat": 38.022131
@@ -67,7 +67,7 @@ A geographic sample may also be represented in x,y (x = longitude, y = latitude)
     {
         "id": 1,
         "kind": "truck",
-        "time": datetime.datetime.now()
+        "time": datetime.datetime.now(),
         "point": {
             "x": -91.571045,
             "y": 38.022131
@@ -86,7 +86,7 @@ A path sample describes a connected sequence of points.  A path requires at leas
     {
         "id": 1,
         "kind": "trace",
-        "time": datetime.datetime.now()
+        "time": datetime.datetime.now(),
         "path": [{
             "x": 571045,
             "y": 22131
@@ -108,7 +108,7 @@ A geographic path sample describes a connected sequence of points in geographic 
     {
         "id": 1,
         "kind": "road",
-        "time": datetime.datetime.now()
+        "time": datetime.datetime.now(),
         "path": [{
             "lon": -91.571045,
             "lat": 38.022131
@@ -131,7 +131,7 @@ A polygon sample describes a closed sequence of points.  A polygon requires at l
     {
         "id": 1,
         "kind": "trace",
-        "time": datetime.datetime.now()
+        "time": datetime.datetime.now(),
         "polygon": [{
             "x": 571045,
             "y": 22131
@@ -156,7 +156,7 @@ A geographic polygon sample describes a closed sequence of points in geographic 
     {
         "id": 1,
         "kind": "road",
-        "time": datetime.datetime.now()
+        "time": datetime.datetime.now(),
         "polygon": [{
             "lon": -91.571045,
             "lat": 38.022131
@@ -186,7 +186,7 @@ Attributes are used to define characteristics of entities not encompassed by the
         "point": {
             "x": 571045,
             "y": 22131
-        }
+        },
         "color": "red",
         "size": 5,
         "velocity": 12.4,
