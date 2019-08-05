@@ -491,7 +491,7 @@ def ingest_samples(dataset_id, sample_list, **kwargs):
     if not isinstance(sample_list, list):
         raise ValueError('sample_list must be a list', sample_list)
 
-    entity_set = _convert_samples_to_entity_set(sample_list)
+    entity_set = util.samples_to_entity_set(sample_list)
     return _ingest_entity_set(dataset_id, entity_set, **kwargs)
 
 
