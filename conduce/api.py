@@ -639,14 +639,8 @@ def _post_transaction(dataset_id, entity_set, **kwargs):
         'data': entity_set,
         'op': kwargs.get('operation', 'INSERT'),
     }
-    response = None
-    if kwargs.get('process', False):
-        response = make_post_request(
-            payload, '/api/v2/data/{}/transactions?process={}'.format(dataset_id, kwargs.get('process', False)), **kwargs)
-    else:
-        # HACK: This works around a bug in the REST API. Remove when the process parameter is handled correctly
-        response = make_post_request(
-            payload, '/api/v2/data/{}/transactions'.format(dataset_id), **kwargs)
+    response = make_post_request(
+        payload, '/api/v2/data/{}/transactions?process={}'.format(dataset_id, kwargs.get('process', False)), **kwargs)
     response.raise_for_status()
 
     if kwargs.get('process', False):
