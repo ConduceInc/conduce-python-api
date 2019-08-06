@@ -626,6 +626,7 @@ def _post_transaction(dataset_id, entity_set, **kwargs):
 
     if kwargs.get('debug'):
         kwargs['debug'] = False
+        kwargs['process'] = True
         print("Debug ingest")
         responses = []
         for idx, entity in enumerate(entity_set['entities'], start=1):

@@ -90,6 +90,24 @@ class Test(unittest.TestCase):
         expected_uri = '/api/v2/data/fake_id/transactions?process=False'
         mock_make_post_request.assert_called_once_with(expected_payload, expected_uri, **fake_kwargs)
 
+    @mock.patch('conduce.api.make_post_request', return_value=ResultMock_201())
+    def test__post_transaction__debug(self, mock_make_post_request):
+        fake_id = 'fake_id'
+        fake_entities = ['fake entity 1', 'fake entity 2', 'fake entity 3']
+        fake_entity_set = {'entities': fake_entities}
+        fake_kwargs = {'arg1': 'arg1', 'debug': True}
+        self.assertIsInstance(api._post_transaction(fake_id, fake_entity_set, **fake_kwargs), list)
+
+        expected_uri = '/api/v2/data/fake_id/transactions?process=True'
+        for idx, call_args in enumerate(mock_make_post_request.call_args_list):
+            expected_payload = {
+                'data': {'entities': [fake_entities[idx]]},
+                'op': 'INSERT'
+            }
+            fake_kwargs = {'arg1': 'arg1', 'debug': False, 'process': True}
+            self.assertEqual(call_args, mock.call(expected_payload, expected_uri, **fake_kwargs))
+            expected_uri = '/api/v2/data/fake_id/transactions?process=True'
+
     @mock.patch('conduce.api.make_post_request', return_value=ResultMock())
     def test_create_resource_mime_type_json(self, mock_make_post_request):
         test_resource_type = "test_resource_type"
