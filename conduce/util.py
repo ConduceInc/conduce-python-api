@@ -504,9 +504,9 @@ def parse_samples(samples):
     return samples
 
 
-def json_to_samples(json_file):
-
-    return json.load(parse_samples, open(json_file))
+def json_to_samples(json_path):
+    with open(json_path, 'r') as json_file:
+        return json.load(parse_samples, open(json_file))
 
 
 if __name__ == '__main__':
