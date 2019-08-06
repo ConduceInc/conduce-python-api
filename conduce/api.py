@@ -374,6 +374,7 @@ def set_generic_data(dataset_id, key, data_string, **kwargs):
     return ingest_samples(dataset_id, [entity], **kwargs)
 
 
+@_deprecated
 def _convert_coordinates(point):
     if len(point) != 2:
         raise KeyError('A point should only have two dimensions', point)
@@ -395,6 +396,7 @@ def _convert_coordinates(point):
     return coord
 
 
+@_deprecated
 def _convert_geometries(sample):
     coordinates = []
     if 'point' in sample:
@@ -417,6 +419,7 @@ def _convert_geometries(sample):
     return coordinates
 
 
+@_deprecated
 def _convert_samples_to_entity_set(sample_list):
     conduce_keys = ['id', 'kind', 'time', 'point', 'path', 'polygon']
     entities = []
@@ -488,10 +491,11 @@ def ingest_samples(dataset_id, sample_list, **kwargs):
     if not isinstance(sample_list, list):
         raise ValueError('sample_list must be a list', sample_list)
 
-    entity_set = _convert_samples_to_entity_set(sample_list)
+    entity_set = util.samples_to_entity_set(sample_list)
     return _ingest_entity_set(dataset_id, entity_set, **kwargs)
 
 
+@_deprecated
 def convert_entities_to_entity_set(entity_list):
     conduce_keys = ['id', 'kind', 'point', 'path', 'polygon']
     entities = []
@@ -573,7 +577,7 @@ def ingest_entities(dataset_id, entity_list, **kwargs):
         Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
     """
 
-    entity_set = convert_entities_to_entity_set(entity_list)
+    entity_set = util.entities_to_entity_set(entity_list)
 
     return _ingest_entity_set(dataset_id, entity_set, **kwargs)
 
