@@ -282,14 +282,11 @@ def create_dataset(args):
 def read_entity_set_from_samples_file(args):
     sample_list = None
     if args.csv:
-        sample_list = util.csv_to_json(args.csv)
+        sample_list = util.parse_samples(util.csv_to_json(args.csv))
     if args.json:
-        sample_list = json.load(open(args.json))
+        sample_list = util.json_to_samples(args.json)
 
-    for sample in sample_list:
-        sample['time'] = parser.parse(sample['time'])
-
-    return api._convert_samples_to_entity_set(sample_list)
+    return util.samples_to_entity_set(sample_list)
 
 
 def append_transaction(args):
