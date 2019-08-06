@@ -680,7 +680,7 @@ def main():
     parser_config_get_api_key.add_argument('--host', help='The server on which the API key is valid')
     parser_config_get_api_key.set_defaults(func=config.get_api_key_config)
 
-    parser_config_list = subparsers.add_parser('list',  parents=[api_cmd_parser], help='List resources by type')
+    parser_config_list = subparsers.add_parser('list', parents=[api_cmd_parser], help='List resources by type')
     parser_config_list.add_argument('object_to_list', help='Conduce object to list')
 
     parser_config_list.set_defaults(func=list_from_args)
