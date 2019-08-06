@@ -28,7 +28,7 @@ class CustomHTTPException:
 
 
 class Test(unittest.TestCase):
-    @mock.patch('conduce.api._post_transaction', return_value=ResultMock())
+    @mock.patch('conduce.api.post_transaction', return_value=ResultMock())
     def test_append_transaction(self, mock_post_transaction):
         fake_id = 'fake id'
         fake_set = 'fake entities'
@@ -36,7 +36,7 @@ class Test(unittest.TestCase):
         api.append_transaction(fake_id, fake_set, **fake_kwargs)
         mock_post_transaction.assert_called_once_with(fake_id, fake_set, operation='APPEND', **fake_kwargs)
 
-    @mock.patch('conduce.api._post_transaction', return_value=ResultMock())
+    @mock.patch('conduce.api.post_transaction', return_value=ResultMock())
     def test_insert_transaction(self, mock_post_transaction):
         fake_id = 'fake id'
         fake_set = 'fake entities'
@@ -44,16 +44,16 @@ class Test(unittest.TestCase):
         api.insert_transaction(fake_id, fake_set, **fake_kwargs)
         mock_post_transaction.assert_called_once_with(fake_id, fake_set, operation='INSERT', **fake_kwargs)
 
-    def test__post_transaction__invalid_entity_set(self):
+    def test_post_transaction__invalid_entity_set(self):
         with self.assertRaisesRegex(ValueError, "Parameter entity_set is not an 'entities' dict."):
-            api._post_transaction('id', {'invalid_set': 'set'})
+            api.post_transaction('id', {'invalid_set': 'set'})
 
     @mock.patch('conduce.api.make_post_request', return_value=ResultMock_201())
-    def test__post_transaction__default_operation(self, mock_make_post_request):
+    def test_post_transaction__default_operation(self, mock_make_post_request):
         fake_id = 'fake_id'
         fake_entities = {'entities': 'fake entities'}
         fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
-        self.assertIsInstance(api._post_transaction(fake_id, fake_entities, **fake_kwargs), ResultMock_201)
+        self.assertIsInstance(api.post_transaction(fake_id, fake_entities, **fake_kwargs), ResultMock_201)
 
         expected_payload = {
             'data': fake_entities,
@@ -63,11 +63,11 @@ class Test(unittest.TestCase):
         mock_make_post_request.assert_called_once_with(expected_payload, expected_uri, **fake_kwargs)
 
     @mock.patch('conduce.api.make_post_request', return_value=ResultMock_201())
-    def test__post_transaction__process_true(self, mock_make_post_request):
+    def test_post_transaction__process_true(self, mock_make_post_request):
         fake_id = 'fake_id'
         fake_entities = {'entities': 'fake entities'}
         fake_kwargs = {'arg1': 'arg1', 'process': True}
-        self.assertIsInstance(api._post_transaction(fake_id, fake_entities, **fake_kwargs), ResultMock_201)
+        self.assertIsInstance(api.post_transaction(fake_id, fake_entities, **fake_kwargs), ResultMock_201)
 
         expected_payload = {
             'data': fake_entities,
@@ -77,11 +77,11 @@ class Test(unittest.TestCase):
         mock_make_post_request.assert_called_once_with(expected_payload, expected_uri, **fake_kwargs)
 
     @mock.patch('conduce.api.make_post_request', return_value=ResultMock_201())
-    def test__post_transaction__kwargs_operation(self, mock_make_post_request):
+    def test_post_transaction__kwargs_operation(self, mock_make_post_request):
         fake_id = 'fake_id'
         fake_entities = {'entities': 'fake entities'}
         fake_kwargs = {'arg1': 'arg1', 'operation': 'fake_op'}
-        self.assertIsInstance(api._post_transaction(fake_id, fake_entities, **fake_kwargs), ResultMock_201)
+        self.assertIsInstance(api.post_transaction(fake_id, fake_entities, **fake_kwargs), ResultMock_201)
 
         expected_payload = {
             'data': fake_entities,
@@ -91,12 +91,12 @@ class Test(unittest.TestCase):
         mock_make_post_request.assert_called_once_with(expected_payload, expected_uri, **fake_kwargs)
 
     @mock.patch('conduce.api.make_post_request', return_value=ResultMock_201())
-    def test__post_transaction__debug(self, mock_make_post_request):
+    def test_post_transaction__debug(self, mock_make_post_request):
         fake_id = 'fake_id'
         fake_entities = ['fake entity 1', 'fake entity 2', 'fake entity 3']
         fake_entity_set = {'entities': fake_entities}
         fake_kwargs = {'arg1': 'arg1', 'debug': True}
-        self.assertIsInstance(api._post_transaction(fake_id, fake_entity_set, **fake_kwargs), list)
+        self.assertIsInstance(api.post_transaction(fake_id, fake_entity_set, **fake_kwargs), list)
 
         expected_uri = '/api/v2/data/fake_id/transactions?process=True'
         for idx, call_args in enumerate(mock_make_post_request.call_args_list):
