@@ -403,24 +403,35 @@ class Test(unittest.TestCase):
         self.assertEqual(mock_get_default.call_args_list, ([mock.call('timestamp_ms'), mock.call('endtime_ms')]))
 
     @mock.patch('dateutil.parser.parse', return_value="fake datetime object")
-    def test_parse_samples(self, mock_dateutil_parser_parse):
+    def test_parse_sample(self, mock_dateutil_parser_parse):
         fake_json_samples = [{'id': 'fake ID 1', 'time': 'fake time string'}, {'id': 'fake ID 2'}]
         fake_parsed_samples = [{'id': 'fake ID 1', 'time': 'fake datetime object'}, {'id': 'fake ID 2'}]
 
-        self.assertEqual(util.parse_samples(fake_json_samples), fake_parsed_samples)
+        self.assertEqual(util.parse_sample(fake_json_samples[0]), fake_parsed_samples[0])
+        self.assertEqual(util.parse_sample(fake_json_samples[1]), fake_parsed_samples[1])
 
         mock_dateutil_parser_parse.assert_called_once_with('fake time string')
 
+    @mock.patch('conduce.util.parse_sample', return_value={"time": "fake datetime object"})
+    def test_parse_samples(self, mock_parse_sample):
+        fake_json_samples = [{'id': 'fake ID 1', 'time': 'fake time string'}, {'id': 'fake ID 2'}]
+        fake_parsed_samples = [{'id': 'fake ID 1', 'time': 'fake datetime object'}, {'id': 'fake ID 2', 'time': 'fake datetime object'}]
+
+        self.assertEqual(util.parse_samples(fake_json_samples), fake_parsed_samples)
+
+        for idx, call_args in enumerate(mock_parse_sample.call_args_list):
+            self.assertEqual(call_args, mock.call(fake_json_samples[idx]))
+
     @mock.patch('builtins.open', return_value="fake file stream")
     @mock.patch('json.load', return_value="fake JSON")
-    @mock.patch('conduce.util.parse_samples', return_value="deserialized samples")
-    def test_json_to_samples(self, mock_parse_samples, mock_json_load, mock_open):
+    @mock.patch('conduce.util.parse_sample', return_value="deserialized samples")
+    def test_json_to_samples(self, mock_parse_sample, mock_json_load, mock_open):
         fake_file = "fake file path"
 
         self.assertEqual(util.json_to_samples(fake_file), 'fake JSON')
 
         mock_json_load.assert_called_once_with(
-            mock_parse_samples, "fake file stream")
+            "fake file stream", object_hook=mock_parse_sample)
 
 
 if __name__ == '__main__':

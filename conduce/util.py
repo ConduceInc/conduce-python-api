@@ -497,15 +497,20 @@ def entities_to_entity_set(entity_list):
     return {'entities': entities}
 
 
+def parse_sample(sample):
+    if 'time' in sample:
+        sample['time'] = parser.parse(sample['time'])
+    return sample
+
+
 def parse_samples(samples):
     for sample in samples:
-        if 'time' in sample:
-            sample['time'] = parser.parse(sample['time'])
+        sample.update(parse_sample(sample))
     return samples
 
 
 def json_to_samples(json_path):
-    return json.load(parse_samples, open(json_path, 'r'))
+    return json.load(open(json_path, 'r'), object_hook=parse_sample)
 
 
 if __name__ == '__main__':
