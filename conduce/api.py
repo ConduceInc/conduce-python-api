@@ -606,26 +606,27 @@ def insert_transaction(dataset_id, entity_set, **kwargs):
 
     The operation will fail if the records are not unique.  Uniqueness is determined by the combination of a record's ID and timestamp.
     """
-    return _post_transaction(dataset_id, entity_set, operation='INSERT', **kwargs)
+    return post_transaction(dataset_id, entity_set, operation='INSERT', **kwargs)
 
 
 def append_transaction(dataset_id, entity_set, **kwargs):
     """
     Add new records to the end of the dataset.
 
-    Append is an optimization over insert in that it only checks to see that all records in the transaction are newer than the newest record in the transaction log.
+    Append is an optimization over insert in that it only checks to see that all records in the transaction
+    are newer than the newest record in the transaction log.
 
     Append may fail to add valid records that occur between the end of an entity stream and the end of a dataset.
     """
-    return _post_transaction(dataset_id, entity_set, operation='APPEND', **kwargs)
+    return post_transaction(dataset_id, entity_set, operation='APPEND', **kwargs)
 
 
-def _post_transaction(dataset_id, entity_set, **kwargs):
+def post_transaction(dataset_id, entity_set, **kwargs):
     """
     Add a new dataset transaction.  This method is provided for completeness and
     should be avoided in favor of :py:func:`insert_transaction` and :py:func:`append_transaction`.
 
-    By default, the transaction will not be processed. Use the \`process\` kwarg to trigger automatic processing.
+    By default, the transaction will not be processed. Use the `process` kwarg to trigger automatic processing.
 
     Parameters
     ----------
@@ -638,14 +639,14 @@ def _post_transaction(dataset_id, entity_set, **kwargs):
     **kwargs : key-value
         **operation**
             The dataset operation to perform on the posted entity set.  Supports all
-            operations listed in the REST API.  However, only \`INSERT`\ and \`APPEND\` are officially supported.
+            operations listed in the REST API.  However, only `INSERT` and `APPEND` are officially supported.
             See https://prd-docs.conduce.com/#/data/createTransaction for a list of endpoints.
         **process**
             Post the transaction and immediately process on backends configured to automatically process transactions.
         **debug**
             Post each entity in the entity set as an individual transaction.
             This enables a user to find bad entities in an entity set but dramatically slows data processing.
-            Forces \`process=True\` to ensure entities are ingested one at a time.
+            Forces `process=True` to ensure entities are ingested one at a time.
 
         See :py:func:`make_post_request` for more kwargs.
 
@@ -665,7 +666,7 @@ def _post_transaction(dataset_id, entity_set, **kwargs):
         for idx, entity in enumerate(entity_set['entities'], start=1):
             single_entity = {'entities': [entity]}
             print(single_entity)
-            responses.append(_post_transaction(dataset_id, single_entity, **kwargs))
+            responses.append(post_transaction(dataset_id, single_entity, **kwargs))
             print("{} / {} ingested".format(idx, len(entity_set['entities'])))
         return responses
 
