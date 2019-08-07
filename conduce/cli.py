@@ -26,18 +26,18 @@ def print_response(response):
     try:
         if isinstance(response, bytes):
             responseStr = response.decode()
-    except:
+    except Exception:
         pass
     # if isinstance(response, str):
     if isstr(responseStr):
         try:
             print(json.dumps(json.loads(responseStr), indent=2))
-        except:
+        except Exception:
             print(responseStr)
     else:
         try:
             print(json.dumps(responseStr, indent=2))
-        except:
+        except Exception:
             print(responseStr)
 
 
@@ -137,7 +137,7 @@ def find_resource(args):
                     if 'content' in resource:
                         try:
                             resource['content'] = json.loads(resource['content'])
-                        except:
+                        except Exception:
                             print('Could not decode content for {}'.format(resource['id']))
                 elif not resource.get('mime', 'invalid-mime').startswith('text/'):
                     resource['content'] = base64.b64decode(resource['content'])
@@ -444,9 +444,9 @@ def remove_api_key(args):
 
 
 def set_api_key(args):
-    if args.new == True:
+    if args.new:
         args.key = api.create_api_key(**vars(args))
-    if args.key == None:
+    if args.key is None:
         raise ValueError('An API must either be provided with the --key argument or you must generate a new key with --new')
     config.set_api_key(args)
     return "API key set for {} on {}".format(args.user, args.host)
