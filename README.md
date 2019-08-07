@@ -176,3 +176,19 @@ To run unit tests (from an activated virtual environment):
 ```
 $ python -m unittest discover -v test/
 ```
+
+## Coverage report
+
+To generate unit test coverage (from an activated virtual environment):
+
+```
+$ coverage run --source conduce -m unittest discover -v test/
+$ coverage report
+```
+
+To view html report in web browser (macOS)
+
+```
+$ coverage html
+$ open htmlcov/index.html
+```

@@ -7,3 +7,6 @@ doc/build
 build/
 dist/
 conduce.egg-info/
+htmlcov
+.coverage
+.python-version
