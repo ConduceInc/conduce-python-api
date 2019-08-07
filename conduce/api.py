@@ -626,6 +626,7 @@ def _post_transaction(dataset_id, entity_set, **kwargs):
     should be avoided in favor of :py:func:`insert_transaction` and :py:func:`append_transaction`.
 
     By default, the transaction will not be processed. Use the \`process\` kwarg to trigger automatic processing.
+
     Parameters
     ----------
     dataset_id : string
