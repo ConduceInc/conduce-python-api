@@ -300,7 +300,7 @@ class Test(unittest.TestCase):
     def test_samples_to_entity_set__invalid_location(self, mock_convert_geometries):
 
         fake_sample_list = [GOOD_POINT_SAMPLE]
-        with self.assertRaisesRegex(ValueError, 'Error processing sample at index 0. Samples must define a location \(point, path, or polygon\).'):
+        with self.assertRaisesRegex(ValueError, r"Error processing sample at index 0. Samples must define a location \(point, path, or polygon\)."):
             util.samples_to_entity_set(fake_sample_list)
 
     @mock.patch('conduce.util.datetime_to_timestamp_ms', return_value="fake sample time")
@@ -380,7 +380,7 @@ class Test(unittest.TestCase):
     @mock.patch('conduce.util._convert_geometries', return_value=[])
     def test_entities_to_entity_set__invalid_location(self, mock_convert_geometries):
         fake_entity_list = [GOOD_POINT_ENTITY]
-        with self.assertRaisesRegex(ValueError, 'Error processing entity at index 0. Entities must define a location \(point, path, or polygon\).'):
+        with self.assertRaisesRegex(ValueError, r'Error processing entity at index 0. Entities must define a location \(point, path, or polygon\).'):
             util.entities_to_entity_set(fake_entity_list)
 
     @mock.patch('conduce.util.get_default', return_value="fake default")
