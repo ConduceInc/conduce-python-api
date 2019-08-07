@@ -18,7 +18,6 @@ def prepare(build_info) {
 def test_and_build() {
   withEnv(["GLSL_PATH=${env.PWD}/shared/python/victor/glsl/"]) {
     stage("Unit tests") {
-      sh "cd react && yarn test"
       sh ". venv/bin/activate && python -m unittest discover -v test/"
       milestone()
     }
