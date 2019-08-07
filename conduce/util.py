@@ -115,12 +115,12 @@ def get_id_score(key, value):
             score += 100
             if '.' not in value:
                 score += 300
-    except:
+    except Exception:
         pass
     try:
         uuid.UUID(value)
         score += 500
-    except:
+    except Exception:
         pass
     if re.match("[0-9a-f]{2}([-:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", str(value.lower())):
         score += 400
@@ -152,7 +152,7 @@ def get_timestamp_score(key, value):
     try:
         float(value)
         return score
-    except:
+    except Exception:
         pass
 
     return 0
@@ -173,7 +173,7 @@ def get_endtime_score(key, value):
     try:
         float(value)
         return score
-    except:
+    except Exception:
         pass
 
     return 0
@@ -190,7 +190,7 @@ def get_x_score(key, value):
     try:
         float(value)
         return score
-    except:
+    except Exception:
         pass
 
     return 0
@@ -207,7 +207,7 @@ def get_y_score(key, value):
     try:
         float(value)
         return score
-    except:
+    except Exception:
         pass
 
     return 0
@@ -224,7 +224,7 @@ def get_z_score(key, value):
     try:
         float(value)
         return score
-    except:
+    except Exception:
         pass
 
     return 0
@@ -270,7 +270,7 @@ def build_attribute(key, value):
         else:
             attribute['type'] = 'DOUBLE'
             attribute['double_value'] = float_val
-    except:
+    except Exception:
         attribute['type'] = 'STRING'
         attribute['str_value'] = str(value)
 
