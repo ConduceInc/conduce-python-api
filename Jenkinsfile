@@ -23,9 +23,6 @@ node('debian') {
       if (env.BRANCH_NAME.contains("PR-")) {
         version_suffix = "pr-${env.CHANGE_ID}"
         suffix = "pr"
-      } else if (env.BRANCH_NAME == 'develop') {
-        version_suffix = "develop+build-${env.BUILD_NUMBER}"
-        suffix = "develop"
       } else if (env.BRANCH_NAME.contains('release')) {
         version_suffix = "${build_info['version']}+rc-${env.BUILD_NUMBER}"
         suffix = "to_test"
