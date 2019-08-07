@@ -2,8 +2,8 @@ def begin(build_info) {
   common = load 'tools/jenkins/common.groovy'
 
   stage("Rebase"){
-    has_label_skip_rebase = sh(script: "python tools/get-github-pr-labels.py ${env.CHANGE_ID} | grep skip_rebase", returnStatus: true) == 0
-    if(!has_label_skip_rebase) {
+    //has_label_skip_rebase = sh(script: "python tools/get-github-pr-labels.py ${env.CHANGE_ID} | grep skip_rebase", returnStatus: true) == 0
+    //if(!has_label_skip_rebase) {
       try {
         sh "git rebase origin/${env.CHANGE_TARGET}"
       } catch(e) {
@@ -12,7 +12,7 @@ def begin(build_info) {
         sh "git rebase --abort"
         throw e
       }
-    }
+    //}
     milestone()
   }
 
