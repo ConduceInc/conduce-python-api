@@ -9,7 +9,6 @@ import os
 import sys
 from subprocess import call
 import mimetypes
-from dateutil import parser
 
 from . import config
 from . import api
