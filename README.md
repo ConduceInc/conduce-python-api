@@ -192,3 +192,11 @@ To view html report in web browser (macOS)
 $ coverage html
 $ open htmlcov/index.html
 ```
+
+## Validating style (pycodestyle)
+
+To run style validation (from an activated virtual environment):
+
+```
+$ pycodestyle conduce test
+```
