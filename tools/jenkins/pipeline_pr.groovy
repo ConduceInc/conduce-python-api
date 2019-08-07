@@ -29,7 +29,7 @@ def begin(build_info) {
   finally {
     if (!fast_deploy) {
         stage("Archive artifacts"){
-          archive "htmlcov/**
+          archive "htmlcov/**"
           milestone()
         }
 

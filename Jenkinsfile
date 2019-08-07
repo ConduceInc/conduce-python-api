@@ -14,10 +14,9 @@ node('debian') {
       print "${environment}"
       // Gather build info to pass to the pipeline
       build_info = [
-          develop_commit_id: sh(script: "git rev-parse --short origin/develop| tr -d '\n'", returnStdout: true),
           master_commit_id : sh(script: "git rev-parse --short origin/master | tr -d '\n'", returnStdout: true),
           commit_id        : sh(script: "git rev-parse --short HEAD | tr -d '\n'", returnStdout: true),
-          version          : sh(script: "cat doc/base.json | grep version | cut -d'\"' -f4", returnStdout: true)
+          version          : sh(script: "cat setup.py | grep version | cut -d'\"' -f2", returnStdout: true)
       ]
 
       // Determine which pipeline to run based on which branch is building
