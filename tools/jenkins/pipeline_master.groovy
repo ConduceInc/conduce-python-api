@@ -4,10 +4,12 @@ def begin(build_info) {
   common.prepare(build_info)
   common.test_and_build()
 
+  /*
   stage("Tag release") {
     sh "git tag ${build_info['version_suffix']}"
     sh "git push --tags"
   }
+  */
 
   /*
   //TODO: deploy
