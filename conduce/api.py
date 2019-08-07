@@ -687,6 +687,56 @@ def post_transaction(dataset_id, entity_set, **kwargs):
     return response
 
 
+def get_transactions(dataset_id, **kwargs):
+    """
+    Read sequence of dataset transactions from transaction log.  If no query parameters are provided,
+    the most recent transaction will be queried.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to modify.
+    **kwargs : key-value
+        **min**
+            The index of the oldest transaction in the sequence.
+        **max**
+            The index of the newest transaction in the sequence.
+        **value**
+            The index of a single transaction to query.
+        **rows**
+            The number of transactions to return.
+        **page_state**
+            The page state from which to continue.
+        **count**
+            Return only number of transactions in the log (ignores all other parameters)
+
+        See :py:func:`make_get_request` for more kwargs.
+        See https://prd-docs.conduce.com/#/data/readTransactions for more complete parameter documentation.
+
+    Returns
+    -------
+    requests.Response
+        Returns a response, the content of which is a list of transactions.
+    """
+
+    fragment = '/api/v2/data/{}/transactions'.format(dataset_id)
+
+    parameters = {
+        'min': kwargs.get('min', -1),
+        'max': kwargs.get('max'),
+        'value': kwargs.get('value'),
+        'rows': kwargs.get('rows'),
+        'page_state': kwargs.get('page_state', ''),
+        'count': bool(kwargs.get('count', False)),
+    }
+
+    # HACK: get around bool parameter bug
+    if not kwargs.get('count'):
+        parameters.pop('count')
+
+    return make_get_request(fragment, parameters=parameters, **kwargs)
+
+
 def _ingest_entity_set(dataset_id, entity_set, **kwargs):
     if 'entities' not in entity_set:
         raise ValueError('parameter entity_set is not an \'entities\' dict')
@@ -1341,6 +1391,8 @@ def make_get_request(fragment, **kwargs):
     **kwargs : key-value
         Target host and user authorization parameters used to make the request.
 
+        parameters : dictionary
+            Key/value pairs used to compose an HTTP query string.
         host : string
             The Conduce server's hostname (ex. app.conduce.com)
         api_key : string
@@ -1493,6 +1545,8 @@ def make_patch_request(payload, fragment, **kwargs):
 def _make_request(request_func, payload, uri, **kwargs):
     USER_CONFIG = {}
 
+    print(kwargs.get('parameters'))
+
     def cfg(USER_CONFIG, key):
         if USER_CONFIG == {}:
             USER_CONFIG.update(config.get_full_config())
@@ -1531,9 +1585,9 @@ def _make_request(request_func, payload, uri, **kwargs):
         else:
             headers = auth
 
-        response = request_func(url, json=payload, headers=headers, verify=verify)
+        response = request_func(url, json=payload, headers=headers, verify=verify, params=kwargs.get('parameters'))
     else:
-        response = request_func(url, json=payload, cookies=auth, headers=headers, verify=verify)
+        response = request_func(url, json=payload, cookies=auth, headers=headers, verify=verify, params=kwargs.get('parameters'))
 
     response.raise_for_status()
     return response

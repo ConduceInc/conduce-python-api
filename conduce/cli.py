@@ -310,6 +310,12 @@ def insert_transaction(args):
     return response
 
 
+def get_dataset_transactions(args):
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    return api.get_transactions(dataset_id, **vars(args))
+
+
 def ingest_data(args):
     if args.raw:
         del vars(args)['dataset_id']
@@ -732,6 +738,17 @@ def main():
     parser_dataset_insert.add_argument('dataset_id', help='Unique identifier of the dataset in which data will be inserted')
     parser_dataset_insert.set_defaults(func=insert_transaction)
 
+    parser_dataset_transactions = parser_dataset_subparsers.add_parser(
+        'transactions', parents=[api_cmd_parser], help='Print a sequence of dataset transactions for debugging')
+    parser_dataset_transactions.add_argument('dataset_id', help='Unique identifier of the dataset to query')
+    parser_dataset_transactions.add_argument('--min', help='The oldest transaction in the returned sequence')
+    parser_dataset_transactions.add_argument('--max', help='The newest transaction in the returned sequence')
+    parser_dataset_transactions.add_argument('--value', help='The index of a single transaction to query')
+    parser_dataset_transactions.add_argument('--rows', help='The number of transactions to return')
+    parser_dataset_transactions.add_argument('--page_state', help='The page state to continue searching from')
+    parser_dataset_transactions.add_argument('--count', action='store_true', help='Return only the number of transactions in the log')
+    parser_dataset_transactions.set_defaults(func=get_dataset_transactions)
+
     parser_create_resource = subparsers.add_parser('create', parents=[api_cmd_parser], help='Create a new resource')
     parser_create_resource.add_argument('name', help='The name of the resource to create')
     parser_create_resource.add_argument('type', help='Conduce resource type to create')
@@ -972,7 +989,7 @@ def main():
                                      action='store_true')
     parser_upload_image.set_defaults(func=upload_image)
 
-    parser_get = subparsers.add_parser('get',  parents=[api_cmd_parser], help='Make an arbitrary get request')
+    parser_get = subparsers.add_parser('get', parents=[api_cmd_parser], help='Make an arbitrary get request')
     parser_get.add_argument('uri', help='The URI of the resource being requested')
     parser_get.set_defaults(func=send_get_request)
 
