@@ -1,7 +1,7 @@
 def prepare(build_info) {
   stage("Prepare"){
     if(!env.BRANCH_NAME.contains("PR-")) {
-      slackSend channel: "#jenkins", message: "Build Started: <${env.JOB_URL}|${env.JOB_NAME}> <${env.BUILD_URL}|#${env.BUILD_NUMBER}> <${env.CHANGE_URL ?: 'https://github.com/ConduceInc/everything'}|(GitHub)>"
+      slackSend channel: "#jenkins", message: "Build Started: <${env.JOB_URL}|${env.JOB_NAME}> <${env.BUILD_URL}|#${env.BUILD_NUMBER}> <${env.CHANGE_URL ?: 'https://github.com/ConduceInc/conduce-python-api'}|(GitHub)>"
     }
 
     sh "rm -rf venv"
