@@ -1,2 +1,3 @@
+-r requirements.txt
 Sphinx
 m2r
