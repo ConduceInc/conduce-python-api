@@ -19,7 +19,7 @@ def begin(build_info) {
   }
   */
 
-  slackSend color: "good", channel: "#jenkins", message: "Version ${build_info['version']} ready to deploy"
+  slackSend color: "good", channel: "#jenkins", message: "Conduce Python API ${build_info['version']} has been published"
 }
 
 return this
