@@ -10,3 +10,7 @@ conduce.egg-info/
 htmlcov
 .coverage
 .python-version
+venv/
+venv2/
+venv3/
+.vscode/
