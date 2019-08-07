@@ -15,7 +15,7 @@ def prepare(build_info) {
 }
 
 
-def test_and_build(Boolean fast_deploy = false) {
+def test_and_build() {
   withEnv(["GLSL_PATH=${env.PWD}/shared/python/victor/glsl/"]) {
     stage("Unit tests") {
       sh "cd react && yarn test"
@@ -31,7 +31,7 @@ def test_and_build(Boolean fast_deploy = false) {
   }
 }
 
-def coverage_report(Boolean fast_deploy = false) {
+def coverage_report() {
   stage("Generate Coverage Report") {
       sh """. venv/bin/activate
           coverage run --source conduce -m unittest discover -v test/

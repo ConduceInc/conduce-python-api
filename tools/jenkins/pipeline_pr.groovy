@@ -17,27 +17,25 @@ def begin(build_info) {
   }
 
   common.prepare(build_info)
-  common.test_and_build(fast_deploy)
+  common.test_and_build()
 
   try {
-    common.coverage_report(fast_deploy)
+    common.coverage_report()
   }
   catch (e) {
     print e
     throw e
   }
   finally {
-    if (!fast_deploy) {
-        stage("Archive artifacts"){
-          archive "htmlcov/**"
-          milestone()
-        }
+    stage("Archive artifacts"){
+      archive "htmlcov/**"
+      milestone()
+    }
 
-        stage("Cleanup"){
-          sh "sudo rm -rf venv"
-          sh "sudo rm -rf htmlcov"
-          sh "sudo rm -rf doc/build"
-        }
+    stage("Cleanup"){
+      sh "sudo rm -rf venv"
+      sh "sudo rm -rf htmlcov"
+      sh "sudo rm -rf doc/build"
     }
   }
 }
