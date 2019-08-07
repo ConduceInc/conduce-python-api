@@ -7,7 +7,6 @@ node('debian') {
   try {
     stage("Plan") {
       checkout scm
-      sh "git submodule update --init --remote"
 
       // Print environment variables
       environment = sh(script: 'env', returnStdout: true)
@@ -57,8 +56,8 @@ node('debian') {
       currentBuild.result = "FAILURE"
 
       if(!env.BRANCH_NAME.contains("PR-")) {
-        slackSend color: "danger", channel: "#jenkins", message: "Build Failure: <${env.JOB_URL}|${env.JOB_NAME}> <${env.BUILD_URL}|#${env.BUILD_NUMBER}> <${env.CHANGE_URL ?: 'https://github.com/ConduceInc/everything'}|(GitHub)>"
-	slackSend color: "danger", channel: "#eng", message: "Build Failure: <${env.JOB_URL}|${env.JOB_NAME}> <${env.BUILD_URL}|#${env.BUILD_NUMBER}> <${env.CHANGE_URL ?: 'https://github.com/ConduceInc/everything'}|(GitHub)>"
+        slackSend color: "danger", channel: "#jenkins", message: "Build Failure: <${env.JOB_URL}|${env.JOB_NAME}> <${env.BUILD_URL}|#${env.BUILD_NUMBER}> <${env.CHANGE_URL ?: 'https://github.com/ConduceInc/conduce-python-api'}|(GitHub)>"
+	slackSend color: "danger", channel: "#eng", message: "Build Failure: <${env.JOB_URL}|${env.JOB_NAME}> <${env.BUILD_URL}|#${env.BUILD_NUMBER}> <${env.CHANGE_URL ?: 'https://github.com/ConduceInc/conduce-python-api'}|(GitHub)>"
       }
     }
   }
@@ -73,8 +72,8 @@ node('debian') {
 
     // Tell everyone we failed
     if(!env.BRANCH_NAME.contains("PR-")) {
-      slackSend color: "danger", channel: "#jenkins", message: "Build Failure: <${env.JOB_URL}|${env.JOB_NAME}> <${env.BUILD_URL}|#${env.BUILD_NUMBER}> <${env.CHANGE_URL ?: 'https://github.com/ConduceInc/everything'}|(GitHub)>"
-      slackSend color: "danger", channel: "#eng", message: "Build Failure: <${env.JOB_URL}|${env.JOB_NAME}> <${env.BUILD_URL}|#${env.BUILD_NUMBER}> <${env.CHANGE_URL ?: 'https://github.com/ConduceInc/everything'}|(GitHub)>"
+      slackSend color: "danger", channel: "#jenkins", message: "Build Failure: <${env.JOB_URL}|${env.JOB_NAME}> <${env.BUILD_URL}|#${env.BUILD_NUMBER}> <${env.CHANGE_URL ?: 'https://github.com/ConduceInc/conduce-python-api'}|(GitHub)>"
+      slackSend color: "danger", channel: "#eng", message: "Build Failure: <${env.JOB_URL}|${env.JOB_NAME}> <${env.BUILD_URL}|#${env.BUILD_NUMBER}> <${env.CHANGE_URL ?: 'https://github.com/ConduceInc/conduce-python-api'}|(GitHub)>"
     }
   }
   finally {

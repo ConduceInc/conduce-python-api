@@ -16,17 +16,15 @@ def prepare(build_info) {
 
 
 def test_and_build() {
-  withEnv(["GLSL_PATH=${env.PWD}/shared/python/victor/glsl/"]) {
-    stage("Unit tests") {
-      sh ". venv/bin/activate && python -m unittest discover -v test/"
-      milestone()
-    }
-    stage("Build docs") {
-      sh """. venv/bin/activate
-            cd doc
-            make html"""
-      milestone()
-    }
+  stage("Unit tests") {
+    sh ". venv/bin/activate && python -m unittest discover -v test/"
+    milestone()
+  }
+  stage("Build docs") {
+    sh """. venv/bin/activate
+        cd doc
+        make html"""
+    milestone()
   }
 }
 
