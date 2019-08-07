@@ -1545,8 +1545,6 @@ def make_patch_request(payload, fragment, **kwargs):
 def _make_request(request_func, payload, uri, **kwargs):
     USER_CONFIG = {}
 
-    print(kwargs.get('parameters'))
-
     def cfg(USER_CONFIG, key):
         if USER_CONFIG == {}:
             USER_CONFIG.update(config.get_full_config())
