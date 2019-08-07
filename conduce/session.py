@@ -29,7 +29,7 @@ def get_session(host, email, password, verify=True):
     try:
         with open(cookie_file_path, 'rb') as cookie_file:
             cookies = requests.utils.cookiejar_from_dict(pickle.load(cookie_file))
-    except:
+    except Exception:
         pass
 
     if cookies is None or not validate_session(host, cookies, verify):

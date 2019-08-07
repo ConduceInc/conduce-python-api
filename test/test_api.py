@@ -98,7 +98,9 @@ class Test(unittest.TestCase):
             'mime': "application/json",
         }
         mock_make_post_request.assert_called_once_with(
-            expected_resource_def, 'conduce/api/v2/resources/searches?content=test_content_valid_json', id=None, tag=None, mime='application/json', content=test_content, name=None, regex=None, type='test_resource_type', **test_kwargs)
+            expected_resource_def, 'conduce/api/v2/resources/searches?content=test_content_valid_json',
+            id=None, tag=None, mime='application/json', content=test_content, name=None, regex=None,
+            type='test_resource_type', **test_kwargs)
 
     @mock.patch('conduce.api.make_get_request', return_value=ResultMock())
     def test_list_api_keys(self, mock_make_get_request):

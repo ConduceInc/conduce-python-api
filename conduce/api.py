@@ -101,7 +101,8 @@ def list_resources(resource_type, **kwargs):
     """
     List all resources of the given type.
 
-    A convenience method that calls :py:func:`find_resource`.  This function, however, requires the user to specify a resource type.
+    A convenience method that calls :py:func:`find_resource`.  This function, however, requires
+    the user to specify a resource type.
 
     Parameters
     ----------
@@ -111,9 +112,11 @@ def list_resources(resource_type, **kwargs):
         host : string
             The Conduce server's hostname (ex. app.conduce.com)
         api_key : string
-            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
+            The user's API key (UUID).  The user should provide `api_key` or `user` but not both.
+            If the user provides both, `api_key` takes precedent.
         user : string
-            The user's email address.  Used to look up an API key from the Conduce configuration or, if not found, authenticate via password.  Ignored if `api_key` is provided.
+            The user's email address.  Used to look up an API key from the Conduce configuration or,
+            if not found, authenticate via password.  Ignored if `api_key` is provided.
 
 
     See :py:func:`find_resource` for information on return type.
@@ -175,7 +178,8 @@ def wait_for_job(job_id, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure.
+        See :py:meth:`requests.Response.raise_for_status` for more information.
     """
     while True:
         time.sleep(0.5)
@@ -195,11 +199,11 @@ def wait_for_job(job_id, **kwargs):
 
 
 def compose_uri(fragment):
-    if not 'api/v' in fragment:
+    if 'api/v' not in fragment:
         prefix = 'conduce/api/v1'
         fragment = fragment.lstrip('/')
         uri = '{}'.format(fragment)
-        if not 'conduce/api' in fragment:
+        if 'conduce/api' not in fragment:
             uri = '{}/{}'.format(prefix, fragment)
     else:
         uri = fragment
@@ -318,7 +322,10 @@ def create_dataset(dataset_name, **kwargs):
     """
     Create a new user owned dataset.
 
-    Creates a dataset with the specified name.  The dataset will be owned by the user who authorized the requested.  :py:func:`create_dataset` is a convenience wrapper that calls :py:func:`create_json_resource`, which in turn calls :py:func:`create_resource`.  For general information about creating resources see :py:func:`create_resource`.
+    Creates a dataset with the specified name.  The dataset will be owned by the user who authorized
+    the requested.  :py:func:`create_dataset` is a convenience wrapper that calls
+    :py:func:`create_json_resource`, which in turn calls :py:func:`create_resource`.  For general
+    information about creating resources see :py:func:`create_resource`.
 
     Parameters
     ----------
@@ -424,11 +431,11 @@ def _convert_samples_to_entity_set(sample_list):
     conduce_keys = ['id', 'kind', 'time', 'point', 'path', 'polygon']
     entities = []
     for idx, sample in enumerate(sample_list):
-        if not 'id' in sample:
+        if 'id' not in sample:
             raise ValueError('Error processing sample at index {}. Samples must include an ID.'.format(idx), sample)
-        if not 'kind' in sample:
+        if 'kind' not in sample:
             raise ValueError('Error processing sample at index {}. Samples must include a kind field.'.format(idx), sample)
-        if not 'time' in sample:
+        if 'time' not in sample:
             raise ValueError('Error processing sample at index {}. Samples must include a time field.'.format(idx), sample)
 
         if sample['id'] is None or len(str(sample['id'])) == 0:
@@ -465,7 +472,9 @@ def ingest_samples(dataset_id, sample_list, **kwargs):
     """
     Upload a :doc:`sample list <conduce-entities>` to the Conduce datastore.
 
-    A convenience method that adds a list of entity samples to the Conduce datastore and waits for the job to complete. This function POSTs a sample list to Conduce and :py:func:`wait_for_job` until the ingest job completes.
+    A convenience method that adds a list of entity samples to the Conduce datastore and
+    waits for the job to complete. This function POSTs a sample list to Conduce and :py:func:`wait_for_job`
+    until the ingest job completes.
 
     Parameters
     ----------
@@ -485,7 +494,8 @@ def ingest_samples(dataset_id, sample_list, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure.
+        See :py:meth:`requests.Response.raise_for_status` for more information.
     """
 
     if not isinstance(sample_list, list):
@@ -501,9 +511,9 @@ def convert_entities_to_entity_set(entity_list):
     entities = []
     ids = set()
     for idx, ent in enumerate(entity_list):
-        if not 'id' in ent:
+        if 'id' not in ent:
             raise ValueError('Error processing entity at index {}. Entities must include an ID.'.format(idx), ent)
-        if not 'kind' in ent:
+        if 'kind' not in ent:
             raise ValueError('Error processing entity at index {}. Entities must include a kind field.'.format(idx), ent)
 
         if ent['id'] is None or len(str(ent['id'])) == 0:
@@ -540,9 +550,12 @@ def ingest_entities(dataset_id, entity_list, **kwargs):
     """
     Upload :doc:`entities <conduce-entities>` to the Conduce datastore.
 
-    A convenience method that adds entities to the Conduce datastore and waits for the job to complete. This function POSTs an entity set to Conduce and :py:func:`wait_for_job` until the ingest job completes.
+    A convenience method that adds entities to the Conduce datastore and waits for the job to
+    complete. This function POSTs an entity set to Conduce and :py:func:`wait_for_job` until the
+    ingest job completes.
 
-    Each element of ``entity_list`` must be a valid :ref:`entity structure <entity-sample-definitions>`.  Here is a simple valid structure::
+    Each element of ``entity_list`` must be a valid :ref:`entity structure <entity-sample-definitions>`.
+    Here is a simple valid structure::
 
         {
             "id": <string>,
@@ -555,7 +568,9 @@ def ingest_entities(dataset_id, entity_list, **kwargs):
 
     It may also contain additional fields with arbitrary keys.
 
-    Since entities do not have timestamps they exist across all time.  Entities must be unique, that means each element in ``entity_list`` must have a unique ID.  Because entities do not have timestamps, ID is the only field that makes them unique.
+    Since entities do not have timestamps they exist across all time.  Entities must be unique, that
+    means each element in ``entity_list`` must have a unique ID.  Because entities do not have timestamps,
+    ID is the only field that makes them unique.
 
     Parameters
     ----------
@@ -574,7 +589,8 @@ def ingest_entities(dataset_id, entity_list, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See
+        :py:meth:`requests.Response.raise_for_status` for more information.
     """
 
     entity_set = util.entities_to_entity_set(entity_list)
@@ -674,6 +690,39 @@ def _modify_data(dataset_id, entity_set, **kwargs):
     return response
 
 
+"""
+TODO: Use this to clean up the long if statements, but needs to be tested against original logic
+def _found_id(resource_obj, kwargs):
+    return (resource_obj.get('id') is not None and (resource_obj['id'] == kwargs['id']))
+
+
+def _found_name(resource_obj, kwargs):
+    return ((resource_obj.get('name') is not None) and
+            (resource_obj['name'] == kwargs['name']))
+
+
+def _found_no_name(resource_obj, kwargs):
+    return ((resource_obj.get('name') is None) and kwargs.get('no_name', False) is True)
+
+
+def _regex_matches_name(resource_obj, kwargs):
+    return (resource_obj.get('name') is not None and kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name']))
+
+
+def _complicated_condition_part_1(resource_obj, kwargs):
+    return (_found_id(resource_obj, kwargs) or _found_no_name(resource_obj, kwargs))
+
+
+def _complicated_condition_part_2(resource_obj, kwargs):
+    return (_found_name(resource_obj, kwargs) or
+            _regex_matches_name(resource_obj, kwargs))
+
+
+def _complicated_condition(resource_obj, kwargs):
+    return _complicated_condition_part_1(resource_obj, kwargs) or _complicated_condition_part_2(resource_obj, kwargs)
+"""
+
+
 def find_resource(**kwargs):
     """
     Get resources that match a search query.
@@ -689,7 +738,8 @@ def find_resource(**kwargs):
         id : string
             The ID of the resource to fetch.  If this parameter is passed, at most, one resource will be returned.
         type : string
-            Resource type to fetch.  One of: SUBSTRATE, DATASET, ASSET, LENS_TEMPLATE, ORCHESTRATION.  If this parameter is set, only resources of the specified type will be returned.
+            Resource type to fetch.  One of: SUBSTRATE, DATASET, ASSET, LENS_TEMPLATE, ORCHESTRATION.
+            If this parameter is set, only resources of the specified type will be returned.
         name : string
             Resource name to fetch.  Resource names are not unique.  Multiple resources may be returned.
         regex : string
@@ -703,7 +753,8 @@ def find_resource(**kwargs):
         api_key : string
             The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
         user : string
-            The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
+            The user's email address.  Used to look up an API key from the Conduce config or, if not
+            found, authenticate via password.  Ignored if `api_key` is provided.
 
     Returns
     -------
@@ -727,7 +778,8 @@ def find_resource(**kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure.
+        See :py:func:`requests.Response.raise_for_status` for more information.
 
     """
     search_uri = 'conduce/api/v2/resources/searches'
@@ -760,7 +812,11 @@ def find_resource(**kwargs):
             return results['resources']
         else:
             for resource_obj in results['resources']:
-                if (resource_obj.get('id') is not None and resource_obj['id'] == kwargs['id']) or (resource_obj.get('name') is None and kwargs.get('no_name', False) is True) or (resource_obj.get('name') is not None and (resource_obj['name'] == kwargs['name'] or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])))):
+                if ((resource_obj.get('id') is not None and resource_obj['id'] == kwargs['id']) or
+                    (resource_obj.get('name') is None and kwargs.get('no_name', False) is True) or
+                        (resource_obj.get('name') is not None and
+                            (resource_obj['name'] == kwargs['name'] or
+                                (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name']))))):
                     found.append(resource_obj)
 
     return found
@@ -788,7 +844,11 @@ def remove_resource(**kwargs):
         results = find_resource(**kwargs)
         to_remove = []
         for resource_obj in results:
-            if (resource_obj.get('name') is not None and (resource_obj['name'] == kwargs['name']) or (resource_obj.get('name') is None and kwargs.get('no_name', False) is True) or (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])) or (kwargs.get('tags') is not None and set(kwargs.get('tags')) < set(resource_obj['tags']))):
+            if (resource_obj.get('name') is not None and
+                    (resource_obj['name'] == kwargs['name']) or
+                    (resource_obj.get('name') is None and kwargs.get('no_name', False) is True) or
+                    (kwargs['regex'] and re.match(kwargs['regex'], resource_obj['name'])) or
+                    (kwargs.get('tags') is not None and set(kwargs.get('tags')) < set(resource_obj['tags']))):
                 to_remove.append(resource_obj)
         if len(to_remove) == 1:
             _remove_resource(to_remove[0]['id'], **kwargs)
@@ -896,11 +956,11 @@ def create_template(name, template_def, **kwargs):
 
 def get_resource(resource_id, **kwargs):
     fragment = 'conduce/api/v2/resources/{}'.format(resource_id)
-    if kwargs.get('raw', False) == True:
+    if kwargs.get('raw', False):
         fragment += '?content=raw'
 
     response = make_get_request(fragment, **kwargs).content
-    if kwargs.get('raw', False) == False:
+    if not kwargs.get('raw', False):
         response = json.loads(response)
 
     return response
@@ -952,7 +1012,7 @@ def is_base64_encoded(string):
     try:
         if base64.b64encode(base64.b64decode(string)) == string:
             return True
-    except:
+    except Exception:
         pass
 
     return False
@@ -971,7 +1031,9 @@ def create_resource(resource_type, resource_name, content, mime_type, **kwargs):
     resource_name : string
         A string that helps identify the resource
     content : string
-        A string representation of the resource.  JSON resources should be passed as a JSON encoded string.  For text and JSON mime types, the string is passed directly as the resource content.  For other types the content string is base64 encoded.
+        A string representation of the resource.  JSON resources should be passed as a JSON encoded string.
+        For text and JSON mime types, the string is passed directly as the resource content.  For other types
+        the content string is base64 encoded.
     mime : string
         The mime type of the resource content.
     kwargs : key-value
@@ -988,7 +1050,8 @@ def create_resource(resource_type, resource_name, content, mime_type, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See
+        :py:func:`requests.Response.raise_for_status` for more information.
     """
     if not (mime_type.startswith('text/') or mime_type == 'application/json'):
         if not is_base64_encoded(content):
@@ -996,7 +1059,7 @@ def create_resource(resource_type, resource_name, content, mime_type, **kwargs):
             content = base64.b64encode(content)
         try:
             content = content.decode('utf-8')
-        except:
+        except Exception:
             pass
 
     resource_def = {
@@ -1024,7 +1087,8 @@ def create_json_resource(resource_type, resource_name, content, **kwargs):
     resource_name : string
         A string that helps identify the resource
     content : dictionary
-        A dictionary representation of the JSON blob that describes the resource content.  The dictionary is converted to a JSON encoded string prior to resource creation.
+        A dictionary representation of the JSON blob that describes the resource content.  The dictionary
+        is converted to a JSON encoded string prior to resource creation.
     kwargs : key-value
         **tags**
             A list of strings that help identify the resource.
@@ -1039,7 +1103,8 @@ def create_json_resource(resource_type, resource_name, content, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:func:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See
+        :py:func:`requests.Response.raise_for_status` for more information.
     """
 
     return create_resource(
@@ -1073,7 +1138,8 @@ def list_api_keys(**kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See
+        :py:meth:`requests.Response.raise_for_status` for more information.
     """
 
     response = make_get_request('apikeys/list', **kwargs)
@@ -1099,7 +1165,8 @@ def create_api_key(**kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See
+        :py:meth:`requests.Response.raise_for_status` for more information.
     """
     response = make_post_request(
         {"description": "Generated and used by conduce-python-api"}, 'apikeys/create', **kwargs)
@@ -1126,7 +1193,8 @@ def remove_api_key(key, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure.
+        See :py:meth:`requests.Response.raise_for_status` for more information.
     """
     response = make_post_request(
         {"apikey": key}, 'apikeys/delete', **kwargs)
@@ -1152,7 +1220,8 @@ def make_delete_request(fragment, **kwargs):
         api_key : string
             The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
         user : string
-            The user's email address.  Used to look up an API key from the Conduce configuration or, if not found, authenticate via password.  Ignored if `api_key` is provided.
+            The user's email address.  Used to look up an API key from the Conduce configuration or,
+            if not found, authenticate via password.  Ignored if `api_key` is provided.
 
     Returns
     -------
@@ -1162,7 +1231,8 @@ def make_delete_request(fragment, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See
+        :py:meth:`requests.Response.raise_for_status` for more information.
 
     """
     return _make_request(requests.delete, None, compose_uri(fragment), **kwargs)
@@ -1187,7 +1257,8 @@ def make_get_request(fragment, **kwargs):
         api_key : string
             The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
         user : string
-            The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
+            The user's email address.  Used to look up an API key from the Conduce config or, if not found,
+            authenticate via password.  Ignored if `api_key` is provided.
 
     Returns
     -------
@@ -1197,7 +1268,8 @@ def make_get_request(fragment, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure.
+        See :py:meth:`requests.Response.raise_for_status` for more information.
 
     """
     return _make_request(requests.get, None, compose_uri(fragment), **kwargs)
@@ -1213,7 +1285,8 @@ def make_post_request(payload, fragment, **kwargs):
     ----------
     payload : dictionary
         #more-complicated-post-requests>`_ for more information.
-        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
+        A dictionary representation of JSON content used to replace the Conduce resource.  See the
+        `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
 
     fragment : string
         The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
@@ -1226,8 +1299,8 @@ def make_post_request(payload, fragment, **kwargs):
         api_key : string
             The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
         user : string
-            The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
-
+            The user's email address.  Used to look up an API key from the Conduce config or, if not found,
+            authenticate via password.  Ignored if `api_key` is provided.
     Returns
     -------
     requests.Response
@@ -1236,7 +1309,8 @@ def make_post_request(payload, fragment, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See
+        :py:meth:`requests.Response.raise_for_status` for more information.
 
     """
     return _make_request(requests.post, payload, compose_uri(fragment), **kwargs)
@@ -1252,7 +1326,8 @@ def make_put_request(payload, fragment, **kwargs):
     ----------
     payload : dictionary
         #more-complicated-post-requests>`_ for more information.
-        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
+        A dictionary representation of JSON content used to replace the Conduce resource.  See the
+        `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
 
     fragment : string
         The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
@@ -1265,7 +1340,8 @@ def make_put_request(payload, fragment, **kwargs):
         api_key : string
             The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
         user : string
-            The user's email address.  Used to look up an API key from the Conduce config or, if not found, authenticate via password.  Ignored if `api_key` is provided.
+            The user's email address.  Used to look up an API key from the Conduce config or, if not found,
+            authenticate via password.  Ignored if `api_key` is provided.
 
     Returns
     -------
@@ -1275,7 +1351,8 @@ def make_put_request(payload, fragment, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See
+        :py:meth:`requests.Response.raise_for_status` for more information.
 
     """
     return _make_request(requests.put, payload, compose_uri(fragment), **kwargs)
@@ -1291,7 +1368,8 @@ def make_patch_request(payload, fragment, **kwargs):
     ----------
     payload : dictionary
         #more-complicated-post-requests>`_ for more information.
-        A dictionary representation of JSON content used to replace the Conduce resource.  See the `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
+        A dictionary representation of JSON content used to replace the Conduce resource.  See the
+        `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
 
     fragment : string
         The URI fragment of the requested endpoint. See https://app.conduce.com/docs for a list of endpoints.
@@ -1304,7 +1382,8 @@ def make_patch_request(payload, fragment, **kwargs):
         api_key : string
             The user's API key (UUID).  The user should provide `api_key` or `user` but not both.  If the user provides both, `api_key` takes precedent.
         user : string
-            The user's email address.  Used to look up an API key from the Conduce configuration or, if not found, authenticate via password.  Ignored if `api_key` is provided.
+            The user's email address.  Used to look up an API key from the Conduce configuration or,
+            if not found, authenticate via password.  Ignored if `api_key` is provided.
 
     Returns
     -------
@@ -1314,7 +1393,8 @@ def make_patch_request(payload, fragment, **kwargs):
     Raises
     ------
     requests.HTTPError
-        Requests that result in an error raise an exception with information about the failure. See :py:meth:`requests.Response.raise_for_status` for more information.
+        Requests that result in an error raise an exception with information about the failure. See
+        :py:meth:`requests.Response.raise_for_status` for more information.
 
     """
     return _make_request(requests.patch, payload, compose_uri(fragment), **kwargs)

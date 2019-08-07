@@ -72,7 +72,7 @@ def set_api_key(args):
     if not args.key:
         raise Exception('No API key specified')
 
-    if not args.user in config:
+    if args.user not in config:
         config[args.user] = {'api-keys': {'dev-app': "", 'stg-app': "", 'prd-app': ""}}
     config[args.user]['api-keys'][get_env_from_host(args.host)] = args.key
 
