@@ -598,6 +598,95 @@ def ingest_entities(dataset_id, entity_list, **kwargs):
     return _ingest_entity_set(dataset_id, entity_set, **kwargs)
 
 
+def insert_transaction(dataset_id, entity_set, **kwargs):
+    """
+    Add records to a dataset.
+
+    Inserts unique records at the beginning, middle, or end of a dataset.
+
+    The operation will fail if the records are not unique.  Uniqueness is determined by the combination of a record's ID and timestamp.
+    """
+    return post_transaction(dataset_id, entity_set, operation='INSERT', **kwargs)
+
+
+def append_transaction(dataset_id, entity_set, **kwargs):
+    """
+    Add new records to the end of the dataset.
+
+    Append is an optimization over insert in that it only checks to see that all records in the transaction
+    are newer than the newest record in the transaction log.
+
+    Append may fail to add valid records that occur between the end of an entity stream and the end of a dataset.
+    """
+    return post_transaction(dataset_id, entity_set, operation='APPEND', **kwargs)
+
+
+def post_transaction(dataset_id, entity_set, **kwargs):
+    """
+    Add a new dataset transaction.  This method is provided for completeness and
+    should be avoided in favor of :py:func:`insert_transaction` and :py:func:`append_transaction`.
+
+    By default, the transaction will not be processed. Use the `process` kwarg to trigger automatic processing.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to modify.
+    entity_set : dictionary
+        A dictionary of raw Conduce entities. Use :py:meth:`util.samples_to_entity_set` or
+        :py:meth:`util.entities_to_entity_set` to construct an entity set dictionary.
+        See :doc:`data-ingest` for documentation on how to ingest data.
+    **kwargs : key-value
+        **operation**
+            The dataset operation to perform on the posted entity set.  Supports all
+            operations listed in the REST API.  However, only `INSERT` and `APPEND` are officially supported.
+            See https://prd-docs.conduce.com/#/data/createTransaction for a list of endpoints.
+        **process**
+            Post the transaction and immediately process on backends configured to automatically process transactions.
+        **debug**
+            Post each entity in the entity set as an individual transaction.
+            This enables a user to find bad entities in an entity set but dramatically slows data processing.
+            Forces `process=True` to ensure entities are ingested one at a time.
+
+        See :py:func:`make_post_request` for more kwargs.
+
+    Returns
+    -------
+    requests.Response
+        Returns an error or the final response message when the job is no longer running.
+    """
+    if 'entities' not in entity_set:
+        raise ValueError("Parameter entity_set is not an 'entities' dict.")
+
+    if kwargs.get('debug'):
+        kwargs['debug'] = False
+        kwargs['process'] = True
+        print("Debug ingest")
+        responses = []
+        for idx, entity in enumerate(entity_set['entities'], start=1):
+            single_entity = {'entities': [entity]}
+            print(single_entity)
+            responses.append(post_transaction(dataset_id, single_entity, **kwargs))
+            print("{} / {} ingested".format(idx, len(entity_set['entities'])))
+        return responses
+
+    payload = {
+        'data': entity_set,
+        'op': kwargs.get('operation', 'INSERT'),
+    }
+    response = make_post_request(
+        payload, '/api/v2/data/{}/transactions?process={}'.format(dataset_id, bool(kwargs.get('process', False))), **kwargs)
+    response.raise_for_status()
+
+    if kwargs.get('process', False):
+        if response.status_code == 202:
+            if 'location' in response.headers:
+                job_id = response.headers['location']
+                response = wait_for_job(job_id, **kwargs)
+
+    return response
+
+
 def _ingest_entity_set(dataset_id, entity_set, **kwargs):
     if 'entities' not in entity_set:
         raise ValueError('parameter entity_set is not an \'entities\' dict')

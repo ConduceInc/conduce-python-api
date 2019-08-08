@@ -4,6 +4,13 @@ import mock
 from conduce import util
 import datetime
 
+# Python 2 compatibility
+try:
+    import __builtin__ as builtins
+except:
+    import builtins
+assert(hasattr(builtins, 'open'))
+###
 
 GOOD_POINT_ENTITY = {
     'id': 'fake ID',
@@ -28,6 +35,11 @@ class CustomHTTPException:
 
 
 class Test(unittest.TestCase):
+    # For Python 2 compatibility
+    if not hasattr(unittest.TestCase, 'assertRaisesRegex'):
+        unittest.TestCase.assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
+    ###
+
     def test__convert_coordinates__length_not_two(self):
         fake_point = {
             "x": 1,
@@ -422,7 +434,7 @@ class Test(unittest.TestCase):
         for idx, call_args in enumerate(mock_parse_sample.call_args_list):
             self.assertEqual(call_args, mock.call(fake_json_samples[idx]))
 
-    @mock.patch('builtins.open', return_value="fake file stream")
+    @mock.patch.object(builtins, 'open', return_value="fake file stream")
     @mock.patch('json.load', return_value="fake JSON")
     @mock.patch('conduce.util.parse_sample', return_value="deserialized samples")
     def test_json_to_samples(self, mock_parse_sample, mock_json_load, mock_open):
