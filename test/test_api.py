@@ -28,6 +28,40 @@ class CustomHTTPException:
 
 
 class Test(unittest.TestCase):
+    @mock.patch('conduce.api.make_get_request', return_value=ResultMock())
+    def test_get_transactions(self, mock_make_get_request):
+        fake_id = 'fake-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        expected_parameters = {
+            'min': fake_kwargs.get('min', -1),
+            'max': fake_kwargs.get('max'),
+            'value': fake_kwargs.get('value'),
+            'rows': fake_kwargs.get('rows'),
+            'page_state': fake_kwargs.get('page_state', ''),
+        }
+        expected_uri = '/api/v2/data/{}/transactions'.format(fake_id)
+        api.get_transactions(fake_id, **fake_kwargs)
+        mock_make_get_request.assert_called_once_with(expected_uri, parameters=expected_parameters, **fake_kwargs)
+
+    @mock.patch('conduce.api.make_get_request', return_value=ResultMock())
+    def test_get_transactions_with_parameters(self, mock_make_get_request):
+        fake_id = 'fake-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2', 'min': 'fake-min', 'max': 'fake-max',
+                       'value': 'fake-value', 'rows': 'fake-rows', 'page_state': 'fake-page-state', 'count': 'fake-count'
+                       }
+        expected_parameters = {
+            'min': fake_kwargs.get('min', -1),
+            'max': fake_kwargs.get('max'),
+            'value': fake_kwargs.get('value'),
+            'rows': fake_kwargs.get('rows'),
+            'page_state': fake_kwargs.get('page_state', ''),
+            'count': bool(fake_kwargs.get('count', False)),
+        }
+
+        expected_uri = '/api/v2/data/{}/transactions'.format(fake_id)
+        api.get_transactions(fake_id, **fake_kwargs)
+        mock_make_get_request.assert_called_once_with(expected_uri, parameters=expected_parameters, **fake_kwargs)
+
     @mock.patch('conduce.api.post_transaction', return_value=ResultMock())
     def test_append_transaction(self, mock_post_transaction):
         fake_id = 'fake id'
@@ -454,7 +488,7 @@ class Test(unittest.TestCase):
         mock_get_full_config.assert_called_once()
         mock_get_session.assert_called_once_with('default-fake-host', 'default-fake-user', None, True)
         mock_request_func.assert_called_once_with('https://default-fake-host/{}'.format(test_uri),
-                                                  json=test_payload, cookies='fake-auth', headers={}, verify=True)
+                                                  json=test_payload, cookies='fake-auth', headers={}, params=None, verify=True)
 
     @mock.patch('conduce.session.get_session', return_value='fake-auth')
     @mock.patch('conduce.config.get_full_config', return_value={'default-host': 'default-fake-host', 'default-user': 'default-fake-user'})
@@ -465,7 +499,7 @@ class Test(unittest.TestCase):
         api._make_request(mock_request_func, test_payload, test_uri, no_verify=True)
         mock_get_session.assert_called_once_with('default-fake-host', 'default-fake-user', None, False)
         mock_request_func.assert_called_once_with('https://default-fake-host/{}'.format(test_uri),
-                                                  json=test_payload, cookies='fake-auth', headers={}, verify=False)
+                                                  json=test_payload, cookies='fake-auth', headers={}, params=None, verify=False)
 
     @mock.patch('conduce.session.get_session', return_value='fake-auth')
     @mock.patch('conduce.config.get_full_config', return_value={'default-host': 'default-fake-host', 'default-user': 'default-fake-user'})
@@ -477,7 +511,19 @@ class Test(unittest.TestCase):
         mock_get_full_config.assert_called_once()
         mock_get_session.assert_called_once_with('default-fake-host', 'fake-user', None, True)
         mock_request_func.assert_called_once_with('https://default-fake-host/{}'.format(test_uri),
-                                                  json=test_payload, cookies='fake-auth', headers={}, verify=True)
+                                                  json=test_payload, cookies='fake-auth', headers={}, params=None, verify=True)
+
+    @mock.patch('conduce.session.get_session', return_value='fake-auth')
+    @mock.patch('conduce.config.get_full_config', return_value={'default-host': 'default-fake-host', 'default-user': 'default-fake-user'})
+    def test__make_request___user_params(self, mock_get_full_config, mock_get_session):
+        mock_request_func = mock.MagicMock()
+        test_payload = {'a': 1, 'b': 2, 'c': 3}
+        test_uri = '/fake-uri'
+        api._make_request(mock_request_func, test_payload, test_uri, parameters='fake-params')
+        mock_get_full_config.assert_called_once()
+        mock_get_session.assert_called_once_with('default-fake-host', 'default-fake-user', None, True)
+        mock_request_func.assert_called_once_with('https://default-fake-host/{}'.format(test_uri),
+                                                  json=test_payload, cookies='fake-auth', headers={}, params='fake-params', verify=True)
 
     @mock.patch('conduce.session.get_session', return_value='fake-auth')
     @mock.patch('conduce.config.get_full_config', return_value={'default-host': 'default-fake-host', 'default-user': 'default-fake-user'})
@@ -489,7 +535,7 @@ class Test(unittest.TestCase):
         mock_get_full_config.assert_called_once()
         mock_get_session.assert_called_once_with('fake-host', 'default-fake-user', None, True)
         mock_request_func.assert_called_once_with('https://fake-host/{}'.format(test_uri),
-                                                  json=test_payload, cookies='fake-auth', headers={}, verify=True)
+                                                  json=test_payload, cookies='fake-auth', headers={}, params=None, verify=True)
 
     @mock.patch('conduce.session.get_session', return_value='fake-auth')
     @mock.patch('conduce.config.get_full_config', return_value={'default-host': 'default-fake-host', 'default-user': 'default-fake-user'})
@@ -501,7 +547,7 @@ class Test(unittest.TestCase):
         mock_get_full_config.assert_called_once()
         mock_get_session.assert_called_once_with('default-fake-host', 'default-fake-user', 'fake-password', True)
         mock_request_func.assert_called_once_with('https://default-fake-host/{}'.format(test_uri),
-                                                  json=test_payload, cookies='fake-auth', headers={}, verify=True)
+                                                  json=test_payload, cookies='fake-auth', headers={}, params=None, verify=True)
 
     @mock.patch('conduce.session.api_key_header', return_value={'Authorization': 'Bearer fake-api-key'})
     @mock.patch('conduce.config.get_full_config', return_value={'default-host': 'default-fake-host', 'default-user': 'default-fake-user'})
@@ -514,7 +560,7 @@ class Test(unittest.TestCase):
         mock_get_full_config.assert_called_once()
         mock_api_key_header.assert_called_once_with(test_api_key)
         mock_request_func.assert_called_once_with('https://default-fake-host/{}'.format(test_uri),
-                                                  json=test_payload, headers={'Authorization': 'Bearer fake-api-key'}, verify=True)
+                                                  json=test_payload, headers={'Authorization': 'Bearer fake-api-key'}, params=None, verify=True)
 
     @mock.patch('conduce.session.api_key_header', return_value={'Authorization': 'Bearer fake-api-key'})
     @mock.patch('conduce.config.get_full_config', return_value={'default-host': 'default-fake-host', 'default-user': 'default-fake-user'})
@@ -529,7 +575,7 @@ class Test(unittest.TestCase):
         mock_get_full_config.assert_called_once()
         mock_api_key_header.assert_called_once_with(test_api_key)
         mock_request_func.assert_called_once_with('https://default-fake-host/{}'.format(test_uri),
-                                                  json=test_payload, headers=test_combined_headers, verify=True)
+                                                  json=test_payload, headers=test_combined_headers, params=None, verify=True)
 
     @mock.patch('conduce.session.api_key_header', return_value={'Authorization': 'Bearer fake-api-key'})
     @mock.patch('conduce.config.get_full_config', return_value={'default-host': 'default-fake-host', 'default-user': 'default-fake-user'})
@@ -542,7 +588,7 @@ class Test(unittest.TestCase):
         mock_get_full_config.assert_not_called()
         mock_api_key_header.assert_called_once_with(test_api_key)
         mock_request_func.assert_called_once_with('https://fake-host/{}'.format(test_uri),
-                                                  json=test_payload, headers={'Authorization': 'Bearer fake-api-key'}, verify=True)
+                                                  json=test_payload, headers={'Authorization': 'Bearer fake-api-key'}, params=None, verify=True)
 
     @mock.patch('conduce.session.get_session', return_value='fake-auth')
     @mock.patch('conduce.config.get_full_config', return_value={'default-host': 'default-fake-host', 'default-user': 'default-fake-user'})
@@ -554,7 +600,7 @@ class Test(unittest.TestCase):
         mock_get_full_config.assert_not_called()
         mock_get_session.assert_called_once_with('fake-host', 'fake-user', None, True)
         mock_request_func.assert_called_once_with('https://fake-host/{}'.format(test_uri),
-                                                  json=test_payload, cookies='fake-auth', headers={}, verify=True)
+                                                  json=test_payload, cookies='fake-auth', headers={}, params=None, verify=True)
 
 
 if __name__ == '__main__':
