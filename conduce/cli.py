@@ -316,6 +316,13 @@ def get_dataset_transactions(args):
     return api.get_transactions(dataset_id, **vars(args))
 
 
+def add_histogram_store(args):
+    dataset_id = args.dataset_id
+    auto_process = not args.manual_processing
+    del vars(args)['dataset_id']
+    return api.add_histogram_store(dataset_id, auto_process, **vars(args))
+
+
 def ingest_data(args):
     if args.raw:
         del vars(args)['dataset_id']
@@ -748,6 +755,12 @@ def main():
     parser_dataset_transactions.add_argument('--page_state', help='The page state to continue searching from')
     parser_dataset_transactions.add_argument('--count', action='store_true', help='Return only the number of transactions in the log')
     parser_dataset_transactions.set_defaults(func=get_dataset_transactions)
+
+    parser_dataset_add_histogram_store = parser_dataset_subparsers.add_parser(
+        'add-histogram-store', parents=[api_cmd_parser], help='Add a histogram store to the dataset')
+    parser_dataset_add_histogram_store.add_argument('dataset_id', help='Unique identifier of the dataset to change')
+    parser_dataset_add_histogram_store.add_argument('--manual-processing', action='store_true', help='Disable automatic processing of transactions')
+    parser_dataset_add_histogram_store.set_defaults(func=add_histogram_store)
 
     parser_create_resource = subparsers.add_parser('create', parents=[api_cmd_parser], help='Create a new resource')
     parser_create_resource.add_argument('name', help='The name of the resource to create')
