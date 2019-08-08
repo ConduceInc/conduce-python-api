@@ -31,6 +31,21 @@ NUM_RETRIES = 5
 WAIT_EXPONENTIAL_MULTIPLIER = 1000
 
 
+class DatasetBackends:
+    BACKEND_TYPES = {
+        'simple': 'SimpleStore',
+        'tile': 'TileStore',
+        'capped_tile': 'CappedTileStore',
+        'elasticsearch': 'ElasticsearchStore',
+        'histogram': 'HistogramStore',
+    }
+    simple = BACKEND_TYPES['simple']
+    tile = BACKEND_TYPES['tile']
+    capped_tile = BACKEND_TYPES['capped_tile']
+    elasticsearch = BACKEND_TYPES['elasticsearch']
+    histogram = BACKEND_TYPES['histogram']
+
+
 def _retry_on_retryable_error(exception):
     if isinstance(exception, HTTPError) and exception.response.status_code < 500:
         return False
@@ -745,6 +760,13 @@ def delete_transactions(dataset_id, **kwargs):
     Return the dataset and all backends to an intialized (empty) state.
     Dataset is ready for ingest when request is finished.
 
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to modify.
+    **kwargs : key-value
+        See :py:func:`make_delete_request` for more kwargs.
+
     Returns
     -------
     requests.Response
@@ -754,6 +776,128 @@ def delete_transactions(dataset_id, **kwargs):
 
     fragment = '/api/v2/data/{}/transactions'.format(dataset_id)
     return make_delete_request(fragment, **kwargs)
+
+
+def add_simple_store(dataset_id, auto_process, **kwargs):
+    """
+    Adds a simple store to the specified dataset.
+
+    If configured for auto-processing (default), transactions will not be auto-processed
+    into the store until new transactions are posted.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to modify.
+    auto_process : boolean
+        Configure the backend to auto process transactions. Auto processing is enabled by default.
+        Set to False to disable auto processing.
+    **kwargs : key-value
+        See :py:func:`make_post_request` for more kwargs.
+    """
+    return _create_dataset_backend(dataset_id, DatasetBackends.simple, auto_process, None, **kwargs)
+
+
+def add_tile_store(dataset_id, auto_process, **kwargs):
+    """
+    Adds a tile store to the specified dataset.
+
+    If configured for auto-processing (default), transactions will not be auto-processed
+    into the store until new transactions are posted.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to modify.
+    auto_process : boolean
+        Configure the backend to auto process transactions. Auto processing is enabled by default.
+        Set to False to disable auto processing.
+    **kwargs : key-value
+        See :py:func:`make_post_request` for more kwargs.
+    """
+    return _create_dataset_backend(dataset_id, DatasetBackends.tile, auto_process, None, **kwargs)
+
+
+def add_capped_tile_store(dataset_id, auto_process, minimum_temoral_level, maximum_temporal_level, **kwargs):
+    """
+    Adds a capped tile store to the specified dataset.
+
+    If configured for auto-processing (default), transactions will not be auto-processed
+    into the store until new transactions are posted.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to modify.
+    auto_process : boolean
+        Configure the backend to auto process transactions. Auto processing is enabled by default.
+        Set to False to disable auto processing.
+    **kwargs : key-value
+        See :py:func:`make_post_request` for more kwargs.
+    """
+    config = {
+        'minimum_temporal_level': minimum_temoral_level,
+        'maximum_temporal_level': maximum_temporal_level,
+    }
+    return _create_dataset_backend(dataset_id, DatasetBackends.capped_tile, auto_process, config, **kwargs)
+
+
+def add_elasticsearch_store(dataset_id, auto_process, **kwargs):
+    """
+    Adds an Elasticsearch store to the specified dataset.
+
+    If configured for auto-processing (default), transactions will not be auto-processed
+    into the store until new transactions are posted.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to modify.
+    auto_process : boolean
+        Configure the backend to auto process transactions. Auto processing is enabled by default.
+        Set to False to disable auto processing.
+    **kwargs : key-value
+        See :py:func:`make_post_request` for more kwargs.
+    """
+    return _create_dataset_backend(dataset_id, DatasetBackends.elasticsearch, auto_process, None, **kwargs)
+
+
+def add_histogram_store(dataset_id, auto_process, **kwargs):
+    """
+    Adds a histogram store to the specified dataset.
+
+    If configured for auto-processing (default), transactions will not be auto-processed
+    into the store until new transactions are posted.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to modify.
+    auto_process : boolean
+        Configure the backend to auto process transactions. Auto processing is enabled by default.
+        Set to False to disable auto processing.
+    **kwargs : key-value
+        See :py:func:`make_post_request` for more kwargs.
+    """
+    return _create_dataset_backend(dataset_id, DatasetBackends.histogram, auto_process, None, **kwargs)
+
+
+def _create_dataset_backend(dataset_id, backend_type, auto_process, config, **kwargs):
+    """
+    Transactions will not be auto-processed into the store until new transactions are posted.
+    """
+    if backend_type not in DatasetBackends.BACKEND_TYPES.values():
+        raise ValueError("The backend type specified is not valid.", backend_type)
+
+    if config is None:
+        config = {}
+
+    config.update({
+        'backend_type': backend_type,
+        'auto_process': auto_process
+    })
+
+    return make_post_request(config, '/api/v2/data/{}/backends'.format(dataset_id), **kwargs)
 
 
 def _ingest_entity_set(dataset_id, entity_set, **kwargs):
@@ -1444,7 +1588,7 @@ def make_post_request(payload, fragment, **kwargs):
     Parameters
     ----------
     payload : dictionary
-        #more-complicated-post-requests>`_ for more information.
+        # more-complicated-post-requests>`_ for more information.
         A dictionary representation of JSON content used to replace the Conduce resource.  See the
         `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
 
@@ -1485,7 +1629,7 @@ def make_put_request(payload, fragment, **kwargs):
     Parameters
     ----------
     payload : dictionary
-        #more-complicated-post-requests>`_ for more information.
+        # more-complicated-post-requests>`_ for more information.
         A dictionary representation of JSON content used to replace the Conduce resource.  See the
         `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
 
@@ -1527,7 +1671,7 @@ def make_patch_request(payload, fragment, **kwargs):
     Parameters
     ----------
     payload : dictionary
-        #more-complicated-post-requests>`_ for more information.
+        # more-complicated-post-requests>`_ for more information.
         A dictionary representation of JSON content used to replace the Conduce resource.  See the
         `requests library documentation <http://docs.python-requests.org/en/master/user/quickstart/
 
