@@ -28,6 +28,98 @@ class CustomHTTPException:
 
 
 class Test(unittest.TestCase):
+    @mock.patch('conduce.api.make_patch_request', return_value=ResultMock())
+    def test_disable_auto_processing(self, mock_make_patch_request):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_id = 'fake-backend-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        api.disable_auto_processing(fake_dataset_id, fake_backend_id, **fake_kwargs)
+
+        expected_fragment = '/api/v2/data/{}/backends/{}'.format(fake_dataset_id, fake_backend_id)
+        expected_payload = [
+            {
+                "path": "/auto_process",
+                "value": False,
+                "op": "add"
+            }
+        ]
+        mock_make_patch_request.assert_called_once_with(expected_payload, expected_fragment, **fake_kwargs)
+
+    @mock.patch('conduce.api.make_patch_request', return_value=ResultMock())
+    def test_enable_auto_processing__disable(self, mock_make_patch_request):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_id = 'fake-backend-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        api.enable_auto_processing(fake_dataset_id, fake_backend_id, enable=False, **fake_kwargs)
+
+        expected_fragment = '/api/v2/data/{}/backends/{}'.format(fake_dataset_id, fake_backend_id)
+        expected_payload = [
+            {
+                "path": "/auto_process",
+                "value": False,
+                "op": "add"
+            }
+        ]
+        mock_make_patch_request.assert_called_once_with(expected_payload, expected_fragment, **fake_kwargs)
+
+    @mock.patch('conduce.api.make_patch_request', return_value=ResultMock())
+    def test_enable_auto_processing__default(self, mock_make_patch_request):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_id = 'fake-backend-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        api.enable_auto_processing(fake_dataset_id, fake_backend_id, **fake_kwargs)
+
+        expected_fragment = '/api/v2/data/{}/backends/{}'.format(fake_dataset_id, fake_backend_id)
+        expected_payload = [
+            {
+                "path": "/auto_process",
+                "value": True,
+                "op": "add"
+            }
+        ]
+        mock_make_patch_request.assert_called_once_with(expected_payload, expected_fragment, **fake_kwargs)
+
+    @mock.patch('conduce.api.make_patch_request', return_value=ResultMock())
+    def test_process_transactions__parameters_set(self, mock_make_patch_request):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_id = 'fake-backend-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2', 'all': True, 'transaction': 'fake-transaction',
+                       'min': 'fake-min', 'max': 'fake-max', 'default': 'fake-default'}
+
+        api.process_transactions(fake_dataset_id, fake_backend_id, **fake_kwargs)
+
+        expected_fragment = '/api/v2/data/{}/backends/{}'.format(fake_dataset_id, fake_backend_id)
+        expected_parameters = {
+            'all': bool(fake_kwargs.get('all')),
+            'tx': fake_kwargs.get('transaction'),
+            'min': fake_kwargs.get('min'),
+            'max': fake_kwargs.get('max'),
+            'default': fake_kwargs.get('default'),
+        }
+
+        mock_make_patch_request.assert_called_once_with({}, expected_fragment, parameters=expected_parameters, **fake_kwargs)
+
+    @mock.patch('conduce.api.make_patch_request', return_value=ResultMock())
+    def test_process_transactions(self, mock_make_patch_request):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_id = 'fake-backend-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        api.process_transactions(fake_dataset_id, fake_backend_id, **fake_kwargs)
+
+        expected_fragment = '/api/v2/data/{}/backends/{}'.format(fake_dataset_id, fake_backend_id)
+        expected_parameters = {
+            'tx': fake_kwargs.get('transaction'),
+            'min': fake_kwargs.get('min'),
+            'max': fake_kwargs.get('max'),
+            'default': fake_kwargs.get('default'),
+        }
+
+        mock_make_patch_request.assert_called_once_with({}, expected_fragment, parameters=expected_parameters, **fake_kwargs)
+
     @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
     def test_add_simple_store(self, mock__create_dataset_backend):
         fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
