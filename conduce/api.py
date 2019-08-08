@@ -737,6 +737,25 @@ def get_transactions(dataset_id, **kwargs):
     return make_get_request(fragment, parameters=parameters, **kwargs)
 
 
+def delete_transactions(dataset_id, **kwargs):
+    """
+    Clear all dataset transactions from Conduce.
+    Delete and re-create dataset backends.
+
+    Return the dataset and all backends to an intialized (empty) state.
+    Dataset is ready for ingest when request is finished.
+
+    Returns
+    -------
+    requests.Response
+         On success, an asynchronous job ID.  Check the job status for deletion progress.
+         (See :py:func:`wait_for_job`)
+    """
+
+    fragment = '/api/v2/data/{}/transactions'.format(dataset_id)
+    return make_delete_request(fragment, **kwargs)
+
+
 def _ingest_entity_set(dataset_id, entity_set, **kwargs):
     if 'entities' not in entity_set:
         raise ValueError('parameter entity_set is not an \'entities\' dict')

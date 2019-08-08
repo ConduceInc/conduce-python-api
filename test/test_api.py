@@ -28,6 +28,14 @@ class CustomHTTPException:
 
 
 class Test(unittest.TestCase):
+    @mock.patch('conduce.api.make_delete_request', return_value=ResultMock())
+    def test_delete_transactions(self, mock_make_get_request):
+        fake_id = 'fake-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        expected_uri = '/api/v2/data/{}/transactions'.format(fake_id)
+        api.delete_transactions(fake_id, **fake_kwargs)
+        mock_make_get_request.assert_called_once_with(expected_uri, **fake_kwargs)
+
     @mock.patch('conduce.api.make_get_request', return_value=ResultMock())
     def test_get_transactions(self, mock_make_get_request):
         fake_id = 'fake-id'
