@@ -245,7 +245,7 @@ class Test(unittest.TestCase):
         result = api.list_api_keys(**test_kwargs)
         mock_make_get_request.assert_called_once_with(
             'apikeys/list', **test_kwargs)
-        self.assertEquals(result['apikey'], 'fake json content')
+        self.assertEqual(result['apikey'], 'fake json content')
 
     @mock.patch('conduce.api.make_post_request', return_value=ResultMock())
     def test_create_api_key(self, mock_make_post_request):
@@ -253,7 +253,7 @@ class Test(unittest.TestCase):
         result = api.create_api_key(**test_kwargs)
         mock_make_post_request.assert_called_once_with(
             {"description": "Generated and used by conduce-python-api"}, 'apikeys/create', **test_kwargs)
-        self.assertEquals(result, 'fake json content')
+        self.assertEqual(result, 'fake json content')
 
     @mock.patch('conduce.api.make_post_request')
     def test_remove_api_key(self, mock_make_post_request):
@@ -262,7 +262,7 @@ class Test(unittest.TestCase):
         result = api.remove_api_key(test_api_key, **test_kwargs)
         mock_make_post_request.assert_called_once_with(
             {'apikey': test_api_key}, 'apikeys/delete', **test_kwargs)
-        self.assertEquals(result, None)
+        self.assertEqual(result, None)
 
     @mock.patch('conduce.api.make_post_request', return_value=False)
     def test_account_exists(self, mock_make_post_request):
