@@ -7,7 +7,7 @@ import datetime
 # Python 2 compatibility
 try:
     import __builtin__ as builtins
-except:
+except Exception:
     import builtins
 assert(hasattr(builtins, 'open'))
 ###

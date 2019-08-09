@@ -831,7 +831,7 @@ def get_dataset_backend_metadata(dataset_id, backend_id, **kwargs):
     **kwargs : key-value
         See :py:func:`make_get_request` for more kwargs.
     """
-    return make_get_request('/api/v2/data/{}/backends/{}'.format(dataset_id, backend_id), **kwargs)
+    return json.loads(make_get_request('/api/v2/data/{}/backends/{}'.format(dataset_id, backend_id), **kwargs).content)
 
 
 def list_dataset_backends(dataset_id, **kwargs):
@@ -847,7 +847,7 @@ def list_dataset_backends(dataset_id, **kwargs):
     **kwargs : key-value
         See :py:func:`make_get_request` for more kwargs.
     """
-    return make_get_request('/api/v2/data/{}/backends'.format(dataset_id), **kwargs)
+    return json.loads(make_get_request('/api/v2/data/{}/backends'.format(dataset_id), **kwargs).content)
 
 
 def set_default_backend(dataset_id, backend_id, **kwargs):
@@ -1027,8 +1027,8 @@ def add_capped_tile_store(dataset_id, auto_process, min_temporal_zoom_level, min
         See :py:func:`make_post_request` for more kwargs.
     """
     config = {
-        'minimum_temporal_level': min_temporal_zoom_level,
-        'minimum_spatial_level': min_spatial_zoom_level,
+        'minimum_temporal_level': int(min_temporal_zoom_level),
+        'minimum_spatial_level': int(min_spatial_zoom_level),
     }
     return _create_dataset_backend(dataset_id, DatasetBackends.capped_tile, auto_process, config, **kwargs)
 

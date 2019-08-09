@@ -198,16 +198,36 @@ class Test(unittest.TestCase):
         fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
         fake_dataset_id = 'fake-id'
         fake_auto_process = 'fake-auto_process'
-        fake_temporal = 'fake-temporal'
-        fake_spatial = 'fake-spatial'
+        fake_temporal = 5
+        fake_spatial = 4
         api.add_capped_tile_store(fake_dataset_id, fake_auto_process, fake_temporal, fake_spatial, **fake_kwargs)
 
         expected_config = {
-            'minimum_temporal_level': 'fake-temporal',
-            'minimum_spatial_level': 'fake-spatial',
+            'minimum_temporal_level': 5,
+            'minimum_spatial_level': 4,
         }
         mock__create_dataset_backend.assert_called_once_with(fake_dataset_id, api.DatasetBackends.capped_tile,
                                                              fake_auto_process, expected_config, **fake_kwargs)
+
+    @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
+    def test_add_capped_tile_store__raises_non_numeric_temporal(self, mock__create_dataset_backend):
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        fake_dataset_id = 'fake-id'
+        fake_auto_process = 'fake-auto_process'
+        fake_temporal = 'fake-temporal'
+        fake_spatial = 4
+        with self.assertRaisesRegex(ValueError, '.*fake-temporal'):
+            api.add_capped_tile_store(fake_dataset_id, fake_auto_process, fake_temporal, fake_spatial, **fake_kwargs)
+
+    @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
+    def test_add_capped_tile_store__raises_non_numeric_spatial(self, mock__create_dataset_backend):
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        fake_dataset_id = 'fake-id'
+        fake_auto_process = 'fake-auto_process'
+        fake_temporal = 5
+        fake_spatial = 'fake-spatial'
+        with self.assertRaisesRegex(ValueError, '.*fake-spatial'):
+            api.add_capped_tile_store(fake_dataset_id, fake_auto_process, fake_temporal, fake_spatial, **fake_kwargs)
 
     @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
     def test_add_elasticsearch_store(self, mock__create_dataset_backend):

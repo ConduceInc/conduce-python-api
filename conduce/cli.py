@@ -316,6 +316,69 @@ def get_dataset_transactions(args):
     return api.get_transactions(dataset_id, **vars(args))
 
 
+def add_simple_store(args):
+    dataset_id = args.dataset_id
+    auto_process = not args.manual_processing
+    del vars(args)['dataset_id']
+    return api.add_simple_store(dataset_id, auto_process, **vars(args))
+
+
+def remove_dataset_backends(args):
+    if len(args.backend_ids) == 0 and not args.all:
+        raise ValueError('You must provide a list of backend IDs or pass --all')
+
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    backend_ids = args.backend_ids
+    del vars(args)['backend_ids']
+    remove_all = args.all
+    del vars(args)['all']
+    force = args.force
+    del vars(args)['force']
+
+    if remove_all:
+        backend_ids = api.list_dataset_backends(dataset_id, **vars(args))
+        if not force:
+            answer = input("Removing {} backends! Are you sure (Y/n): ".format(len(backend_ids)))
+            if answer is not 'Y':
+                return
+
+    for backend_id in backend_ids:
+        print('Removing {}'.format(backend_id))
+        api.remove_dataset_backend(dataset_id, backend_id, **vars(args))
+
+
+def list_dataset_backends(args):
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    verbose = args.verbose
+    del vars(args)['verbose']
+
+    backends = api.list_dataset_backends(dataset_id, **vars(args))
+
+    if verbose:
+        metadata = []
+        for backend_id in backends:
+            metadata.append(api.get_dataset_backend_metadata(dataset_id, backend_id, **vars(args)))
+        return metadata
+
+    return backends
+
+
+def add_tile_store(args):
+    dataset_id = args.dataset_id
+    auto_process = not args.manual_processing
+    del vars(args)['dataset_id']
+    return api.add_tile_store(dataset_id, auto_process, **vars(args))
+
+
+def add_elasticsearch_store(args):
+    dataset_id = args.dataset_id
+    auto_process = not args.manual_processing
+    del vars(args)['dataset_id']
+    return api.add_elasticsearch_store(dataset_id, auto_process, **vars(args))
+
+
 def add_histogram_store(args):
     dataset_id = args.dataset_id
     auto_process = not args.manual_processing
@@ -325,9 +388,13 @@ def add_histogram_store(args):
 
 def add_capped_tile_store(args):
     dataset_id = args.dataset_id
+    min_spatial = args.min_spatial
+    min_temporal = args.min_temporal
     auto_process = not args.manual_processing
     del vars(args)['dataset_id']
-    return api.add_capped_tile_store(dataset_id, auto_process, 2, 5, **vars(args))
+    del vars(args)['min_spatial']
+    del vars(args)['min_temporal']
+    return api.add_capped_tile_store(dataset_id, auto_process, min_spatial, min_temporal, **vars(args))
 
 
 def ingest_data(args):
@@ -770,16 +837,50 @@ def main():
     parser_dataset_transactions.add_argument('--count', action='store_true', help='Return only the number of transactions in the log')
     parser_dataset_transactions.set_defaults(func=get_dataset_transactions)
 
-    parser_dataset_add_capped_tile_store = parser_dataset_subparsers.add_parser(
-        'add-capped-tile-store', parents=[api_cmd_parser], help='Add a capped_tile store to the dataset')
-    parser_dataset_add_capped_tile_store.add_argument('dataset_id', help='Unique identifier of the dataset to change')
-    parser_dataset_add_capped_tile_store.add_argument('--manual-processing', action='store_true', help='Disable automatic processing of transactions')
+    parser_dataset_list_backends = parser_dataset_subparsers.add_parser(
+        'list-backends', parents=[api_cmd_parser], help='List backends attached to the dataset')
+    parser_dataset_list_backends.add_argument('dataset_id', help='Unique identifier of the dataset to list')
+    parser_dataset_list_backends.add_argument('-v', '--verbose', action='store_true', help='List metadata for all backends')
+    parser_dataset_list_backends.set_defaults(func=list_dataset_backends)
+
+    parser_dataset_list_backends = parser_dataset_subparsers.add_parser(
+        'remove-backend', parents=[api_cmd_parser], help='Remove backends from the dataset')
+    parser_dataset_list_backends.add_argument('dataset_id', help='Unique identifier of the dataset to list')
+    parser_dataset_list_backends.add_argument('backend_ids', nargs='*', help='IDs of backends to remove')
+    parser_dataset_list_backends.add_argument('--all', action='store_true', help='Remove all backends, overrides list of backend IDs')
+    parser_dataset_list_backends.add_argument('-f', '--force', action='store_true',
+                                              help='When --all specified, skip prompt and remove backends without prejudice.')
+    parser_dataset_list_backends.set_defaults(func=remove_dataset_backends)
+
+    parser_dataset_add_backend = parser_dataset_subparsers.add_parser(
+        'add-backend', parents=[api_cmd_parser], help='Add a backend to the dataset')
+    parser_dataset_add_backend_subparsers = parser_dataset_add_backend.add_subparsers(help='Available backends', dest='see subcommands')
+    parser_dataset_add_backend_subparsers.required = True
+
+    dataset_add_backend_parser = ConduceCommandLineParser(add_help=False)
+    dataset_add_backend_parser.add_argument('dataset_id', help='Unique identifier of the dataset to change')
+    dataset_add_backend_parser.add_argument('--manual-processing', action='store_true', help='Disable automatic processing of transactions')
+
+    parser_dataset_add_simple_store = parser_dataset_add_backend_subparsers.add_parser(
+        'simple', parents=[api_cmd_parser, dataset_add_backend_parser], help='Add a simple store to the dataset')
+    parser_dataset_add_simple_store.set_defaults(func=add_simple_store)
+
+    parser_dataset_add_tile_store = parser_dataset_add_backend_subparsers.add_parser(
+        'tile', parents=[api_cmd_parser, dataset_add_backend_parser], help='Add a tile store to the dataset')
+    parser_dataset_add_tile_store.set_defaults(func=add_tile_store)
+
+    parser_dataset_add_elasticsearch_store = parser_dataset_add_backend_subparsers.add_parser(
+        'elasticsearch', parents=[api_cmd_parser, dataset_add_backend_parser], help='Add a elasticsearch store to the dataset')
+    parser_dataset_add_elasticsearch_store.set_defaults(func=add_elasticsearch_store)
+
+    parser_dataset_add_capped_tile_store = parser_dataset_add_backend_subparsers.add_parser(
+        'capped-tile', parents=[api_cmd_parser, dataset_add_backend_parser], help='Add a capped_tile store to the dataset')
+    parser_dataset_add_capped_tile_store.add_argument('min_spatial', type=int, help='The lowest spatial resolution supported by the store')
+    parser_dataset_add_capped_tile_store.add_argument('min_temporal', type=int, help='The lowest temporal resolution supported by the store')
     parser_dataset_add_capped_tile_store.set_defaults(func=add_capped_tile_store)
 
-    parser_dataset_add_histogram_store = parser_dataset_subparsers.add_parser(
-        'add-histogram-store', parents=[api_cmd_parser], help='Add a histogram store to the dataset')
-    parser_dataset_add_histogram_store.add_argument('dataset_id', help='Unique identifier of the dataset to change')
-    parser_dataset_add_histogram_store.add_argument('--manual-processing', action='store_true', help='Disable automatic processing of transactions')
+    parser_dataset_add_histogram_store = parser_dataset_add_backend_subparsers.add_parser(
+        'histogram', parents=[api_cmd_parser, dataset_add_backend_parser], help='Add a histogram store to the dataset')
     parser_dataset_add_histogram_store.set_defaults(func=add_histogram_store)
 
     parser_create_resource = subparsers.add_parser('create', parents=[api_cmd_parser], help='Create a new resource')
