@@ -28,12 +28,45 @@ class CustomHTTPException:
 
 
 class Test(unittest.TestCase):
+    @mock.patch('conduce.api.make_post_request', return_value=ResultMock())
+    def test_search_dataset_backend(self, mock_make_post_request):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_id = 'fake-backend-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        api.search_dataset_backend(fake_dataset_id, fake_backend_id, 'fake-query', **fake_kwargs)
+
+        expected_fragment = '/api/v2/data/{}/backends/{}/searches'.format(fake_dataset_id, fake_backend_id)
+        mock_make_post_request.assert_called_once_with('fake-query', expected_fragment, **fake_kwargs)
+
+    @mock.patch('conduce.api.make_delete_request', return_value=ResultMock())
+    def test_delete_dataset_backend(self, mock_make_delete_request):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_id = 'fake-backend-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        api.remove_dataset_backend(fake_dataset_id, fake_backend_id, **fake_kwargs)
+
+        expected_fragment = '/api/v2/data/{}/backends/{}'.format(fake_dataset_id, fake_backend_id)
+        mock_make_delete_request.assert_called_once_with(expected_fragment, **fake_kwargs)
+
     @mock.patch('conduce.api.make_get_request', return_value=ResultMock())
-    def test_get_dataset_backends(self, mock_make_get_request):
+    def test_get_dataset_backend_metadata(self, mock_make_get_request):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_id = 'fake-backend-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        api.get_dataset_backend_metadata(fake_dataset_id, fake_backend_id, **fake_kwargs)
+
+        expected_fragment = '/api/v2/data/{}/backends/{}'.format(fake_dataset_id, fake_backend_id)
+        mock_make_get_request.assert_called_once_with(expected_fragment, **fake_kwargs)
+
+    @mock.patch('conduce.api.make_get_request', return_value=ResultMock())
+    def test_list_dataset_backends(self, mock_make_get_request):
         fake_dataset_id = 'fake-dataset-id'
         fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
 
-        api.get_dataset_backends(fake_dataset_id, **fake_kwargs)
+        api.list_dataset_backends(fake_dataset_id, **fake_kwargs)
 
         expected_fragment = '/api/v2/data/{}/backends'.format(fake_dataset_id)
         mock_make_get_request.assert_called_once_with(expected_fragment, **fake_kwargs)

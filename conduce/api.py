@@ -778,7 +778,55 @@ def delete_transactions(dataset_id, **kwargs):
     return make_delete_request(fragment, **kwargs)
 
 
-def get_dataset_backends(dataset_id, **kwargs):
+def search_dataset_backend(dataset_id, backend_id, query, **kwargs):
+    """
+    Remove all data from the backend, remove the backend from the dataset.  Delete the backend.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to which the backend belongs.
+    backend_id : string
+        The UUID that identifies the dataset backend to update.
+    **kwargs : key-value
+        See :py:func:`make_delete_request` for more kwargs.
+    """
+    return make_post_request(query, '/api/v2/data/{}/backends/{}/searches'.format(dataset_id, backend_id), **kwargs)
+
+
+def remove_dataset_backend(dataset_id, backend_id, **kwargs):
+    """
+    Remove all data from the backend, remove the backend from the dataset.  Delete the backend.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to which the backend belongs.
+    backend_id : string
+        The UUID that identifies the dataset backend to update.
+    **kwargs : key-value
+        See :py:func:`make_delete_request` for more kwargs.
+    """
+    return make_delete_request('/api/v2/data/{}/backends/{}'.format(dataset_id, backend_id), **kwargs)
+
+
+def get_dataset_backend_metadata(dataset_id, backend_id, **kwargs):
+    """
+    Retrieves dataset backend metadata.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to which the backend belongs.
+    backend_id : string
+        The UUID that identifies the dataset backend to update.
+    **kwargs : key-value
+        See :py:func:`make_get_request` for more kwargs.
+    """
+    return make_get_request('/api/v2/data/{}/backends/{}'.format(dataset_id, backend_id), **kwargs)
+
+
+def list_dataset_backends(dataset_id, **kwargs):
     """
     Retrieves the list of backend UUIDs associated with the specified dataset.
 
