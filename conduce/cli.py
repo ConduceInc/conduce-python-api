@@ -323,6 +323,13 @@ def add_histogram_store(args):
     return api.add_histogram_store(dataset_id, auto_process, **vars(args))
 
 
+def add_capped_tile_store(args):
+    dataset_id = args.dataset_id
+    auto_process = not args.manual_processing
+    del vars(args)['dataset_id']
+    return api.add_capped_tile_store(dataset_id, auto_process, 2, 5, **vars(args))
+
+
 def ingest_data(args):
     if args.raw:
         del vars(args)['dataset_id']
@@ -590,6 +597,13 @@ def send_patch_request(args):
     return api.make_patch_request(json.loads(args.data), uri, **vars(args))
 
 
+def send_delete_request(args):
+    uri = args.uri
+    del vars(args)['uri']
+
+    return api.make_delete_request(uri, **vars(args))
+
+
 def account_exists(args):
     email = args.email
     del vars(args)['email']
@@ -755,6 +769,12 @@ def main():
     parser_dataset_transactions.add_argument('--page_state', help='The page state to continue searching from')
     parser_dataset_transactions.add_argument('--count', action='store_true', help='Return only the number of transactions in the log')
     parser_dataset_transactions.set_defaults(func=get_dataset_transactions)
+
+    parser_dataset_add_capped_tile_store = parser_dataset_subparsers.add_parser(
+        'add-capped-tile-store', parents=[api_cmd_parser], help='Add a capped_tile store to the dataset')
+    parser_dataset_add_capped_tile_store.add_argument('dataset_id', help='Unique identifier of the dataset to change')
+    parser_dataset_add_capped_tile_store.add_argument('--manual-processing', action='store_true', help='Disable automatic processing of transactions')
+    parser_dataset_add_capped_tile_store.set_defaults(func=add_capped_tile_store)
 
     parser_dataset_add_histogram_store = parser_dataset_subparsers.add_parser(
         'add-histogram-store', parents=[api_cmd_parser], help='Add a histogram store to the dataset')
@@ -1015,6 +1035,10 @@ def main():
     parser_patch.add_argument('uri', help='The URI of the resource being requested')
     parser_patch.add_argument('data', help='The data being posted')
     parser_patch.set_defaults(func=send_patch_request)
+
+    parser_patch = subparsers.add_parser('delete', parents=[api_cmd_parser], help='Make an arbitrary delete request')
+    parser_patch.add_argument('uri', help='The URI of the resource being requested')
+    parser_patch.set_defaults(func=send_delete_request)
 
     args = arg_parser.parse_args()
 
