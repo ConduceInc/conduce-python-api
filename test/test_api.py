@@ -51,13 +51,13 @@ class Test(unittest.TestCase):
         fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
         fake_dataset_id = 'fake-id'
         fake_auto_process = 'fake-auto_process'
-        fake_min = 'fake-min'
-        fake_max = 'fake-max'
-        api.add_capped_tile_store(fake_dataset_id, fake_auto_process, fake_min, fake_max, **fake_kwargs)
+        fake_temporal = 'fake-temporal'
+        fake_spatial = 'fake-spatial'
+        api.add_capped_tile_store(fake_dataset_id, fake_auto_process, fake_temporal, fake_spatial, **fake_kwargs)
 
         expected_config = {
-            'minimum_temporal_level': 'fake-min',
-            'maximum_temporal_level': 'fake-max',
+            'minimum_temporal_level': 'fake-temporal',
+            'minimum_spatial_level': 'fake-spatial',
         }
         mock__create_dataset_backend.assert_called_once_with(fake_dataset_id, api.DatasetBackends.capped_tile,
                                                              fake_auto_process, expected_config, **fake_kwargs)

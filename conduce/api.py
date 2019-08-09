@@ -818,7 +818,7 @@ def add_tile_store(dataset_id, auto_process, **kwargs):
     return _create_dataset_backend(dataset_id, DatasetBackends.tile, auto_process, None, **kwargs)
 
 
-def add_capped_tile_store(dataset_id, auto_process, minimum_temporal_level, maximum_temporal_level, **kwargs):
+def add_capped_tile_store(dataset_id, auto_process, min_temporal_zoom_level, min_spatial_zoom_level, **kwargs):
     """
     Adds a capped tile store to the specified dataset.
 
@@ -832,16 +832,16 @@ def add_capped_tile_store(dataset_id, auto_process, minimum_temporal_level, maxi
     auto_process : boolean
         Configure the backend to auto process transactions. Auto processing is enabled by default.
         Set to False to disable auto processing.
-    minimum_temporal_level : integer
+    min_temporal_zoom_level : integer
         The lowest resolution temporal zoom level at which data will be tiled.
-    maximum_temporal_level : integer
+    min_spatial_zoom_level : integer
         The highest resolution temporal zoom level at which data will be tiled.
     **kwargs : key-value
         See :py:func:`make_post_request` for more kwargs.
     """
     config = {
-        'minimum_temporal_level': minimum_temporal_level,
-        'maximum_temporal_level': maximum_temporal_level,
+        'minimum_temporal_level': min_temporal_zoom_level,
+        'minimum_spatial_level': min_spatial_zoom_level,
     }
     return _create_dataset_backend(dataset_id, DatasetBackends.capped_tile, auto_process, config, **kwargs)
 
