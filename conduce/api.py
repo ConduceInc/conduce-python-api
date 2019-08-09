@@ -780,7 +780,7 @@ def delete_transactions(dataset_id, **kwargs):
 
 def search_dataset_backend(dataset_id, backend_id, query, **kwargs):
     """
-    Remove all data from the backend, remove the backend from the dataset.  Delete the backend.
+    Retrieves data from the dataset matching the query provided.
 
     Parameters
     ----------
@@ -788,10 +788,18 @@ def search_dataset_backend(dataset_id, backend_id, query, **kwargs):
         The UUID that identifies the dataset to which the backend belongs.
     backend_id : string
         The UUID that identifies the dataset backend to update.
+    query: dictionary
+        Query parameters.
     **kwargs : key-value
         See :py:func:`make_delete_request` for more kwargs.
+
+    Returns
+    -------
+    list
+        A list of entities matching the specified query
     """
-    return make_post_request(query, '/api/v2/data/{}/backends/{}/searches'.format(dataset_id, backend_id), **kwargs)
+    response = make_post_request(query, '/api/v2/data/{}/backends/{}/searches'.format(dataset_id, backend_id), **kwargs)
+    return json.loads(response.content)
 
 
 def remove_dataset_backend(dataset_id, backend_id, **kwargs):

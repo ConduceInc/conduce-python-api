@@ -34,7 +34,8 @@ class Test(unittest.TestCase):
         fake_backend_id = 'fake-backend-id'
         fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
 
-        api.search_dataset_backend(fake_dataset_id, fake_backend_id, 'fake-query', **fake_kwargs)
+        expected_response = {'apikey': 'fake json content'}
+        self.assertEqual(api.search_dataset_backend(fake_dataset_id, fake_backend_id, 'fake-query', **fake_kwargs), expected_response)
 
         expected_fragment = '/api/v2/data/{}/backends/{}/searches'.format(fake_dataset_id, fake_backend_id)
         mock_make_post_request.assert_called_once_with('fake-query', expected_fragment, **fake_kwargs)
