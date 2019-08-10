@@ -29,11 +29,6 @@ class ResultMock:
     content = "{\"apikey\": \"fake json content\"}"
 
 
-class CustomHTTPException:
-    return_value = 409
-    msg = "Not found"
-
-
 class Test(unittest.TestCase):
     # For Python 2 compatibility
     if not hasattr(unittest.TestCase, 'assertRaisesRegex'):
