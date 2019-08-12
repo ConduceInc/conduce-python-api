@@ -748,8 +748,10 @@ def get_transactions(dataset_id, **kwargs):
     # HACK: get around bool parameter bug
     if not kwargs.get('count'):
         parameters.pop('count')
+    if kwargs.get('max'):
+        parameters.pop('min')
 
-    return make_get_request(fragment, parameters=parameters, **kwargs)
+    return make_get_request(fragment, parameters=parameters, **kwargs).content
 
 
 def delete_transactions(dataset_id, **kwargs):

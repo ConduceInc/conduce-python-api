@@ -150,13 +150,49 @@ class Test(unittest.TestCase):
         mock_make_get_request.assert_called_once_with(expected_uri, parameters=expected_parameters, **fake_kwargs)
 
     @mock.patch('conduce.api.make_get_request', return_value=ResultMock())
-    def test_get_transactions_with_parameters(self, mock_make_get_request):
+    def test_get_transactions_with_parameters_min(self, mock_make_get_request):
+        fake_id = 'fake-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2', 'min': 'fake-min',
+                       'value': 'fake-value', 'rows': 'fake-rows', 'page_state': 'fake-page-state', 'count': 'fake-count'
+                       }
+        expected_parameters = {
+            'min': fake_kwargs.get('min'),
+            'max': None,
+            'value': fake_kwargs.get('value'),
+            'rows': fake_kwargs.get('rows'),
+            'page_state': fake_kwargs.get('page_state', ''),
+            'count': bool(fake_kwargs.get('count', False)),
+        }
+
+        expected_uri = '/api/v2/data/{}/transactions'.format(fake_id)
+        api.get_transactions(fake_id, **fake_kwargs)
+        mock_make_get_request.assert_called_once_with(expected_uri, parameters=expected_parameters, **fake_kwargs)
+
+    @mock.patch('conduce.api.make_get_request', return_value=ResultMock())
+    def test_get_transactions_with_parameters_max(self, mock_make_get_request):
+        fake_id = 'fake-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2', 'max': 'fake-max',
+                       'value': 'fake-value', 'rows': 'fake-rows', 'page_state': 'fake-page-state', 'count': 'fake-count'
+                       }
+        expected_parameters = {
+            'max': fake_kwargs.get('max'),
+            'value': fake_kwargs.get('value'),
+            'rows': fake_kwargs.get('rows'),
+            'page_state': fake_kwargs.get('page_state', ''),
+            'count': bool(fake_kwargs.get('count', False)),
+        }
+
+        expected_uri = '/api/v2/data/{}/transactions'.format(fake_id)
+        api.get_transactions(fake_id, **fake_kwargs)
+        mock_make_get_request.assert_called_once_with(expected_uri, parameters=expected_parameters, **fake_kwargs)
+
+    @mock.patch('conduce.api.make_get_request', return_value=ResultMock())
+    def test_get_transactions_with_parameters_max_overrides_min(self, mock_make_get_request):
         fake_id = 'fake-id'
         fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2', 'min': 'fake-min', 'max': 'fake-max',
                        'value': 'fake-value', 'rows': 'fake-rows', 'page_state': 'fake-page-state', 'count': 'fake-count'
                        }
         expected_parameters = {
-            'min': fake_kwargs.get('min', -1),
             'max': fake_kwargs.get('max'),
             'value': fake_kwargs.get('value'),
             'rows': fake_kwargs.get('rows'),
