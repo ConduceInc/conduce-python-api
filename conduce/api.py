@@ -778,6 +778,169 @@ def delete_transactions(dataset_id, **kwargs):
     return make_delete_request(fragment, **kwargs)
 
 
+def search_dataset_backend(dataset_id, backend_id, query, **kwargs):
+    """
+    Retrieves data from the dataset matching the query provided.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to which the backend belongs.
+    backend_id : string
+        The UUID that identifies the dataset backend to update.
+    query: dictionary
+        Query parameters.
+    **kwargs : key-value
+        See :py:func:`make_delete_request` for more kwargs.
+
+    Returns
+    -------
+    list
+        A list of entities matching the specified query
+    """
+    response = make_post_request(query, '/api/v2/data/{}/backends/{}/searches'.format(dataset_id, backend_id), **kwargs)
+    return json.loads(response.content)
+
+
+def remove_dataset_backend(dataset_id, backend_id, **kwargs):
+    """
+    Remove all data from the backend, remove the backend from the dataset.  Delete the backend.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to which the backend belongs.
+    backend_id : string
+        The UUID that identifies the dataset backend to update.
+    **kwargs : key-value
+        See :py:func:`make_delete_request` for more kwargs.
+    """
+    return make_delete_request('/api/v2/data/{}/backends/{}'.format(dataset_id, backend_id), **kwargs)
+
+
+def get_dataset_backend_metadata(dataset_id, backend_id, **kwargs):
+    """
+    Retrieves dataset backend metadata.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to which the backend belongs.
+    backend_id : string
+        The UUID that identifies the dataset backend to update.
+    **kwargs : key-value
+        See :py:func:`make_get_request` for more kwargs.
+    """
+    return make_get_request('/api/v2/data/{}/backends/{}'.format(dataset_id, backend_id), **kwargs)
+
+
+def list_dataset_backends(dataset_id, **kwargs):
+    """
+    Retrieves the list of backend UUIDs associated with the specified dataset.
+
+    If no backends are found, the list is empty.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to which the backend belongs.
+    **kwargs : key-value
+        See :py:func:`make_get_request` for more kwargs.
+    """
+    return make_get_request('/api/v2/data/{}/backends'.format(dataset_id), **kwargs)
+
+
+def process_transactions(dataset_id, backend_id, **kwargs):
+    """
+    Process transactions on a dataset backend
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to which the backend belongs.
+    backend_id : string
+        The UUID that identifies the dataset backend to update.
+    **kwargs : key-value
+        **all**
+            Process all outstanding transactions to the specified backend
+        **transaction**
+            Process a specific transaction to the specified backend
+        **min**
+            The oldest transaction in the sequence to be processed to the backend
+        **max**
+            The newest transaction in the sequence to be processed to the backend
+        **default**
+            Make this backend the default backend. Set to any value, all other parameters are ignored.
+        See :py:func:`make_patch_request` for more kwargs.
+
+    Returns
+    -------
+    requests.Response
+         On success, an asynchronous job ID.  Check the job status for progress.
+         (See :py:func:`wait_for_job`)
+    """
+
+    fragment = '/api/v2/data/{}/backends/{}'.format(dataset_id, backend_id)
+    parameters = {
+        'all': bool(kwargs.get('all')),
+        'tx': kwargs.get('transaction'),
+        'min': kwargs.get('min'),
+        'max': kwargs.get('max'),
+        'default': kwargs.get('default'),
+    }
+
+    # HACK: Remove when boolean parameters are supported
+    if not kwargs.get('all'):
+        parameters.pop('all')
+
+    return make_patch_request({}, fragment, parameters=parameters, **kwargs)
+
+
+def enable_auto_processing(dataset_id, backend_id, enable=True, **kwargs):
+    """
+    Configure a dataset backend to automatically process new transactions
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to which the backend belongs.
+    backend_id : string
+        The UUID that identifies the dataset backend to update.
+    **kwargs : key-value
+        **enable**
+            When True (default) enables auto processing.  Set to False to disable, or call :py:func:`disable_auto_processing`.
+        See :py:func:`make_patch_request` for more kwargs.
+    """
+
+    fragment = '/api/v2/data/{}/backends/{}'.format(dataset_id, backend_id)
+    payload = [
+        {
+            "path": "/auto_process",
+            "value": enable,
+            "op": "add"
+        }
+    ]
+    return make_patch_request(payload, fragment, **kwargs)
+
+
+def disable_auto_processing(dataset_id, backend_id, **kwargs):
+    """
+    Configure a dataset backend to ignore new transactions
+
+    Transactions can be triggered to process to the backend manually using :py:func:`process_transactions`.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to which the backend belongs.
+    backend_id : string
+        The UUID that identifies the dataset backend to update.
+    **kwargs : key-value
+        See :py:func:`make_patch_request` for kwargs.
+    """
+    return enable_auto_processing(dataset_id, backend_id, False, **kwargs)
+
+
 def add_simple_store(dataset_id, auto_process, **kwargs):
     """
     Adds a simple store to the specified dataset.
