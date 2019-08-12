@@ -28,6 +28,104 @@ class CustomHTTPException:
 
 
 class Test(unittest.TestCase):
+    @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
+    def test_add_simple_store(self, mock__create_dataset_backend):
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        fake_dataset_id = 'fake-id'
+        fake_auto_process = 'fake-auto_process'
+        api.add_simple_store(fake_dataset_id, fake_auto_process, **fake_kwargs)
+        mock__create_dataset_backend.assert_called_once_with(fake_dataset_id, api.DatasetBackends.simple,
+                                                             fake_auto_process, None, **fake_kwargs)
+
+    @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
+    def test_add_tile_store(self, mock__create_dataset_backend):
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        fake_dataset_id = 'fake-id'
+        fake_auto_process = 'fake-auto_process'
+        api.add_tile_store(fake_dataset_id, fake_auto_process, **fake_kwargs)
+        mock__create_dataset_backend.assert_called_once_with(fake_dataset_id, api.DatasetBackends.tile,
+                                                             fake_auto_process, None, **fake_kwargs)
+
+    @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
+    def test_add_capped_tile_store(self, mock__create_dataset_backend):
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        fake_dataset_id = 'fake-id'
+        fake_auto_process = 'fake-auto_process'
+        fake_temporal = 'fake-temporal'
+        fake_spatial = 'fake-spatial'
+        api.add_capped_tile_store(fake_dataset_id, fake_auto_process, fake_temporal, fake_spatial, **fake_kwargs)
+
+        expected_config = {
+            'minimum_temporal_level': 'fake-temporal',
+            'minimum_spatial_level': 'fake-spatial',
+        }
+        mock__create_dataset_backend.assert_called_once_with(fake_dataset_id, api.DatasetBackends.capped_tile,
+                                                             fake_auto_process, expected_config, **fake_kwargs)
+
+    @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
+    def test_add_elasticsearch_store(self, mock__create_dataset_backend):
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        fake_dataset_id = 'fake-id'
+        fake_auto_process = 'fake-auto_process'
+        api.add_elasticsearch_store(fake_dataset_id, fake_auto_process, **fake_kwargs)
+        mock__create_dataset_backend.assert_called_once_with(fake_dataset_id, api.DatasetBackends.elasticsearch,
+                                                             fake_auto_process, None, **fake_kwargs)
+
+    @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
+    def test_add_histogram_store(self, mock__create_dataset_backend):
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        fake_dataset_id = 'fake-id'
+        fake_auto_process = 'fake-auto_process'
+        api.add_histogram_store(fake_dataset_id, fake_auto_process, **fake_kwargs)
+        mock__create_dataset_backend.assert_called_once_with(fake_dataset_id, api.DatasetBackends.histogram,
+                                                             fake_auto_process, None, **fake_kwargs)
+
+    def test__create_dataset_backend__invalid_backend(self):
+        with self.assertRaisesRegex(ValueError, 'The backend type specified is not valid.'):
+            api._create_dataset_backend('fake-id', 'invalid-backend-type', 'irrelevant', 'irrelevant')
+
+    @mock.patch('conduce.api.make_post_request', return_value=ResultMock())
+    def test__create_dataset_backend__simple(self, mock_make_post_request):
+        api._create_dataset_backend('fake-id', api.DatasetBackends.simple, None, None)
+        expected_payload = {
+            'backend_type': 'SimpleStore',
+            'auto_process': None,
+        }
+        mock_make_post_request.assert_called_once_with(expected_payload, '/api/v2/data/fake-id/backends')
+
+    @mock.patch('conduce.api.make_post_request', return_value=ResultMock())
+    def test__create_dataset_backend__kwargs_passthrough(self, mock_make_post_request):
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        api._create_dataset_backend('fake-id', api.DatasetBackends.simple, None, None, **fake_kwargs)
+        expected_payload = {
+            'backend_type': 'SimpleStore',
+            'auto_process': None,
+        }
+        mock_make_post_request.assert_called_once_with(expected_payload, '/api/v2/data/fake-id/backends', **fake_kwargs)
+
+    @mock.patch('conduce.api.make_post_request', return_value=ResultMock())
+    def test__create_dataset_backend__auto_process(self, mock_make_post_request):
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        api._create_dataset_backend('fake-id', api.DatasetBackends.simple, 'fake-auto-process', None, **fake_kwargs)
+        expected_payload = {
+            'backend_type': 'SimpleStore',
+            'auto_process': 'fake-auto-process',
+        }
+        mock_make_post_request.assert_called_once_with(expected_payload, '/api/v2/data/fake-id/backends', **fake_kwargs)
+
+    @mock.patch('conduce.api.make_post_request', return_value=ResultMock())
+    def test__create_dataset_backend__custom_config(self, mock_make_post_request):
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        fake_config = {'config1': 'config1', 'config2': 'config2'}
+        api._create_dataset_backend('fake-id', api.DatasetBackends.simple, None, fake_config, **fake_kwargs)
+        expected_payload = {
+            'backend_type': 'SimpleStore',
+            'auto_process': None,
+            'config1': 'config1',
+            'config2': 'config2'
+        }
+        mock_make_post_request.assert_called_once_with(expected_payload, '/api/v2/data/fake-id/backends', **fake_kwargs)
+
     @mock.patch('conduce.api.make_delete_request', return_value=ResultMock())
     def test_delete_transactions(self, mock_make_get_request):
         fake_id = 'fake-id'
@@ -245,7 +343,7 @@ class Test(unittest.TestCase):
         result = api.list_api_keys(**test_kwargs)
         mock_make_get_request.assert_called_once_with(
             'apikeys/list', **test_kwargs)
-        self.assertEquals(result['apikey'], 'fake json content')
+        self.assertEqual(result['apikey'], 'fake json content')
 
     @mock.patch('conduce.api.make_post_request', return_value=ResultMock())
     def test_create_api_key(self, mock_make_post_request):
@@ -253,7 +351,7 @@ class Test(unittest.TestCase):
         result = api.create_api_key(**test_kwargs)
         mock_make_post_request.assert_called_once_with(
             {"description": "Generated and used by conduce-python-api"}, 'apikeys/create', **test_kwargs)
-        self.assertEquals(result, 'fake json content')
+        self.assertEqual(result, 'fake json content')
 
     @mock.patch('conduce.api.make_post_request')
     def test_remove_api_key(self, mock_make_post_request):
@@ -262,7 +360,7 @@ class Test(unittest.TestCase):
         result = api.remove_api_key(test_api_key, **test_kwargs)
         mock_make_post_request.assert_called_once_with(
             {'apikey': test_api_key}, 'apikeys/delete', **test_kwargs)
-        self.assertEquals(result, None)
+        self.assertEqual(result, None)
 
     @mock.patch('conduce.api.make_post_request', return_value=False)
     def test_account_exists(self, mock_make_post_request):
