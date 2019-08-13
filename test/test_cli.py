@@ -33,6 +33,7 @@ class MockResponse_202:
 
 class MockResponse:
     content = "{\"apikey\": \"fake json content\"}"
+    headers = {"location": "fake location"}
 
 
 class CustomHTTPException:
@@ -44,6 +45,95 @@ listed_backends = ['listed-backend-{}'.format(x) for x in range(0, 9)]
 
 
 class Test(unittest.TestCase):
+    @mock.patch('conduce.api.enable_auto_processing', return_value=MockResponse())
+    def test_enable_auto_processing__disable_True(self, mock_api_enable_auto_processing):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_id = 'fake-backend-id'
+        fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
+        fake_args = FakeArgs(dataset_id=fake_dataset_id, disable=True, backend_id=fake_backend_id, **vars(fake_passed_args))
+
+        cli.enable_auto_processing(fake_args)
+
+        mock_api_enable_auto_processing.assert_called_once_with(fake_dataset_id, fake_backend_id, enable=False, **vars(fake_passed_args))
+
+    @mock.patch('conduce.api.enable_auto_processing', return_value=MockResponse())
+    def test_enable_auto_processing__disable_False(self, mock_api_enable_auto_processing):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_id = 'fake-backend-id'
+        fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
+        fake_args = FakeArgs(dataset_id=fake_dataset_id, disable=False, backend_id=fake_backend_id, **vars(fake_passed_args))
+
+        cli.enable_auto_processing(fake_args)
+
+        mock_api_enable_auto_processing.assert_called_once_with(fake_dataset_id, fake_backend_id, enable=True, **vars(fake_passed_args))
+
+    @mock.patch('conduce.api.set_default_backend', return_value=MockResponse())
+    def test_set_default_backend(self, mock_api_set_default_backend):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_id = 'fake-backend-id'
+        fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
+        fake_args = FakeArgs(dataset_id=fake_dataset_id, backend_id=fake_backend_id, **vars(fake_passed_args))
+
+        cli.set_default_backend(fake_args)
+
+        mock_api_set_default_backend.assert_called_once_with(fake_dataset_id, fake_backend_id, **vars(fake_passed_args))
+
+    @mock.patch('conduce.api.list_dataset_backends', return_value=listed_backends)
+    @mock.patch('conduce.api.process_transactions', return_value=MockResponse())
+    def test_process_transactions__all_backends(self, mock_api_process_transactions, mock_api_list_dataset_backends):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_passed_args = FakeArgs(all=True, host='fake-host', user='fake-user')
+        fake_args = FakeArgs(dataset_id=fake_dataset_id, backend_ids=[], all_backends=True, **vars(fake_passed_args))
+
+        cli.process_transactions(fake_args)
+
+        expected_calls = []
+        for idx, id in enumerate(listed_backends):
+            expected_calls.append(mock.call(fake_dataset_id, listed_backends[idx], **vars(fake_passed_args)))
+        mock_api_process_transactions.assert_has_calls(expected_calls)
+        mock_api_list_dataset_backends.assert_called_once_with(fake_dataset_id, **vars(fake_passed_args))
+
+    @mock.patch('conduce.api.list_dataset_backends', return_value=listed_backends)
+    @mock.patch('conduce.api.process_transactions', return_value=MockResponse())
+    def test_process_transactions__all_backends_override_list(self, mock_api_process_transactions, mock_api_list_dataset_backends):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_ids = ['fake-backend-id-1', 'fake-backend-id-2', 'fake-backend-id-3']
+        fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
+        fake_args = FakeArgs(dataset_id=fake_dataset_id, backend_ids=fake_backend_ids, all_backends=True, **vars(fake_passed_args))
+
+        cli.process_transactions(fake_args)
+
+        expected_calls = []
+        for idx, id in enumerate(listed_backends):
+            expected_calls.append(mock.call(fake_dataset_id, listed_backends[idx], **vars(fake_passed_args)))
+        mock_api_process_transactions.assert_has_calls(expected_calls)
+        mock_api_list_dataset_backends.assert_called_once_with(fake_dataset_id, **vars(fake_passed_args))
+
+    @mock.patch('conduce.api.process_transactions', return_value=MockResponse())
+    def test_process_transactions__backend_list(self, mock_api_process_transactions):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_ids = ['fake-backend-id-1', 'fake-backend-id-2', 'fake-backend-id-3']
+        fake_passed_args = FakeArgs(all=True, host='fake-host', user='fake-user')
+        fake_args = FakeArgs(dataset_id=fake_dataset_id, backend_ids=fake_backend_ids, all_backends=False, **vars(fake_passed_args))
+
+        cli.process_transactions(fake_args)
+
+        expected_calls = []
+        for idx, id in enumerate(fake_backend_ids):
+            expected_calls.append(mock.call(fake_dataset_id, fake_backend_ids[idx], **vars(fake_passed_args)))
+        mock_api_process_transactions.assert_has_calls(expected_calls)
+
+    @mock.patch('conduce.api.process_transactions', return_value=MockResponse())
+    def test_process_transactions__one_backend(self, mock_api_process_transactions):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_id = 'fake-backend-id'
+        fake_passed_args = FakeArgs(all=False, host='fake-host', user='fake-user')
+        fake_args = FakeArgs(dataset_id=fake_dataset_id, backend_ids=[fake_backend_id], all_backends=False, **vars(fake_passed_args))
+
+        cli.process_transactions(fake_args)
+
+        mock_api_process_transactions.assert_called_once_with(fake_dataset_id, fake_backend_id, **vars(fake_passed_args))
+
     @mock.patch('conduce.util.csv_to_json', return_value='fake-csv-to-json')
     @mock.patch('conduce.util.parse_samples', return_value='fake-parsed-samples')
     @mock.patch('conduce.util.json_to_samples', return_value='fake-samples')

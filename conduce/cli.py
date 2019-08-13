@@ -316,6 +316,44 @@ def get_dataset_transactions(args):
     return api.get_transactions(dataset_id, **vars(args))
 
 
+def process_transactions(args):
+    if len(args.backend_ids) == 0 and not args.all:
+        raise ValueError('You must provide a list of backend IDs or pass --all-backends')
+
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    backend_ids = args.backend_ids
+    del vars(args)['backend_ids']
+    all_backends = args.all_backends
+    del vars(args)['all_backends']
+
+    if all_backends:
+        backend_ids = api.list_dataset_backends(dataset_id, **vars(args))
+
+    for backend_id in backend_ids:
+        response = api.process_transactions(dataset_id, backend_id, **vars(args))
+        print('See job {}'.format(response.headers['location']))
+
+
+def enable_auto_processing(args):
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    backend_id = args.backend_id
+    del vars(args)['backend_id']
+    enable = not args.disable
+    del vars(args)['disable']
+
+    return api.enable_auto_processing(dataset_id, backend_id, enable=enable, **vars(args))
+
+
+def set_default_backend(args):
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    backend_id = args.backend_id
+    del vars(args)['backend_id']
+    return api.set_default_backend(dataset_id, backend_id, **vars(args))
+
+
 def remove_dataset_backends(args):
     if len(args.backend_ids) == 0 and not args.all:
         raise ValueError('You must provide a list of backend IDs or pass --all')
@@ -854,6 +892,30 @@ def main():
     parser_dataset_transactions.add_argument('--count', action='store_true', help='Return only the number of transactions in the log')
     parser_dataset_transactions.set_defaults(func=get_dataset_transactions)
 
+    parser_dataset_enable_auto_processing = parser_dataset_subparsers.add_parser(
+        'auto-process', parents=[api_cmd_parser], help='Configure backend to enable/disable automatic transaction processing')
+    parser_dataset_enable_auto_processing.add_argument('dataset_id', help='Unique identifier of the dataset to configure')
+    parser_dataset_enable_auto_processing.add_argument('backend_id', help='ID of backend to configure')
+    parser_dataset_enable_auto_processing.add_argument('--disable', action='store_true', help='Disable auto processing on the specified backend')
+    parser_dataset_enable_auto_processing.set_defaults(func=enable_auto_processing)
+
+    parser_dataset_set_default_backend = parser_dataset_subparsers.add_parser(
+        'set-default-backend', parents=[api_cmd_parser], help='Set backend to receive lens queries')
+    parser_dataset_set_default_backend.add_argument('dataset_id', help='Unique identifier of the dataset to configure')
+    parser_dataset_set_default_backend.add_argument('backend_id', help='ID of default backend')
+    parser_dataset_set_default_backend.set_defaults(func=set_default_backend)
+
+    parser_dataset_process_transactions = parser_dataset_subparsers.add_parser(
+        'process', parents=[api_cmd_parser], help='Process a sequence of transactions on the specified backends')
+    parser_dataset_process_transactions.add_argument('dataset_id', help='Unique identifier of the dataset to process')
+    parser_dataset_process_transactions.add_argument('backend_ids', nargs='*', help='IDs of backends to process')
+    parser_dataset_process_transactions.add_argument('--all-backends', help='Process specified transactions on all backends')
+    parser_dataset_process_transactions.add_argument('--all', help='Process all outstanding transactions (determined per backend)')
+    parser_dataset_process_transactions.add_argument('--min', help='The oldest transaction to be processed')
+    parser_dataset_process_transactions.add_argument('--max', help='The newest transaction to be processed')
+    parser_dataset_process_transactions.add_argument('--transaction', help='The index of a single transaction to process')
+    parser_dataset_process_transactions.set_defaults(func=process_transactions)
+
     parser_dataset_list_backends = parser_dataset_subparsers.add_parser(
         'list-backends', parents=[api_cmd_parser], help='List backends attached to the dataset')
     parser_dataset_list_backends.add_argument(
@@ -902,7 +964,6 @@ def main():
         'histogram', parents=[api_cmd_parser, dataset_add_backend_parser], help='Add a histogram store to the dataset')
     parser_dataset_add_histogram_store.set_defaults(func=add_histogram_store)
 
-    # TODO: process transactions
     # TODO: enable auto processing
     # TODO: disable auto processing
 
