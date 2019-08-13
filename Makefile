@@ -4,19 +4,13 @@ setup-env: venv2 venv3
 
 venv2:
 	mkdir -p venv2
-	cd venv2
 	pyenv install -s 2.7.16
-	pyenv local 2.7.16
-	cd ..
-	virtualenv venv2
+	PYENV_VERSION=2.7.16 virtualenv venv2
 
 venv3:
 	mkdir -p venv3
-	cd venv3
 	pyenv install -s 3.7.4
-	pyenv local 3.7.4
-	cd ..
-	python -m venv venv3 
+	PYENV_VERSION=3.7.4 python -m venv venv3
 
 deps-venv2: venv2 requirements-dev.txt
 	./venv2/bin/pip install -r requirements-dev.txt
