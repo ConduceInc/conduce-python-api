@@ -28,6 +28,40 @@ class CustomHTTPException:
 
 
 class Test(unittest.TestCase):
+    @mock.patch('conduce.api.delete_transactions', return_value=ResultMock())
+    def test__clear_dataset(self, mock_delete_transactions):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        api._clear_dataset(fake_dataset_id, **fake_kwargs)
+        mock_delete_transactions.assert_called_once_with(fake_dataset_id, **fake_kwargs)
+
+    @mock.patch('conduce.api.post_transaction', return_value=ResultMock())
+    def test__ingest_entity_set__custom_args(self, mock_post_transaction):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_entity_set = 'fake-entity-set'
+        fake_kwargs = {'process': False, 'operation': 'INSERT', 'arg1': 'arg1', 'arg2': 'arg2'}
+
+        api._ingest_entity_set(fake_dataset_id, fake_entity_set, **fake_kwargs)
+        mock_post_transaction.assert_called_once_with(
+            fake_dataset_id,
+            fake_entity_set,
+            **fake_kwargs)
+
+    @mock.patch('conduce.api.post_transaction', return_value=ResultMock())
+    def test__ingest_entity_set(self, mock_post_transaction):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_entity_set = 'fake-entity-set'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        api._ingest_entity_set(fake_dataset_id, fake_entity_set, **fake_kwargs)
+        mock_post_transaction.assert_called_once_with(
+            fake_dataset_id,
+            fake_entity_set,
+            process=True,
+            operation='ADD',
+            **fake_kwargs)
+
     @mock.patch('conduce.api.make_post_request', return_value=ResultMock())
     def test_search_dataset_backend(self, mock_make_post_request):
         fake_dataset_id = 'fake-dataset-id'

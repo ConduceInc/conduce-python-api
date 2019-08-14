@@ -655,7 +655,7 @@ def post_transaction(dataset_id, entity_set, **kwargs):
         **operation**
             The dataset operation to perform on the posted entity set.  Supports all
             operations listed in the REST API.  However, only `INSERT` and `APPEND` are officially supported.
-            See https://prd-docs.conduce.com/#/data/createTransaction for a list of endpoints.
+            See https://prd-docs.conduce.com/#/data/createTransaction for a list of operations.
         **process**
             Post the transaction and immediately process on backends configured to automatically process transactions.
         **debug**
@@ -1068,34 +1068,13 @@ def _create_dataset_backend(dataset_id, backend_type, auto_process, config, **kw
 
 
 def _ingest_entity_set(dataset_id, entity_set, **kwargs):
-    if 'entities' not in entity_set:
-        raise ValueError('parameter entity_set is not an \'entities\' dict')
-
-    if kwargs.get('debug'):
-        kwargs['debug'] = False
-        print("Debug ingest")
-        responses = []
-        for idx, entity in enumerate(entity_set['entities'], start=1):
-            single_entity = {'entities': [entity]}
-            print(single_entity)
-            responses.append(_ingest_entity_set(dataset_id, single_entity, **kwargs))
-            print("{} / {} ingested".format(idx, len(entity_set['entities'])))
-        return responses
-
-    response = make_post_request(
-        entity_set, 'datasets/add-data/{}'.format(dataset_id), **kwargs)
-    if 'location' in response.headers:
-        job_id = response.headers['location']
-        response = wait_for_job(job_id, **kwargs)
-
-    return response
+    kwargs['process'] = kwargs.get('process', True)
+    kwargs['operation'] = kwargs.get('operation', 'ADD')
+    return post_transaction(dataset_id, entity_set, **kwargs)
 
 
 def _clear_dataset(dataset_id, **kwargs):
-    response = make_post_request(
-        None, 'datasets/clear/{}'.format(dataset_id), **kwargs)
-
-    return response
+    return delete_transactions(dataset_id, **kwargs)
 
 
 def clear_dataset(**kwargs):
