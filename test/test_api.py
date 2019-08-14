@@ -200,7 +200,7 @@ class Test(unittest.TestCase):
         fake_auto_process = 'fake-auto_process'
         fake_temporal = 5
         fake_spatial = 4
-        api.add_capped_tile_store(fake_dataset_id, fake_auto_process, fake_temporal, fake_spatial, **fake_kwargs)
+        api.add_capped_tile_store(fake_dataset_id, fake_auto_process, fake_spatial, fake_temporal, **fake_kwargs)
 
         expected_config = {
             'minimum_temporal_level': 5,
@@ -217,7 +217,7 @@ class Test(unittest.TestCase):
         fake_temporal = 'fake-temporal'
         fake_spatial = 4
         with self.assertRaisesRegex(ValueError, '.*fake-temporal'):
-            api.add_capped_tile_store(fake_dataset_id, fake_auto_process, fake_temporal, fake_spatial, **fake_kwargs)
+            api.add_capped_tile_store(fake_dataset_id, fake_auto_process, fake_spatial, fake_temporal, **fake_kwargs)
 
     @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
     def test_add_capped_tile_store__raises_non_numeric_spatial(self, mock__create_dataset_backend):
@@ -227,7 +227,7 @@ class Test(unittest.TestCase):
         fake_temporal = 5
         fake_spatial = 'fake-spatial'
         with self.assertRaisesRegex(ValueError, '.*fake-spatial'):
-            api.add_capped_tile_store(fake_dataset_id, fake_auto_process, fake_temporal, fake_spatial, **fake_kwargs)
+            api.add_capped_tile_store(fake_dataset_id, fake_auto_process, fake_spatial, fake_temporal, **fake_kwargs)
 
     @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
     def test_add_elasticsearch_store(self, mock__create_dataset_backend):

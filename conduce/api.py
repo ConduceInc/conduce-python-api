@@ -209,7 +209,7 @@ def wait_for_job(job_id, **kwargs):
             if e.response.status_code < 500:
                 return e.response
             else:
-                print("Job status check failed:", e.response.reason)
+                print("Job status check failed for {}:".format(job_id), e.response.reason)
                 print("Will retry after sleep period.")
 
 
@@ -749,7 +749,7 @@ def get_transactions(dataset_id, **kwargs):
     if not kwargs.get('count'):
         parameters.pop('count')
 
-    return make_get_request(fragment, parameters=parameters, **kwargs).content
+    return json.loads(make_get_request(fragment, parameters=parameters, **kwargs).content)
 
 
 def delete_transactions(dataset_id, **kwargs):
@@ -1005,7 +1005,7 @@ def add_tile_store(dataset_id, auto_process, **kwargs):
     return _create_dataset_backend(dataset_id, DatasetBackends.tile, auto_process, None, **kwargs)
 
 
-def add_capped_tile_store(dataset_id, auto_process, min_temporal_zoom_level, min_spatial_zoom_level, **kwargs):
+def add_capped_tile_store(dataset_id, auto_process, min_spatial_zoom_level, min_temporal_zoom_level, **kwargs):
     """
     Adds a capped tile store to the specified dataset.
 
