@@ -850,6 +850,30 @@ def list_dataset_backends(dataset_id, **kwargs):
     return make_get_request('/api/v2/data/{}/backends'.format(dataset_id), **kwargs)
 
 
+def set_default_backend(dataset_id, backend_id, **kwargs):
+    """
+    Make the specified backend the default for the specified dataset.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to which the backend belongs.
+    backend_id : string
+        The UUID that identifies the dataset backend to update.
+    **kwargs : key-value
+        See :py:func:`make_patch_request` for more kwargs.
+
+    Returns
+    -------
+    requests.Response
+         On success, an asynchronous job ID.  Check the job status for progress.
+         (See :py:func:`wait_for_job`)
+    """
+
+    fragment = '/api/v2/data/{}/backends/{}'.format(dataset_id, backend_id)
+    return make_patch_request({}, fragment, parameters={'default': 1}, **kwargs)
+
+
 def process_transactions(dataset_id, backend_id, **kwargs):
     """
     Process transactions on a dataset backend
