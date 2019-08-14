@@ -479,6 +479,23 @@ def add_capped_tile_store(args):
     return api.add_capped_tile_store(dataset_id, auto_process, min_spatial, min_temporal, **vars(args))
 
 
+def get_backend_status(args):
+    dataset_ids = args.dataset_ids
+    del vars(args)['dataset_ids']
+
+    for dataset_id in dataset_ids:
+        print("{}:".format(dataset_id))
+        max_transaction = api.get_transactions(dataset_id, count=True, **request_kwargs(**vars(args)))['count']
+        backend_ids = api.list_dataset_backends(dataset_id, **request_kwargs(**vars(args)))
+
+        metadata = {}
+        for backend_id in backend_ids:
+            metadata = api.get_dataset_backend_metadata(dataset_id, backend_id, **vars(args))
+            print("  {}::{}: processed {} of {} transactions".format(
+                metadata.get('configuration', {}).get('backend_type', 'LegacyTileStore'),
+                backend_id, metadata.get('transactions', 'NaN'), max_transaction))
+
+
 def ingest_data(args):
     if args.raw:
         del vars(args)['dataset_id']
@@ -1015,6 +1032,11 @@ def main():
     parser_dataset_add_histogram_store = parser_dataset_add_backend_subparsers.add_parser(
         'histogram', parents=[api_cmd_parser, dataset_add_backend_parser], help='Add a histogram store to the dataset')
     parser_dataset_add_histogram_store.set_defaults(func=add_histogram_store)
+
+    parser_dataset_backend_status = parser_dataset_subparsers.add_parser(
+        'backend-status', parents=[api_cmd_parser], help='Retrieve transaction processing progress for backends')
+    parser_dataset_backend_status.add_argument('dataset_ids', nargs='*', help='Unique identifier of the dataset to configure')
+    parser_dataset_backend_status.set_defaults(func=get_backend_status)
 
     parser_create_resource = subparsers.add_parser('create', parents=[api_cmd_parser], help='Create a new resource')
     parser_create_resource.add_argument('name', help='The name of the resource to create')
