@@ -73,6 +73,17 @@ class Test(unittest.TestCase):
         mock_make_get_request.assert_called_once_with(expected_fragment, **fake_kwargs)
 
     @mock.patch('conduce.api.make_patch_request', return_value=ResultMock())
+    def test_set_default_backend(self, mock_make_patch_request):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_id = 'fake-backend-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        api.set_default_backend(fake_dataset_id, fake_backend_id, **fake_kwargs)
+
+        expected_fragment = '/api/v2/data/{}/backends/{}'.format(fake_dataset_id, fake_backend_id)
+        mock_make_patch_request.assert_called_once_with({}, expected_fragment, parameters={'default': 1}, **fake_kwargs)
+
+    @mock.patch('conduce.api.make_patch_request', return_value=ResultMock())
     def test_disable_auto_processing(self, mock_make_patch_request):
         fake_dataset_id = 'fake-dataset-id'
         fake_backend_id = 'fake-backend-id'
