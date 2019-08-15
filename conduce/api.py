@@ -737,7 +737,7 @@ def get_transactions(dataset_id, **kwargs):
     fragment = '/api/v2/data/{}/transactions'.format(dataset_id)
 
     parameters = {
-        'min': kwargs.get('min', -1),
+        'min': kwargs.get('min'),
         'max': kwargs.get('max'),
         'value': kwargs.get('value'),
         'rows': kwargs.get('rows'),
@@ -749,7 +749,7 @@ def get_transactions(dataset_id, **kwargs):
     if not kwargs.get('count'):
         parameters.pop('count')
 
-    return make_get_request(fragment, parameters=parameters, **kwargs)
+    return make_get_request(fragment, parameters=parameters, **kwargs).content
 
 
 def delete_transactions(dataset_id, **kwargs):

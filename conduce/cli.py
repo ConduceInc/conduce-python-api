@@ -846,7 +846,7 @@ def main():
     parser_dataset_transactions = parser_dataset_subparsers.add_parser(
         'transactions', parents=[api_cmd_parser], help='Print a sequence of dataset transactions for debugging')
     parser_dataset_transactions.add_argument('dataset_id', help='Unique identifier of the dataset to query')
-    parser_dataset_transactions.add_argument('--min', help='The oldest transaction in the returned sequence')
+    parser_dataset_transactions.add_argument('--min', default=-1, help='The oldest transaction in the returned sequence')
     parser_dataset_transactions.add_argument('--max', help='The newest transaction in the returned sequence')
     parser_dataset_transactions.add_argument('--value', help='The index of a single transaction to query')
     parser_dataset_transactions.add_argument('--rows', help='The number of transactions to return')
