@@ -198,16 +198,36 @@ class Test(unittest.TestCase):
         fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
         fake_dataset_id = 'fake-id'
         fake_auto_process = 'fake-auto_process'
-        fake_temporal = 'fake-temporal'
-        fake_spatial = 'fake-spatial'
-        api.add_capped_tile_store(fake_dataset_id, fake_auto_process, fake_temporal, fake_spatial, **fake_kwargs)
+        fake_temporal = 5
+        fake_spatial = 4
+        api.add_capped_tile_store(fake_dataset_id, fake_auto_process, fake_spatial, fake_temporal, **fake_kwargs)
 
         expected_config = {
-            'minimum_temporal_level': 'fake-temporal',
-            'minimum_spatial_level': 'fake-spatial',
+            'minimum_temporal_level': 5,
+            'minimum_spatial_level': 4,
         }
         mock__create_dataset_backend.assert_called_once_with(fake_dataset_id, api.DatasetBackends.capped_tile,
                                                              fake_auto_process, expected_config, **fake_kwargs)
+
+    @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
+    def test_add_capped_tile_store__raises_non_numeric_temporal(self, mock__create_dataset_backend):
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        fake_dataset_id = 'fake-id'
+        fake_auto_process = 'fake-auto_process'
+        fake_temporal = 'fake-temporal'
+        fake_spatial = 4
+        with self.assertRaisesRegex(ValueError, '.*fake-temporal'):
+            api.add_capped_tile_store(fake_dataset_id, fake_auto_process, fake_spatial, fake_temporal, **fake_kwargs)
+
+    @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
+    def test_add_capped_tile_store__raises_non_numeric_spatial(self, mock__create_dataset_backend):
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        fake_dataset_id = 'fake-id'
+        fake_auto_process = 'fake-auto_process'
+        fake_temporal = 5
+        fake_spatial = 'fake-spatial'
+        with self.assertRaisesRegex(ValueError, '.*fake-spatial'):
+            api.add_capped_tile_store(fake_dataset_id, fake_auto_process, fake_spatial, fake_temporal, **fake_kwargs)
 
     @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
     def test_add_elasticsearch_store(self, mock__create_dataset_backend):
@@ -286,7 +306,7 @@ class Test(unittest.TestCase):
         fake_id = 'fake-id'
         fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
         expected_parameters = {
-            'min': fake_kwargs.get('min', -1),
+            'min': fake_kwargs.get('min'),
             'max': fake_kwargs.get('max'),
             'value': fake_kwargs.get('value'),
             'rows': fake_kwargs.get('rows'),
@@ -297,13 +317,51 @@ class Test(unittest.TestCase):
         mock_make_get_request.assert_called_once_with(expected_uri, parameters=expected_parameters, **fake_kwargs)
 
     @mock.patch('conduce.api.make_get_request', return_value=ResultMock())
-    def test_get_transactions_with_parameters(self, mock_make_get_request):
+    def test_get_transactions_with_parameters_min(self, mock_make_get_request):
+        fake_id = 'fake-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2', 'min': 'fake-min',
+                       'value': 'fake-value', 'rows': 'fake-rows', 'page_state': 'fake-page-state', 'count': 'fake-count'
+                       }
+        expected_parameters = {
+            'min': fake_kwargs.get('min'),
+            'max': None,
+            'value': fake_kwargs.get('value'),
+            'rows': fake_kwargs.get('rows'),
+            'page_state': fake_kwargs.get('page_state', ''),
+            'count': bool(fake_kwargs.get('count', False)),
+        }
+
+        expected_uri = '/api/v2/data/{}/transactions'.format(fake_id)
+        api.get_transactions(fake_id, **fake_kwargs)
+        mock_make_get_request.assert_called_once_with(expected_uri, parameters=expected_parameters, **fake_kwargs)
+
+    @mock.patch('conduce.api.make_get_request', return_value=ResultMock())
+    def test_get_transactions_with_parameters_max(self, mock_make_get_request):
+        fake_id = 'fake-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2', 'max': 'fake-max',
+                       'value': 'fake-value', 'rows': 'fake-rows', 'page_state': 'fake-page-state', 'count': 'fake-count'
+                       }
+        expected_parameters = {
+            'min': fake_kwargs.get('min'),
+            'max': fake_kwargs.get('max'),
+            'value': fake_kwargs.get('value'),
+            'rows': fake_kwargs.get('rows'),
+            'page_state': fake_kwargs.get('page_state', ''),
+            'count': bool(fake_kwargs.get('count', False)),
+        }
+
+        expected_uri = '/api/v2/data/{}/transactions'.format(fake_id)
+        api.get_transactions(fake_id, **fake_kwargs)
+        mock_make_get_request.assert_called_once_with(expected_uri, parameters=expected_parameters, **fake_kwargs)
+
+    @mock.patch('conduce.api.make_get_request', return_value=ResultMock())
+    def test_get_transactions_with_parameters_max_and_min(self, mock_make_get_request):
         fake_id = 'fake-id'
         fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2', 'min': 'fake-min', 'max': 'fake-max',
                        'value': 'fake-value', 'rows': 'fake-rows', 'page_state': 'fake-page-state', 'count': 'fake-count'
                        }
         expected_parameters = {
-            'min': fake_kwargs.get('min', -1),
+            'min': fake_kwargs.get('min'),
             'max': fake_kwargs.get('max'),
             'value': fake_kwargs.get('value'),
             'rows': fake_kwargs.get('rows'),
