@@ -209,7 +209,7 @@ def wait_for_job(job_id, **kwargs):
             if e.response.status_code < 500:
                 return e.response
             else:
-                print("Job status check failed:", e.response.reason)
+                print("Job status check failed for {}:".format(job_id), e.response.reason)
                 print("Will retry after sleep period.")
 
 
@@ -737,7 +737,7 @@ def get_transactions(dataset_id, **kwargs):
     fragment = '/api/v2/data/{}/transactions'.format(dataset_id)
 
     parameters = {
-        'min': kwargs.get('min', -1),
+        'min': kwargs.get('min'),
         'max': kwargs.get('max'),
         'value': kwargs.get('value'),
         'rows': kwargs.get('rows'),
@@ -749,7 +749,7 @@ def get_transactions(dataset_id, **kwargs):
     if not kwargs.get('count'):
         parameters.pop('count')
 
-    return make_get_request(fragment, parameters=parameters, **kwargs)
+    return json.loads(make_get_request(fragment, parameters=parameters, **kwargs).content)
 
 
 def delete_transactions(dataset_id, **kwargs):
@@ -831,7 +831,7 @@ def get_dataset_backend_metadata(dataset_id, backend_id, **kwargs):
     **kwargs : key-value
         See :py:func:`make_get_request` for more kwargs.
     """
-    return make_get_request('/api/v2/data/{}/backends/{}'.format(dataset_id, backend_id), **kwargs)
+    return json.loads(make_get_request('/api/v2/data/{}/backends/{}'.format(dataset_id, backend_id), **kwargs).content)
 
 
 def list_dataset_backends(dataset_id, **kwargs):
@@ -847,7 +847,31 @@ def list_dataset_backends(dataset_id, **kwargs):
     **kwargs : key-value
         See :py:func:`make_get_request` for more kwargs.
     """
-    return make_get_request('/api/v2/data/{}/backends'.format(dataset_id), **kwargs)
+    return json.loads(make_get_request('/api/v2/data/{}/backends'.format(dataset_id), **kwargs).content)
+
+
+def set_default_backend(dataset_id, backend_id, **kwargs):
+    """
+    Make the specified backend the default for the specified dataset.
+
+    Parameters
+    ----------
+    dataset_id : string
+        The UUID that identifies the dataset to which the backend belongs.
+    backend_id : string
+        The UUID that identifies the dataset backend to update.
+    **kwargs : key-value
+        See :py:func:`make_patch_request` for more kwargs.
+
+    Returns
+    -------
+    requests.Response
+         On success, an asynchronous job ID.  Check the job status for progress.
+         (See :py:func:`wait_for_job`)
+    """
+
+    fragment = '/api/v2/data/{}/backends/{}'.format(dataset_id, backend_id)
+    return make_patch_request({}, fragment, parameters={'default': 1}, **kwargs)
 
 
 def process_transactions(dataset_id, backend_id, **kwargs):
@@ -981,7 +1005,7 @@ def add_tile_store(dataset_id, auto_process, **kwargs):
     return _create_dataset_backend(dataset_id, DatasetBackends.tile, auto_process, None, **kwargs)
 
 
-def add_capped_tile_store(dataset_id, auto_process, min_temporal_zoom_level, min_spatial_zoom_level, **kwargs):
+def add_capped_tile_store(dataset_id, auto_process, min_spatial_zoom_level, min_temporal_zoom_level, **kwargs):
     """
     Adds a capped tile store to the specified dataset.
 
@@ -1003,8 +1027,8 @@ def add_capped_tile_store(dataset_id, auto_process, min_temporal_zoom_level, min
         See :py:func:`make_post_request` for more kwargs.
     """
     config = {
-        'minimum_temporal_level': min_temporal_zoom_level,
-        'minimum_spatial_level': min_spatial_zoom_level,
+        'minimum_temporal_level': int(min_temporal_zoom_level),
+        'minimum_spatial_level': int(min_spatial_zoom_level),
     }
     return _create_dataset_backend(dataset_id, DatasetBackends.capped_tile, auto_process, config, **kwargs)
 

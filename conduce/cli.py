@@ -292,10 +292,10 @@ def append_transaction(args):
     entity_set = read_entity_set_from_samples_file(args)
     dataset_id = args.dataset_id
     del vars(args)['dataset_id']
+    process = not args.hold
+    del vars(args)['hold']
 
-    response = api.append_transaction(dataset_id, entity_set, **vars(args))
-    print(response.headers)
-    print(response.status_code)
+    response = api.append_transaction(dataset_id, entity_set, process=process, **vars(args))
     return response
 
 
@@ -303,10 +303,10 @@ def insert_transaction(args):
     entity_set = read_entity_set_from_samples_file(args)
     dataset_id = args.dataset_id
     del vars(args)['dataset_id']
+    process = not args.hold
+    del vars(args)['hold']
 
-    response = api.insert_transaction(dataset_id, entity_set, **vars(args))
-    print(response.headers)
-    print(response.status_code)
+    response = api.insert_transaction(dataset_id, entity_set, process=process, **vars(args))
     return response
 
 
@@ -314,6 +314,169 @@ def get_dataset_transactions(args):
     dataset_id = args.dataset_id
     del vars(args)['dataset_id']
     return api.get_transactions(dataset_id, **vars(args))
+
+
+def strip_none(original):
+    return {k: v for k, v in original.items() if v is not None}
+
+
+def request_kwargs(**kwargs):
+    return strip_none({
+        'host': kwargs.get('host'),
+        'user': kwargs.get('user'),
+        'api_key': kwargs.get('api_key'),
+        'no_verify': kwargs.get('no_verify'),
+        'password': kwargs.get('password'),
+    })
+
+
+def process_transactions(args):
+    if len(args.backend_ids) == 0 and not args.all_backends:
+        raise ValueError('You must provide a list of backend IDs or pass --all-backends')
+
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    backend_ids = args.backend_ids
+    del vars(args)['backend_ids']
+    all_backends = args.all_backends
+    del vars(args)['all_backends']
+    async_processing = args.async_processing
+    del vars(args)['async_processing']
+
+    if all_backends:
+        backend_ids = api.list_dataset_backends(dataset_id, **request_kwargs(**vars(args)))
+
+    if async_processing or args.transaction or args.all:
+        for backend_id in backend_ids:
+            response = api.process_transactions(dataset_id, backend_id, **vars(args))
+            print('Processing... check status at {}'.format(response.headers['location']))
+    else:
+        min_tx = args.min
+        del vars(args)['min']
+        max_tx = args.max
+        del vars(args)['max']
+        del vars(args)['all']
+        del vars(args)['transaction']
+
+        max_transaction = max_tx or api.get_transactions(dataset_id, count=True, **vars(args))['count']
+        for backend_id in backend_ids:
+            min_transaction = min_tx or api.get_dataset_backend_metadata(dataset_id, backend_id, **vars(args))['transactions']
+            idx = 1
+            while min_transaction + idx <= max_transaction:
+                print("Processing transaction {} of {} on {}...".format(min_transaction + idx, max_transaction, backend_id))
+                response = api.process_transactions(dataset_id, backend_id, transaction=(min_transaction + idx), **vars(args))
+                api.wait_for_job(response.headers['location'])
+                idx += 1
+
+
+def enable_auto_processing(args):
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    backend_id = args.backend_id
+    del vars(args)['backend_id']
+    enable = not args.disable
+    del vars(args)['disable']
+
+    return api.enable_auto_processing(dataset_id, backend_id, enable=enable, **vars(args))
+
+
+def set_default_backend(args):
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    backend_id = args.backend_id
+    del vars(args)['backend_id']
+    return api.set_default_backend(dataset_id, backend_id, **vars(args))
+
+
+def remove_dataset_backends(args):
+    if len(args.backend_ids) == 0 and not args.all:
+        raise ValueError('You must provide a list of backend IDs or pass --all')
+
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    backend_ids = args.backend_ids
+    del vars(args)['backend_ids']
+    remove_all = args.all
+    del vars(args)['all']
+    force = args.force
+    del vars(args)['force']
+
+    if remove_all:
+        backend_ids = api.list_dataset_backends(dataset_id, **vars(args))
+        if not force:
+            answer = input("Removing {} backends! Are you sure (Y/n): ".format(len(backend_ids)))
+            if answer is not 'Y':
+                return
+
+    for backend_id in backend_ids:
+        location = api.remove_dataset_backend(dataset_id, backend_id, **vars(args)).headers['location']
+        print('Removing {}: check status at {}'.format(backend_id, location))
+
+
+def list_dataset_backends(args):
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    backends = args.backend_ids
+    del vars(args)['backend_ids']
+    verbose = args.verbose
+    del vars(args)['verbose']
+
+    if len(backends) == 0:
+        backends = api.list_dataset_backends(dataset_id, **vars(args))
+    else:
+        verbose = True
+
+    if verbose:
+        metadata = {}
+        for backend_id in backends:
+            metadata.update({backend_id: api.get_dataset_backend_metadata(dataset_id, backend_id, **vars(args))})
+        return metadata
+
+    return backends
+
+
+def add_simple_store(args):
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    auto_process = not args.manual_processing
+    del vars(args)['manual_processing']
+    return api.add_simple_store(dataset_id, auto_process, **vars(args))
+
+
+def add_tile_store(args):
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    auto_process = not args.manual_processing
+    del vars(args)['manual_processing']
+    return api.add_tile_store(dataset_id, auto_process, **vars(args))
+
+
+def add_elasticsearch_store(args):
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    auto_process = not args.manual_processing
+    del vars(args)['manual_processing']
+    return api.add_elasticsearch_store(dataset_id, auto_process, **vars(args))
+
+
+def add_histogram_store(args):
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    auto_process = not args.manual_processing
+    del vars(args)['manual_processing']
+    return api.add_histogram_store(dataset_id, auto_process, **vars(args))
+
+
+def add_capped_tile_store(args):
+    dataset_id = args.dataset_id
+    del vars(args)['dataset_id']
+    min_spatial = args.min_spatial
+    del vars(args)['min_spatial']
+    min_temporal = args.min_temporal
+    del vars(args)['min_temporal']
+    auto_process = not args.manual_processing
+    del vars(args)['manual_processing']
+    return api.add_capped_tile_store(dataset_id, auto_process, min_spatial, min_temporal, **vars(args))
 
 
 def ingest_data(args):
@@ -583,6 +746,13 @@ def send_patch_request(args):
     return api.make_patch_request(json.loads(args.data), uri, **vars(args))
 
 
+def send_delete_request(args):
+    uri = args.uri
+    del vars(args)['uri']
+
+    return api.make_delete_request(uri, **vars(args))
+
+
 def account_exists(args):
     email = args.email
     del vars(args)['email']
@@ -714,14 +884,20 @@ def main():
     parser_dataset_get_metadata.set_defaults(func=get_dataset_metadata)
 
     dataset_post_transaction_parser = ConduceCommandLineParser(add_help=False)
-    dataset_post_transaction_parser.add_argument('--json', help='Optional: A JSON file that can parsed into Conduce entities')
-    dataset_post_transaction_parser.add_argument('--csv', help='Optional: A CSV file that can be parsed as Conduce data')
+    dataset_post_transaction_parser.add_argument(
+        '--json', help='Optional: A JSON file that can parsed into Conduce entities')
+    dataset_post_transaction_parser.add_argument(
+        '--csv', help='Optional: A CSV file that can be parsed as Conduce data')
     dataset_post_transaction_parser.add_argument(
         '--raw', help='Optional: A well formatted Conduce entities JSON file. Ignores --kind, --generate-ids and --answer-yes')
-    dataset_post_transaction_parser.add_argument('--generate-ids', help='Set this flag if the data does not contain an ID field', action='store_true')
-    dataset_post_transaction_parser.add_argument('--kind', help='Use this value as the kind for all entities')
-    dataset_post_transaction_parser.add_argument('--answer-yes', help='Set this flag to answer yes at all prompts', action='store_true')
-    dataset_post_transaction_parser.add_argument('--debug', help='Get better information about errors', action='store_true')
+    dataset_post_transaction_parser.add_argument(
+        '--generate-ids', help='Set this flag if the data does not contain an ID field', action='store_true')
+    dataset_post_transaction_parser.add_argument(
+        '--kind', help='Use this value as the kind for all entities')
+    dataset_post_transaction_parser.add_argument(
+        '--answer-yes', help='Set this flag to answer yes at all prompts', action='store_true')
+    dataset_post_transaction_parser.add_argument(
+        '--debug', help='Get better information about errors', action='store_true')
 
     parser_dataset_create = parser_dataset_subparsers.add_parser(
         'create', parents=[api_cmd_parser, dataset_post_transaction_parser], help='Create a new dataset with optional data')
@@ -730,24 +906,115 @@ def main():
 
     parser_dataset_append = parser_dataset_subparsers.add_parser(
         'append', parents=[api_cmd_parser, dataset_post_transaction_parser], help='Append records to a dataset')
-    parser_dataset_append.add_argument('dataset_id', help='Unique identifier of the dataset to which data will be appended')
+    parser_dataset_append.add_argument(
+        'dataset_id', help='Unique identifier of the dataset to which data will be appended')
+    parser_dataset_append.add_argument(
+        '--hold', action='store_true', help='Prevent this transactions from being processed immediately')
     parser_dataset_append.set_defaults(func=append_transaction)
 
     parser_dataset_insert = parser_dataset_subparsers.add_parser(
         'insert', parents=[api_cmd_parser, dataset_post_transaction_parser], help='Insert records into a dataset')
-    parser_dataset_insert.add_argument('dataset_id', help='Unique identifier of the dataset in which data will be inserted')
+    parser_dataset_insert.add_argument(
+        'dataset_id', help='Unique identifier of the dataset in which data will be inserted')
+    parser_dataset_insert.add_argument(
+        '--hold', action='store_true', help='Prevent this transactions from being processed immediately')
     parser_dataset_insert.set_defaults(func=insert_transaction)
 
     parser_dataset_transactions = parser_dataset_subparsers.add_parser(
         'transactions', parents=[api_cmd_parser], help='Print a sequence of dataset transactions for debugging')
     parser_dataset_transactions.add_argument('dataset_id', help='Unique identifier of the dataset to query')
-    parser_dataset_transactions.add_argument('--min', help='The oldest transaction in the returned sequence')
+    parser_dataset_transactions.add_argument('--min', default=-1, help='The oldest transaction in the returned sequence')
     parser_dataset_transactions.add_argument('--max', help='The newest transaction in the returned sequence')
     parser_dataset_transactions.add_argument('--value', help='The index of a single transaction to query')
     parser_dataset_transactions.add_argument('--rows', help='The number of transactions to return')
     parser_dataset_transactions.add_argument('--page_state', help='The page state to continue searching from')
     parser_dataset_transactions.add_argument('--count', action='store_true', help='Return only the number of transactions in the log')
     parser_dataset_transactions.set_defaults(func=get_dataset_transactions)
+
+    parser_dataset_enable_auto_processing = parser_dataset_subparsers.add_parser(
+        'auto-process', parents=[api_cmd_parser], help='Configure backend to enable/disable automatic transaction processing')
+    parser_dataset_enable_auto_processing.add_argument('dataset_id', help='Unique identifier of the dataset to configure')
+    parser_dataset_enable_auto_processing.add_argument('backend_id', help='ID of backend to configure')
+    parser_dataset_enable_auto_processing.add_argument('--disable', action='store_true', help='Disable auto processing on the specified backend')
+    parser_dataset_enable_auto_processing.set_defaults(func=enable_auto_processing)
+
+    parser_dataset_set_default_backend = parser_dataset_subparsers.add_parser(
+        'set-default-backend', parents=[api_cmd_parser], help='Set backend to receive lens queries')
+    parser_dataset_set_default_backend.add_argument('dataset_id', help='Unique identifier of the dataset to configure')
+    parser_dataset_set_default_backend.add_argument('backend_id', help='ID of default backend')
+    parser_dataset_set_default_backend.set_defaults(func=set_default_backend)
+
+    parser_dataset_process_transactions = parser_dataset_subparsers.add_parser(
+        'process', parents=[api_cmd_parser], help='Process a sequence of transactions on the specified backends')
+    parser_dataset_process_transactions.add_argument(
+        'dataset_id', help='Unique identifier of the dataset to process')
+    parser_dataset_process_transactions.add_argument(
+        'backend_ids', nargs='*', help='IDs of backends to process')
+    parser_dataset_process_transactions.add_argument(
+        '--all-backends', action='store_true', help='Process specified transactions on all backends')
+    parser_dataset_process_transactions.add_argument(
+        '--async-processing', action='store_true', help='Process transactions on the backend as a batch job')
+    parser_dataset_process_transactions.add_argument(
+        '--all', action='store_true', help='Process all outstanding transactions (determined per backend)')
+    parser_dataset_process_transactions.add_argument(
+        '--min', type=int, help='The oldest transaction to be processed')
+    parser_dataset_process_transactions.add_argument(
+        '--max', type=int, help='The newest transaction to be processed')
+    parser_dataset_process_transactions.add_argument(
+        '--transaction', type=int, help='The index of a single transaction to process')
+    parser_dataset_process_transactions.set_defaults(func=process_transactions)
+
+    parser_dataset_list_backends = parser_dataset_subparsers.add_parser(
+        'list-backends', parents=[api_cmd_parser], help='List backends attached to the dataset')
+    parser_dataset_list_backends.add_argument(
+        'dataset_id', help='Unique identifier of the dataset to list')
+    parser_dataset_list_backends.add_argument(
+        'backend_ids', nargs='*', help='One or more backend IDs to list')
+    parser_dataset_list_backends.add_argument(
+        '-v', '--verbose', action='store_true', help='List metadata for all backends')
+    parser_dataset_list_backends.set_defaults(func=list_dataset_backends)
+
+    parser_dataset_list_backends = parser_dataset_subparsers.add_parser(
+        'remove-backend', parents=[api_cmd_parser], help='Remove backends from the dataset')
+    parser_dataset_list_backends.add_argument('dataset_id', help='Unique identifier of the dataset to list')
+    parser_dataset_list_backends.add_argument('backend_ids', nargs='*', help='IDs of backends to remove')
+    parser_dataset_list_backends.add_argument('--all', action='store_true', help='Remove all backends, overrides list of backend IDs')
+    parser_dataset_list_backends.add_argument('-f', '--force', action='store_true',
+                                              help='When --all specified, skip prompt and remove backends without prejudice.')
+    parser_dataset_list_backends.set_defaults(func=remove_dataset_backends)
+
+    parser_dataset_add_backend = parser_dataset_subparsers.add_parser(
+        'add-backend', parents=[api_cmd_parser], help='Add a backend to the dataset')
+    parser_dataset_add_backend_subparsers = parser_dataset_add_backend.add_subparsers(help='Available backends', dest='see subcommands')
+    parser_dataset_add_backend_subparsers.required = True
+
+    dataset_add_backend_parser = ConduceCommandLineParser(add_help=False)
+    dataset_add_backend_parser.add_argument('dataset_id', help='Unique identifier of the dataset to change')
+    dataset_add_backend_parser.add_argument('--manual-processing', action='store_true', help='Disable automatic processing of transactions')
+
+    parser_dataset_add_simple_store = parser_dataset_add_backend_subparsers.add_parser(
+        'simple', parents=[api_cmd_parser, dataset_add_backend_parser], help='Add a simple store to the dataset')
+    parser_dataset_add_simple_store.set_defaults(func=add_simple_store)
+
+    parser_dataset_add_tile_store = parser_dataset_add_backend_subparsers.add_parser(
+        'tile', parents=[api_cmd_parser, dataset_add_backend_parser], help='Add a tile store to the dataset')
+    parser_dataset_add_tile_store.set_defaults(func=add_tile_store)
+
+    parser_dataset_add_elasticsearch_store = parser_dataset_add_backend_subparsers.add_parser(
+        'elasticsearch', parents=[api_cmd_parser, dataset_add_backend_parser], help='Add a elasticsearch store to the dataset')
+    parser_dataset_add_elasticsearch_store.set_defaults(func=add_elasticsearch_store)
+
+    parser_dataset_add_capped_tile_store = parser_dataset_add_backend_subparsers.add_parser(
+        'capped-tile', parents=[api_cmd_parser, dataset_add_backend_parser], help='Add a capped_tile store to the dataset')
+    parser_dataset_add_capped_tile_store.add_argument(
+        '--min-spatial', type=int, default=0, help='The lowest spatial resolution supported by the store (default: 0)')
+    parser_dataset_add_capped_tile_store.add_argument(
+        '--min-temporal', type=int, default=0, help='The lowest temporal resolution supported by the store (default: 0)')
+    parser_dataset_add_capped_tile_store.set_defaults(func=add_capped_tile_store)
+
+    parser_dataset_add_histogram_store = parser_dataset_add_backend_subparsers.add_parser(
+        'histogram', parents=[api_cmd_parser, dataset_add_backend_parser], help='Add a histogram store to the dataset')
+    parser_dataset_add_histogram_store.set_defaults(func=add_histogram_store)
 
     parser_create_resource = subparsers.add_parser('create', parents=[api_cmd_parser], help='Create a new resource')
     parser_create_resource.add_argument('name', help='The name of the resource to create')
@@ -1002,6 +1269,10 @@ def main():
     parser_patch.add_argument('uri', help='The URI of the resource being requested')
     parser_patch.add_argument('data', help='The data being posted')
     parser_patch.set_defaults(func=send_patch_request)
+
+    parser_patch = subparsers.add_parser('delete', parents=[api_cmd_parser], help='Make an arbitrary delete request')
+    parser_patch.add_argument('uri', help='The URI of the resource being requested')
+    parser_patch.set_defaults(func=send_delete_request)
 
     args = arg_parser.parse_args()
 
