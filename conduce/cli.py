@@ -919,6 +919,7 @@ def main():
     parser_dataset_create = parser_dataset_subparsers.add_parser(
         'create', parents=[api_cmd_parser, dataset_post_transaction_parser], help='Create a new dataset with optional data')
     parser_dataset_create.add_argument('name', help='The name to be given to the new dataset')
+    parser_dataset_create.add_argument('backends', nargs='*', help='Backends with which to create the dataset')
     parser_dataset_create.set_defaults(func=create_dataset)
 
     parser_dataset_append = parser_dataset_subparsers.add_parser(
