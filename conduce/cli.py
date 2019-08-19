@@ -349,7 +349,7 @@ def process_transactions(args):
     if async_processing or args.transaction or args.all:
         for backend_id in backend_ids:
             response = api.process_transactions(dataset_id, backend_id, **vars(args))
-            print('Processing... check status at {}'.format(response.headers['location']))
+            print('Processing... check backend {} status at {}'.format(backend_id, response.headers['location']))
     else:
         min_tx = args.min
         del vars(args)['min']
