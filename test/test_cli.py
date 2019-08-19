@@ -45,6 +45,38 @@ listed_backends = ['listed-backend-{}'.format(x) for x in range(0, 9)]
 
 
 class Test(unittest.TestCase):
+    @mock.patch('conduce.api.get_transactions', return_value={'count': 'all-the-transactions'})
+    @mock.patch('conduce.api.get_dataset_backend_metadata', return_value={'transactions': 43, 'configuration': {'backend_type': 'fake-backend-type'}})
+    @mock.patch('conduce.api.list_dataset_backends', return_value=listed_backends)
+    def test_get_backend_status(
+        self,
+        mock_api_list_dataset_backends,
+        mock_api_get_dataset_backend_metadata,
+        mock_api_get_transactions,
+    ):
+        fake_dataset_ids = ['fake-dataset-id-1', 'fake-dataset-id-2', 'fake-dataset-id-3']
+        fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
+        fake_args = FakeArgs(dataset_ids=fake_dataset_ids, **vars(fake_passed_args))
+
+        cli.get_backend_status(fake_args)
+
+        expected_list_dataset_backend_calls = []
+        expected_get_transaction_count_calls = []
+        expected_get_metadata_calls = []
+
+        for dataset_id in fake_dataset_ids:
+            expected_get_transaction_count_calls.append(
+                mock.call(dataset_id, count=True, **vars(fake_passed_args)))
+            expected_list_dataset_backend_calls.append(
+                mock.call(dataset_id, **vars(fake_passed_args)))
+            for bid in listed_backends:
+                expected_get_metadata_calls.append(
+                    mock.call(dataset_id, bid, **vars(fake_passed_args)))
+
+        mock_api_list_dataset_backends.assert_has_calls(expected_list_dataset_backend_calls)
+        mock_api_get_transactions.assert_has_calls(expected_get_transaction_count_calls)
+        mock_api_get_dataset_backend_metadata.assert_has_calls(expected_get_metadata_calls)
+
     @mock.patch('conduce.api.enable_auto_processing', return_value=MockResponse())
     def test_enable_auto_processing__disable_True(self, mock_api_enable_auto_processing):
         fake_dataset_id = 'fake-dataset-id'
