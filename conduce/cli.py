@@ -318,6 +318,9 @@ def insert_transaction(args):
 def get_dataset_transactions(args):
     dataset_id = args.dataset_id
     del vars(args)['dataset_id']
+    if args.value:
+        del vars(args)['min']
+        del vars(args)['max']
     return api.get_transactions(dataset_id, **vars(args))
 
 
