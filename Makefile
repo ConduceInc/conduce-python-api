@@ -58,10 +58,10 @@ deps-venv3: venv3 requirements-dev.txt
 test: clean-pyc test2 test3
 
 test2:
-	./venv2/bin/python -m unittest discover -v test/
+	./venv2/bin/python -m unittest discover -v test/ -b
 
 test3:
-	./venv3/bin/python -m unittest discover -v test/
+	./venv3/bin/python -m unittest discover -v test/ -b
 
 docs: venv3 
 	. ./venv3/bin/activate && make -C doc html
