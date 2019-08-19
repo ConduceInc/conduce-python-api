@@ -1297,6 +1297,7 @@ def main():
     parser_patch.set_defaults(func=send_delete_request)
 
     args = arg_parser.parse_args()
+    args.cli = True
 
     try:
         result = args.func(args)

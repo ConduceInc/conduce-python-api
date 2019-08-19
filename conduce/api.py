@@ -196,21 +196,34 @@ def wait_for_job(job_id, **kwargs):
         Requests that result in an error raise an exception with information about the failure.
         See :py:meth:`requests.Response.raise_for_status` for more information.
     """
+    initial_status_countdown = 10
+    server_error_count = 0
     while True:
         time.sleep(0.5)
         try:
             response = make_get_request(job_id, **kwargs)
 
             if response.ok:
+                initial_status_countdown = 0
+                server_error_count = 0
                 msg = response.json()
                 if 'response' in msg:
                     return response
         except requests.exceptions.HTTPError as e:
-            if e.response.status_code < 500:
-                return e.response
+            if initial_status_countdown and e.response.status_code == 404:
+                if kwargs.get('cli'):
+                    print("Job not ready... {}".format(initial_status_countdown))
+                initial_status_countdown -= 1
+                time.sleep(1)
+            elif e.response.status_code < 500:
+                raise e
+            elif server_error_count > 120:
+                raise e
             else:
-                print("Job status check failed for {}:".format(job_id), e.response.reason)
-                print("Will retry after sleep period.")
+                server_error_count += 1
+                if kwargs.get('cli'):
+                    print("Job status check failed for {}:".format(job_id), e.response.reason)
+                    print("Will retry after sleep period.")
 
 
 def compose_uri(fragment):
