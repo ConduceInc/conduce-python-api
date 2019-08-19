@@ -2,6 +2,7 @@ import unittest
 import mock
 
 from conduce import cli
+from conduce import api
 
 # Python 2 compatibility
 try:
@@ -76,6 +77,127 @@ class Test(unittest.TestCase):
         mock_api_list_dataset_backends.assert_has_calls(expected_list_dataset_backend_calls)
         mock_api_get_transactions.assert_has_calls(expected_get_transaction_count_calls)
         mock_api_get_dataset_backend_metadata.assert_has_calls(expected_get_metadata_calls)
+
+    @mock.patch('conduce.api.create_dataset', return_value={'id': 'fake-dataset-id'})
+    @mock.patch('conduce.ingest.ingest_file')
+    @mock.patch('conduce.cli.ingest_entities')
+    def test_create_dataset__raw(
+            self,
+            mock_ingest_entities,
+            mock_ingest_file,
+            mock_api_create_dataset,
+    ):
+        fake_dataset_name = 'fake-dataset-name'
+        fake_backend_types = []
+        fake_json = 'fake-json'
+        fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
+        fake_args = FakeArgs(name=fake_dataset_name, backends=fake_backend_types, csv=None, raw=fake_json, json=None, **vars(fake_passed_args))
+
+        cli.create_dataset(fake_args)
+        mock_ingest_file.assert_not_called()
+        mock_ingest_entities.assert_called_once_with('fake-dataset-id', fake_args)
+        mock_api_create_dataset.assert_called_once_with(fake_dataset_name, backend_types=fake_backend_types, **vars(fake_passed_args))
+
+    @mock.patch('conduce.api.create_dataset', return_value={'id': 'fake-dataset-id'})
+    @mock.patch('conduce.ingest.ingest_file')
+    @mock.patch('conduce.cli.ingest_entities')
+    def test_create_dataset__json(
+            self,
+            mock_ingest_entities,
+            mock_ingest_file,
+            mock_api_create_dataset,
+    ):
+        fake_dataset_name = 'fake-dataset-name'
+        fake_backend_types = []
+        fake_json = 'fake-json'
+        fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
+        fake_args = FakeArgs(name=fake_dataset_name, backends=fake_backend_types, csv=None, json=fake_json, raw=None, **vars(fake_passed_args))
+
+        cli.create_dataset(fake_args)
+        mock_ingest_entities.assert_not_called()
+        mock_ingest_file.assert_called_once_with('fake-dataset-id', **vars(fake_args))
+        mock_api_create_dataset.assert_called_once_with(fake_dataset_name, backend_types=fake_backend_types, **vars(fake_passed_args))
+
+    @mock.patch('conduce.api.create_dataset', return_value={'id': 'fake-dataset-id'})
+    @mock.patch('conduce.ingest.ingest_file')
+    @mock.patch('conduce.cli.ingest_entities')
+    def test_create_dataset__csv(
+            self,
+            mock_ingest_entities,
+            mock_ingest_file,
+            mock_api_create_dataset,
+    ):
+        fake_dataset_name = 'fake-dataset-name'
+        fake_backend_types = []
+        fake_csv = 'fake-csv'
+        fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
+        fake_args = FakeArgs(name=fake_dataset_name, backends=fake_backend_types, json=None, csv=fake_csv, raw=None, **vars(fake_passed_args))
+
+        cli.create_dataset(fake_args)
+        mock_ingest_entities.assert_not_called()
+        mock_ingest_file.assert_called_once_with('fake-dataset-id', **vars(fake_args))
+        mock_api_create_dataset.assert_called_once_with(fake_dataset_name, backend_types=fake_backend_types, **vars(fake_passed_args))
+
+    @mock.patch('conduce.api.create_dataset')
+    @mock.patch('conduce.ingest.ingest_file')
+    @mock.patch('conduce.cli.ingest_entities')
+    def test_create_dataset__backends(
+            self,
+            mock_ingest_entities,
+            mock_ingest_file,
+            mock_api_create_dataset,
+    ):
+        fake_dataset_name = 'fake-dataset-name'
+        fake_backend_types = ['simple', 'histogram', 'capped-tile']
+        fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
+        fake_args = FakeArgs(name=fake_dataset_name, backends=fake_backend_types, json=None, csv=None, raw=None, **vars(fake_passed_args))
+
+        cli.create_dataset(fake_args)
+        mock_ingest_entities.assert_not_called()
+        mock_ingest_file.assert_not_called()
+        mock_api_create_dataset.assert_called_once_with(
+            fake_dataset_name,
+            backend_types=['SimpleStore', 'HistogramStore', 'CappedTileStore'],
+            **vars(fake_passed_args))
+
+    @mock.patch('conduce.api.create_dataset')
+    @mock.patch('conduce.ingest.ingest_file')
+    @mock.patch('conduce.cli.ingest_entities')
+    def test_create_dataset__raises_key_error(
+            self,
+            mock_ingest_entities,
+            mock_ingest_file,
+            mock_api_create_dataset,
+    ):
+        fake_dataset_name = 'fake-dataset-name'
+        fake_backend_types = ['fake_backend_types']
+        fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
+        fake_args = FakeArgs(name=fake_dataset_name, backends=fake_backend_types, json=None, csv=None, raw=None, **vars(fake_passed_args))
+
+        with self.assertRaises(KeyError):
+            cli.create_dataset(fake_args)
+        mock_ingest_entities.assert_not_called()
+        mock_ingest_file.assert_not_called()
+        mock_api_create_dataset.assert_not_called()
+
+    @mock.patch('conduce.api.create_dataset')
+    @mock.patch('conduce.ingest.ingest_file')
+    @mock.patch('conduce.cli.ingest_entities')
+    def test_create_dataset__default(
+            self,
+            mock_ingest_entities,
+            mock_ingest_file,
+            mock_api_create_dataset,
+    ):
+        fake_dataset_name = 'fake-dataset-name'
+        fake_backend_types = []
+        fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
+        fake_args = FakeArgs(name=fake_dataset_name, backends=fake_backend_types, json=None, csv=None, raw=None, **vars(fake_passed_args))
+
+        cli.create_dataset(fake_args)
+        mock_ingest_entities.assert_not_called()
+        mock_ingest_file.assert_not_called()
+        mock_api_create_dataset.assert_called_once_with(fake_dataset_name, backend_types=fake_backend_types, **vars(fake_passed_args))
 
     @mock.patch('conduce.api.enable_auto_processing', return_value=MockResponse())
     def test_enable_auto_processing__disable_True(self, mock_api_enable_auto_processing):

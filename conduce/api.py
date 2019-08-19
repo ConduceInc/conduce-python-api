@@ -39,11 +39,16 @@ class DatasetBackends:
         'elasticsearch': 'ElasticsearchStore',
         'histogram': 'HistogramStore',
     }
+
     simple = BACKEND_TYPES['simple']
     tile = BACKEND_TYPES['tile']
     capped_tile = BACKEND_TYPES['capped_tile']
     elasticsearch = BACKEND_TYPES['elasticsearch']
     histogram = BACKEND_TYPES['histogram']
+
+    @staticmethod
+    def types():
+        return DatasetBackends.BACKEND_TYPES.values()
 
 
 def _retry_on_retryable_error(exception):
@@ -381,7 +386,21 @@ def create_dataset(dataset_name, **kwargs):
            }
     """
 
-    return create_json_resource('DATASET', dataset_name, {'backend': 'SAGE_BACKEND'}, **kwargs)
+    dataset_response = create_json_resource('DATASET', dataset_name, {'backend': 'SAGE_BACKEND'}, **kwargs)
+    backend_types = kwargs.get('backend_types', [])
+
+    if not all(elem in DatasetBackends.types() for elem in backend_types):
+        raise ValueError('Invalid backend type in: {}'.format(backend_types))
+
+    if backend_types:
+        dataset_id = dataset_response.get('id')
+        for backend_type in backend_types:
+            config = None
+            _create_dataset_backend(dataset_id, backend_type, True, config, **kwargs)
+
+        remove_dataset_backend(dataset_id, dataset_id, **kwargs)
+
+    return dataset_response
 
 
 def set_generic_data(dataset_id, key, data_string, **kwargs):
@@ -1090,7 +1109,7 @@ def _create_dataset_backend(dataset_id, backend_type, auto_process, config, **kw
     """
     Transactions will not be auto-processed into the store until new transactions are posted.
     """
-    if backend_type not in DatasetBackends.BACKEND_TYPES.values():
+    if backend_type not in DatasetBackends.types():
         raise ValueError("The backend type specified is not valid.", backend_type)
 
     if config is None:

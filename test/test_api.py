@@ -62,6 +62,64 @@ class Test(unittest.TestCase):
             operation='ADD',
             **fake_kwargs)
 
+    @mock.patch('conduce.api.remove_dataset_backend')
+    @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
+    @mock.patch('conduce.api.create_json_resource', return_value={'id': 'fake-dataset-id'})
+    def test_create_dataset__backends(
+            self,
+            mock_create_json_resource,
+            mock__create_dataset_backend,
+            mock_remove_dataset_backend,
+    ):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2', 'backend_types': api.DatasetBackends.types()}
+        api.create_dataset(fake_dataset_id, **fake_kwargs)
+
+        mock_create_json_resource.assert_called_once_with('DATASET', fake_dataset_id, {'backend': 'SAGE_BACKEND'}, **fake_kwargs)
+        mock_remove_dataset_backend.assert_called_once_with(fake_dataset_id, fake_dataset_id, **fake_kwargs)
+
+        expected_calls = []
+        for backend in api.DatasetBackends.types():
+            expected_calls.append(mock.call(fake_dataset_id, backend, True, None, **fake_kwargs))
+        mock__create_dataset_backend.assert_has_calls(expected_calls)
+
+    @mock.patch('conduce.api.remove_dataset_backend')
+    @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
+    @mock.patch('conduce.api.create_json_resource', return_value={})
+    def test_create_dataset__raises(
+            self,
+            mock_create_json_resource,
+            mock__create_dataset_backend,
+            mock_remove_dataset_backend,
+    ):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_types = ['fake-backend-type']
+        fake_kwargs = {'backend_types': fake_backend_types, 'arg1': 'arg1', 'arg2': 'arg2'}
+
+        with self.assertRaisesRegex(ValueError, r"Invalid backend type in: \['fake-backend-type'\]"):
+            api.create_dataset(fake_dataset_id, **fake_kwargs)
+
+        mock_create_json_resource.assert_called_once_with('DATASET', fake_dataset_id, {'backend': 'SAGE_BACKEND'}, **fake_kwargs)
+        mock__create_dataset_backend.assert_not_called()
+        mock_remove_dataset_backend.assert_not_called()
+
+    @mock.patch('conduce.api.remove_dataset_backend')
+    @mock.patch('conduce.api._create_dataset_backend', return_value=ResultMock())
+    @mock.patch('conduce.api.create_json_resource', return_value={})
+    def test_create_dataset__default(
+            self,
+            mock_create_json_resource,
+            mock__create_dataset_backend,
+            mock_remove_dataset_backend,
+    ):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        api.create_dataset(fake_dataset_id, **fake_kwargs)
+
+        mock_create_json_resource.assert_called_once_with('DATASET', fake_dataset_id, {'backend': 'SAGE_BACKEND'}, **fake_kwargs)
+        mock__create_dataset_backend.assert_not_called()
+        mock_remove_dataset_backend.assert_not_called()
+
     @mock.patch('conduce.api.make_post_request', return_value=ResultMock())
     def test_search_dataset_backend(self, mock_make_post_request):
         fake_dataset_id = 'fake-dataset-id'
