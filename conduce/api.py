@@ -203,8 +203,8 @@ def wait_for_job(job_id, **kwargs):
     """
     initial_status_countdown = 10
     server_error_count = 0
+
     while True:
-        time.sleep(0.5)
         try:
             response = make_get_request(job_id, **kwargs)
 
@@ -229,6 +229,7 @@ def wait_for_job(job_id, **kwargs):
                 if kwargs.get('cli'):
                     print("Job status check failed for {}:".format(job_id), e.response.reason)
                     print("Will retry after sleep period.")
+                    time.sleep(0.5)
 
 
 def compose_uri(fragment):
