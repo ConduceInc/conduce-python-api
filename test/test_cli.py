@@ -2,7 +2,6 @@ import unittest
 import mock
 
 from conduce import cli
-from conduce import api
 
 # Python 2 compatibility
 try:
@@ -259,10 +258,13 @@ class Test(unittest.TestCase):
         cli.process_transactions(fake_args)
 
         expected_calls = []
+        expected_waits = []
         for idx, id in enumerate(listed_backends):
-            for tx_idx in range(44, 49):
+            for tx_idx in range(44, 48):
                 expected_calls.append(mock.call(fake_dataset_id, listed_backends[idx], transaction=tx_idx, **vars(fake_passed_args)))
+                expected_waits.append(mock.call('fake location', **vars(fake_passed_args)))
         mock_api_process_transactions.assert_has_calls(expected_calls)
+        mock_api_wait_for_job.assert_has_calls(expected_waits)
         mock_api_list_dataset_backends.assert_called_once_with(fake_dataset_id, **vars(fake_passed_args))
 
     @mock.patch('conduce.api.wait_for_job')
@@ -287,10 +289,13 @@ class Test(unittest.TestCase):
         cli.process_transactions(fake_args)
 
         expected_calls = []
+        expected_waits = []
         for idx, id in enumerate(listed_backends):
-            for tx_idx in range(44, 49):
+            for tx_idx in range(44, 48):
                 expected_calls.append(mock.call(fake_dataset_id, listed_backends[idx], transaction=tx_idx, **vars(fake_passed_args)))
+                expected_waits.append(mock.call('fake location', **vars(fake_passed_args)))
         mock_api_process_transactions.assert_has_calls(expected_calls)
+        mock_api_wait_for_job.assert_has_calls(expected_waits)
         mock_api_list_dataset_backends.assert_called_once_with(fake_dataset_id, **vars(fake_passed_args))
 
     @mock.patch('conduce.api.wait_for_job')
@@ -313,10 +318,13 @@ class Test(unittest.TestCase):
         cli.process_transactions(fake_args)
 
         expected_calls = []
+        expected_waits = []
         for idx, id in enumerate(fake_backend_ids):
-            for tx_idx in range(44, 49):
+            for tx_idx in range(44, 48):
                 expected_calls.append(mock.call(fake_dataset_id, fake_backend_ids[idx], transaction=tx_idx, **vars(fake_passed_args)))
+                expected_waits.append(mock.call('fake location', **vars(fake_passed_args)))
         mock_api_process_transactions.assert_has_calls(expected_calls)
+        mock_api_wait_for_job.assert_has_calls(expected_waits)
 
     @mock.patch('conduce.api.wait_for_job')
     @mock.patch('conduce.api.get_transactions', return_value={'count': 48})
@@ -338,9 +346,12 @@ class Test(unittest.TestCase):
         cli.process_transactions(fake_args)
 
         expected_calls = []
-        for idx in range(44, 49):
+        expected_waits = []
+        for idx in range(44, 48):
             expected_calls.append(mock.call(fake_dataset_id, fake_backend_id, transaction=idx, **vars(fake_passed_args)))
+            expected_waits.append(mock.call('fake location', **vars(fake_passed_args)))
         mock_api_process_transactions.assert_has_calls(expected_calls)
+        mock_api_wait_for_job.assert_has_calls(expected_waits)
 
     @mock.patch('conduce.api.list_dataset_backends', return_value=listed_backends)
     @mock.patch('conduce.api.process_transactions', return_value=MockResponse())
