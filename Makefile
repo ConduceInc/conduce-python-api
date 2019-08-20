@@ -55,7 +55,15 @@ deps-venv3: venv3 requirements-dev.txt
 	./venv3/bin/pip install --upgrade pip
 	./venv3/bin/pip install -r requirements-dev.txt
 
+devtest: clean-pyc devtest2 devtest3
+
 test: clean-pyc test2 test3
+
+devtest2:
+	./venv2/bin/python -m unittest discover -v test/
+
+devtest3:
+	./venv3/bin/python -m unittest discover -v test/
 
 test2:
 	./venv2/bin/python -m unittest discover -v test/ -b

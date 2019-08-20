@@ -3,6 +3,9 @@ import mock
 
 from conduce import api
 
+from requests.exceptions import HTTPError
+import requests
+
 
 class ResultMock_201:
     status_code = 201
@@ -119,6 +122,100 @@ class Test(unittest.TestCase):
         mock_create_json_resource.assert_called_once_with('DATASET', fake_dataset_id, {'backend': 'SAGE_BACKEND'}, **fake_kwargs)
         mock__create_dataset_backend.assert_not_called()
         mock_remove_dataset_backend.assert_not_called()
+
+    @mock.patch('conduce.api.make_get_request',
+                side_effect=([HTTPError(response=mock.Mock(status_code=500))] * 10 +
+                             [mock.Mock(json=(lambda: {}), ok=True, status_code=200)] +
+                             [HTTPError(response=mock.Mock(status_code=500))] * 122)
+                )
+    @mock.patch('time.sleep')
+    def test_wait_for_job__200_resets_server_error(self, mock_time_sleep, mock_make_get_request):
+        fake_job_id = 'fake-job-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        with self.assertRaises(HTTPError):
+            api.wait_for_job(fake_job_id, **fake_kwargs)
+            mock_make_get_request.assert_has_calls([mock.call(fake_job_id, **fake_kwargs)] * 133)
+
+    @mock.patch('conduce.api.make_get_request', side_effect=[
+        HTTPError(response=mock.Mock(status_code=404)),
+        HTTPError(response=mock.Mock(status_code=404)),
+        mock.Mock(json=(lambda: {}), ok=True, status_code=200),
+        HTTPError(response=mock.Mock(status_code=404)),
+    ])
+    @mock.patch('time.sleep')
+    def test_wait_for_job__200_short_circuits_countdown(self, mock_time_sleep, mock_make_get_request):
+        fake_job_id = 'fake-job-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        with self.assertRaises(HTTPError):
+            api.wait_for_job(fake_job_id, **fake_kwargs)
+            mock_make_get_request.assert_has_calls([mock.call(fake_job_id, **fake_kwargs)] * 4)
+
+    @mock.patch('conduce.api.make_get_request', side_effect=[
+        HTTPError(response=mock.Mock(status_code=404)),
+        HTTPError(response=mock.Mock(status_code=500)),
+        mock.Mock(json=(lambda: {}), ok=True, status_code=200),
+        mock.Mock(json=(lambda: {'response': 'Mock'}), ok=True, status_code=200),
+    ])
+    @mock.patch('time.sleep')
+    def test_wait_for_job__404_500_and_done(self, mock_time_sleep, mock_make_get_request):
+        fake_job_id = 'fake-job-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        api.wait_for_job(fake_job_id, **fake_kwargs)
+        mock_make_get_request.assert_has_calls([mock.call(fake_job_id, **fake_kwargs)] * 4)
+
+    @mock.patch('conduce.api.make_get_request', side_effect=[
+        mock.Mock(json=(lambda: {}), ok=True, status_code=200),
+        mock.Mock(json=(lambda: {'response': 'Mock'}), ok=True, status_code=200),
+    ])
+    @mock.patch('time.sleep')
+    def test_wait_for_job__once_and_done(self, mock_time_sleep, mock_make_get_request):
+        fake_job_id = 'fake-job-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        api.wait_for_job(fake_job_id, **fake_kwargs)
+        mock_make_get_request.assert_has_calls([mock.call(fake_job_id, **fake_kwargs)] * 2)
+
+    @mock.patch('conduce.api.make_get_request', return_value=mock.Mock(json=(lambda: {'response': 'Mock'}), ok=True, status_code=200))
+    @mock.patch('time.sleep')
+    def test_wait_for_job__done(self, mock_time_sleep, mock_make_get_request):
+        fake_job_id = 'fake-job-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        api.wait_for_job(fake_job_id, **fake_kwargs)
+        mock_make_get_request.assert_called_once_with(fake_job_id, **fake_kwargs)
+
+    @mock.patch('conduce.api.make_get_request', side_effect=HTTPError(response=mock.Mock(status_code=500)))
+    @mock.patch('time.sleep')
+    def test_wait_for_job__500(self, mock_time_sleep, mock_make_get_request):
+        fake_job_id = 'fake-job-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        with self.assertRaises(HTTPError):
+            api.wait_for_job(fake_job_id, **fake_kwargs)
+            mock_make_get_request.assert_has_calls([mock.call(fake_job_id, **fake_kwargs)] * 100)
+
+    @mock.patch('conduce.api.make_get_request', side_effect=HTTPError(response=mock.Mock(status_code=404)))
+    @mock.patch('time.sleep')
+    def test_wait_for_job__404(self, mock_time_sleep, mock_make_get_request):
+        fake_job_id = 'fake-job-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        with self.assertRaises(HTTPError):
+            api.wait_for_job(fake_job_id, **fake_kwargs)
+            mock_make_get_request.assert_has_calls([mock.call(fake_job_id, **fake_kwargs)] * 10)
+
+    @mock.patch('conduce.api.make_get_request', side_effect=HTTPError(response=mock.Mock(status_code=400)))
+    @mock.patch('time.sleep')
+    def test_wait_for_job__400(self, mock_time_sleep, mock_make_get_request):
+        fake_job_id = 'fake-job-id'
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+
+        with self.assertRaises(HTTPError):
+            api.wait_for_job(fake_job_id, **fake_kwargs)
+            mock_make_get_request.assert_called_once_with(fake_job_id, **fake_kwargs)
 
     @mock.patch('conduce.api.make_post_request', return_value=ResultMock())
     def test_search_dataset_backend(self, mock_make_post_request):
