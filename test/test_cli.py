@@ -463,9 +463,29 @@ class Test(unittest.TestCase):
         mock_read_entity_set_from_samples_file.assert_called_once_with(fake_args)
 
     @mock.patch('conduce.api.get_transactions', return_value=MockResponse())
-    def test_get_dataset_transactions(self, mock_api_get_transactions):
+    def test_get_dataset_transactions_set_value(self, mock_api_get_transactions):
         fake_dataset_id = 'fake-dataset-id'
-        fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
+        fake_passed_args = FakeArgs(value=13, host='fake-host', user='fake-user')
+        fake_args = FakeArgs(dataset_id=fake_dataset_id, min=1, max=15, **vars(fake_passed_args))
+
+        cli.get_dataset_transactions(fake_args)
+
+        mock_api_get_transactions.assert_called_once_with(fake_dataset_id, **vars(fake_passed_args))
+
+    @mock.patch('conduce.api.get_transactions', return_value=MockResponse())
+    def test_get_dataset_transactions_set_min_max(self, mock_api_get_transactions):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_passed_args = FakeArgs(min=1, max=15, value=None, host='fake-host', user='fake-user')
+        fake_args = FakeArgs(dataset_id=fake_dataset_id, **vars(fake_passed_args))
+
+        cli.get_dataset_transactions(fake_args)
+
+        mock_api_get_transactions.assert_called_once_with(fake_dataset_id, **vars(fake_passed_args))
+
+    @mock.patch('conduce.api.get_transactions', return_value=MockResponse())
+    def test_get_dataset_transactions_default(self, mock_api_get_transactions):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_passed_args = FakeArgs(min=-1, max=None, value=None, host='fake-host', user='fake-user')
         fake_args = FakeArgs(dataset_id=fake_dataset_id, **vars(fake_passed_args))
 
         cli.get_dataset_transactions(fake_args)
