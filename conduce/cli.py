@@ -366,14 +366,14 @@ def process_transactions(args):
         del vars(args)['all']
         del vars(args)['transaction']
 
-        max_transaction = max_tx or api.get_transactions(dataset_id, count=True, **vars(args))['count']
+        max_transaction = max_tx or api.get_transactions(dataset_id, count=True, **vars(args))['count'] - 1
         for backend_id in backend_ids:
             min_transaction = min_tx or api.get_dataset_backend_metadata(dataset_id, backend_id, **vars(args))['transactions']
             idx = 1
             while min_transaction + idx <= max_transaction:
                 print("Processing transaction {} of {} on {}...".format(min_transaction + idx, max_transaction, backend_id))
                 response = api.process_transactions(dataset_id, backend_id, transaction=(min_transaction + idx), **vars(args))
-                api.wait_for_job(response.headers['location'])
+                api.wait_for_job(response.headers['location'], **request_kwargs(**vars(args)))
                 idx += 1
 
 
