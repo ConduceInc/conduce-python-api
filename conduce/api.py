@@ -31,6 +31,11 @@ NUM_RETRIES = 5
 WAIT_EXPONENTIAL_MULTIPLIER = 1000
 
 
+class TimeoutError(Exception):
+    def __init__(self, message):
+        super(TimeoutError, self).__init__(message)
+
+
 class DatasetBackends:
     BACKEND_TYPES = {
         'simple': 'SimpleStore',
@@ -201,10 +206,11 @@ def wait_for_job(job_id, **kwargs):
         Requests that result in an error raise an exception with information about the failure.
         See :py:meth:`requests.Response.raise_for_status` for more information.
     """
-    initial_status_countdown = 10
+    initial_status_countdown = 9
     server_error_count = 0
-    while True:
-        time.sleep(0.5)
+    timeout = kwargs.get('timeout', 300) * 2
+
+    while timeout > 0:
         try:
             response = make_get_request(job_id, **kwargs)
 
@@ -214,6 +220,8 @@ def wait_for_job(job_id, **kwargs):
                 msg = response.json()
                 if 'response' in msg:
                     return response
+
+            time.sleep(0.5)
         except requests.exceptions.HTTPError as e:
             if initial_status_countdown and e.response.status_code == 404:
                 if kwargs.get('cli'):
@@ -222,13 +230,19 @@ def wait_for_job(job_id, **kwargs):
                 time.sleep(1)
             elif e.response.status_code < 500:
                 raise e
-            elif server_error_count > 120:
-                raise e
-            else:
+            elif server_error_count < 119:
                 server_error_count += 1
                 if kwargs.get('cli'):
                     print("Job status check failed for {}:".format(job_id), e.response.reason)
                     print("Will retry after sleep period.")
+                time.sleep(0.5)
+            else:
+                raise e
+
+        timeout -= 1
+
+    if timeout <= 0:
+        raise TimeoutError('Timed out waiting for job to complete. {}'.format(job_id))
 
 
 def compose_uri(fragment):
