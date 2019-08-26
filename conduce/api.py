@@ -1011,7 +1011,7 @@ def disable_auto_processing(dataset_id, backend_id, **kwargs):
     return enable_auto_processing(dataset_id, backend_id, False, **kwargs)
 
 
-def add_simple_store(dataset_id, auto_process, **kwargs):
+def add_simple_store(dataset_id, auto_process=None, **kwargs):
     """
     Adds a simple store to the specified dataset.
 
@@ -1028,10 +1028,10 @@ def add_simple_store(dataset_id, auto_process, **kwargs):
     **kwargs : key-value
         See :py:func:`make_post_request` for more kwargs.
     """
-    return _create_dataset_backend(dataset_id, DatasetBackends.simple, auto_process, None, **kwargs)
+    return _create_dataset_backend(dataset_id, DatasetBackends.simple, auto_process, **kwargs)
 
 
-def add_tile_store(dataset_id, auto_process, **kwargs):
+def add_tile_store(dataset_id, auto_process=None, **kwargs):
     """
     Adds a tile store to the specified dataset.
 
@@ -1048,10 +1048,10 @@ def add_tile_store(dataset_id, auto_process, **kwargs):
     **kwargs : key-value
         See :py:func:`make_post_request` for more kwargs.
     """
-    return _create_dataset_backend(dataset_id, DatasetBackends.tile, auto_process, None, **kwargs)
+    return _create_dataset_backend(dataset_id, DatasetBackends.tile, auto_process, **kwargs)
 
 
-def add_capped_tile_store(dataset_id, auto_process, min_spatial_zoom_level, min_temporal_zoom_level, **kwargs):
+def add_capped_tile_store(dataset_id, min_spatial_zoom_level=0, min_temporal_zoom_level=0, auto_process=None, **kwargs):
     """
     Adds a capped tile store to the specified dataset.
 
@@ -1066,9 +1066,9 @@ def add_capped_tile_store(dataset_id, auto_process, min_spatial_zoom_level, min_
         Configure the backend to auto process transactions. Auto processing is enabled by default.
         Set to False to disable auto processing.
     min_temporal_zoom_level : integer
-        The lowest resolution temporal zoom level at which data will be tiled.
+        The lowest resolution temporal zoom level at which data will be tiled (default = 0).
     min_spatial_zoom_level : integer
-        The highest resolution temporal zoom level at which data will be tiled.
+        The highest resolution temporal zoom level at which data will be tiled (default = 0).
     **kwargs : key-value
         See :py:func:`make_post_request` for more kwargs.
     """
@@ -1079,7 +1079,7 @@ def add_capped_tile_store(dataset_id, auto_process, min_spatial_zoom_level, min_
     return _create_dataset_backend(dataset_id, DatasetBackends.capped_tile, auto_process, config, **kwargs)
 
 
-def add_elasticsearch_store(dataset_id, auto_process, **kwargs):
+def add_elasticsearch_store(dataset_id, auto_process=None, **kwargs):
     """
     Adds an Elasticsearch store to the specified dataset.
 
@@ -1096,10 +1096,10 @@ def add_elasticsearch_store(dataset_id, auto_process, **kwargs):
     **kwargs : key-value
         See :py:func:`make_post_request` for more kwargs.
     """
-    return _create_dataset_backend(dataset_id, DatasetBackends.elasticsearch, auto_process, None, **kwargs)
+    return _create_dataset_backend(dataset_id, DatasetBackends.elasticsearch, auto_process, **kwargs)
 
 
-def add_histogram_store(dataset_id, auto_process, **kwargs):
+def add_histogram_store(dataset_id, auto_process=None, **kwargs):
     """
     Adds a histogram store to the specified dataset.
 
@@ -1116,10 +1116,10 @@ def add_histogram_store(dataset_id, auto_process, **kwargs):
     **kwargs : key-value
         See :py:func:`make_post_request` for more kwargs.
     """
-    return _create_dataset_backend(dataset_id, DatasetBackends.histogram, auto_process, None, **kwargs)
+    return _create_dataset_backend(dataset_id, DatasetBackends.histogram, auto_process, **kwargs)
 
 
-def _create_dataset_backend(dataset_id, backend_type, auto_process, config, **kwargs):
+def _create_dataset_backend(dataset_id, backend_type, auto_process=None, config=None, **kwargs):
     """
     Transactions will not be auto-processed into the store until new transactions are posted.
     """
