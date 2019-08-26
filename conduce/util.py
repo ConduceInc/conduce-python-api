@@ -150,7 +150,7 @@ def get_timestamp_score(key, value):
         score += 200
 
     try:
-        float(value)
+        string_to_timestamp_ms(value)
         return score
     except Exception:
         pass

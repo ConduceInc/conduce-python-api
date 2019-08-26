@@ -37,6 +37,9 @@ class TimeoutError(Exception):
 
 
 class DatasetBackends:
+    """
+    An interface for accessing dataset backend type names.
+    """
     BACKEND_TYPES = {
         'simple': 'SimpleStore',
         'tile': 'TileStore',
@@ -45,11 +48,45 @@ class DatasetBackends:
         'histogram': 'HistogramStore',
     }
 
-    simple = BACKEND_TYPES['simple']
     tile = BACKEND_TYPES['tile']
+    """
+    Primary store for real-time visualization of data in time and space.
+
+    Data samples are written to spatial and temporal "tiles" enabling
+    fast queries for spatial and temporal ranges.
+
+    Datasets are created with a tile store for backward compatibility.
+    """
+
     capped_tile = BACKEND_TYPES['capped_tile']
-    elasticsearch = BACKEND_TYPES['elasticsearch']
+    """
+    An optimized store for real-time visualization of data in time and space.
+
+    Like the tile store, data samples are written to spatial and temporal "tiles" enabling
+    fast queries for spatial and temporal ranges.  However, the minimum zoom level is fixed,
+    preventing the store from adding lower zoom levels (zoomed out) dynamically.
+    """
+
     histogram = BACKEND_TYPES['histogram']
+    """
+    Provides a collection of histograms at various time resolutions.
+
+    Counts data samples into time bins. The user interface will display histograms appropriately.
+    """
+
+    elasticsearch = BACKEND_TYPES['elasticsearch']
+    """
+    Coming soon.
+
+    Full text search.
+    """
+
+    simple = BACKEND_TYPES['simple']
+    """
+    Writes all samples to a 2D array organized by entity ID and timestamp.
+
+    This store is primarily intended for testing, it is not recommended for large datasets.
+    """
 
     @staticmethod
     def types():
