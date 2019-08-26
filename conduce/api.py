@@ -450,8 +450,7 @@ def create_dataset(dataset_name, **kwargs):
     if backend_types:
         dataset_id = dataset_response.get('id')
         for backend_type in backend_types:
-            config = None
-            _create_dataset_backend(dataset_id, backend_type, True, config, **kwargs)
+            _create_dataset_backend(dataset_id, backend_type, **kwargs)
 
         remove_dataset_backend(dataset_id, dataset_id, **kwargs)
 

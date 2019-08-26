@@ -83,7 +83,7 @@ class Test(unittest.TestCase):
 
         expected_calls = []
         for backend in api.DatasetBackends.types():
-            expected_calls.append(mock.call(fake_dataset_id, backend, True, None, **fake_kwargs))
+            expected_calls.append(mock.call(fake_dataset_id, backend, **fake_kwargs))
         mock__create_dataset_backend.assert_has_calls(expected_calls)
 
     @mock.patch('conduce.api.remove_dataset_backend')
