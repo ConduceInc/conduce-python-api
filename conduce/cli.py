@@ -9,6 +9,7 @@ import os
 import sys
 from subprocess import call
 import mimetypes
+import datetime
 
 from . import config
 from . import api
@@ -342,38 +343,45 @@ def process_transactions(args):
     if len(args.backend_ids) == 0 and not args.all_backends:
         raise ValueError('You must provide a list of backend IDs or pass --all-backends')
 
-    dataset_id = args.dataset_id
-    del vars(args)['dataset_id']
-    backend_ids = args.backend_ids
-    del vars(args)['backend_ids']
-    all_backends = args.all_backends
-    del vars(args)['all_backends']
-    async_processing = args.async_processing
-    del vars(args)['async_processing']
+    dataset_id = vars(args).pop('dataset_id')
+    backend_ids = vars(args).pop('backend_ids')
+    all_backends = vars(args).pop('all_backends')
+    async_processing = vars(args).pop('async_processing')
+    if args.transaction:
+        del vars(args)['min']
+        del vars(args)['max']
+        del vars(args)['all']
+    timeout = vars(args).pop('timeout')
 
     if all_backends:
         backend_ids = api.list_dataset_backends(dataset_id, **request_kwargs(**vars(args)))
 
-    if async_processing or args.transaction or args.all:
+    if async_processing or vars(args).get('all'):
         for backend_id in backend_ids:
             response = api.process_transactions(dataset_id, backend_id, **vars(args))
             print('Processing... check backend {} status at {}'.format(backend_id, response.headers['location']))
+    elif args.transaction:
+        transaction = vars(args).pop('transaction')
+        for backend_id in backend_ids:
+            print("Processing transaction {}...".format(transaction))
+            response = api.process_transactions(dataset_id, backend_id, transaction=transaction, **request_kwargs(**vars(args)))
+            api.wait_for_job(response.headers['location'], timeout=timeout, **request_kwargs(**vars(args)))
     else:
         min_tx = args.min
-        del vars(args)['min']
+        min_tx = vars(args).pop('min')
         max_tx = args.max
         del vars(args)['max']
         del vars(args)['all']
-        del vars(args)['transaction']
+        transaction = vars(args).pop('transaction')
 
         max_transaction = max_tx or api.get_transactions(dataset_id, count=True, **vars(args))['count'] - 1
         for backend_id in backend_ids:
             min_transaction = min_tx or api.get_dataset_backend_metadata(dataset_id, backend_id, **vars(args))['transactions']
             idx = 1
             while min_transaction + idx <= max_transaction:
-                print("Processing transaction {} of {} on {}...".format(min_transaction + idx, max_transaction, backend_id))
-                response = api.process_transactions(dataset_id, backend_id, transaction=(min_transaction + idx), **vars(args))
-                api.wait_for_job(response.headers['location'], **request_kwargs(**vars(args)))
+                print("{}: Processing transaction {} of {} on {}...".format(datetime.datetime.now(), min_transaction + idx, max_transaction, backend_id))
+                response = api.process_transactions(dataset_id, backend_id, transaction=(min_transaction + idx), **request_kwargs(**vars(args)))
+                api.wait_for_job(response.headers['location'], timeout=timeout, **request_kwargs(**vars(args)))
                 idx += 1
 
 
@@ -987,7 +995,9 @@ def main():
     parser_dataset_process_transactions.add_argument(
         '--max', type=int, help='The newest transaction to be processed')
     parser_dataset_process_transactions.add_argument(
-        '--transaction', type=int, help='The index of a single transaction to process')
+        '--transaction', '--value', type=int, help='The index of a single transaction to process')
+    parser_dataset_process_transactions.add_argument(
+        '--timeout', '-t', type=int, help='Time at which to abandon asynchronous job')
     parser_dataset_process_transactions.set_defaults(func=process_transactions)
 
     parser_dataset_list_backends = parser_dataset_subparsers.add_parser(

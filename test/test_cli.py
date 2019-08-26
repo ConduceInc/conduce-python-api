@@ -234,7 +234,7 @@ class Test(unittest.TestCase):
     def test_process_transactions__raises_value_error(self):
         fake_dataset_id = 'fake-dataset-id'
         fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
-        fake_args = FakeArgs(dataset_id=fake_dataset_id, backend_ids=[], all_backends=False, **vars(fake_passed_args))
+        fake_args = FakeArgs(dataset_id=fake_dataset_id, backend_ids=[], all_backends=False, timeout=None, **vars(fake_passed_args))
         with self.assertRaisesRegex(ValueError, 'You must provide a list of backend IDs or pass --all-backends'):
             cli.process_transactions(fake_args)
 
@@ -253,7 +253,7 @@ class Test(unittest.TestCase):
         fake_dataset_id = 'fake-dataset-id'
         fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
         fake_args = FakeArgs(all=False, min=None, max=None, dataset_id=fake_dataset_id, backend_ids=[],
-                             transaction=None, async_processing=False, all_backends=True, **vars(fake_passed_args))
+                             transaction=None, async_processing=False, all_backends=True, timeout=None, **vars(fake_passed_args))
 
         cli.process_transactions(fake_args)
 
@@ -262,7 +262,7 @@ class Test(unittest.TestCase):
         for idx, id in enumerate(listed_backends):
             for tx_idx in range(44, 48):
                 expected_calls.append(mock.call(fake_dataset_id, listed_backends[idx], transaction=tx_idx, **vars(fake_passed_args)))
-                expected_waits.append(mock.call('fake location', **vars(fake_passed_args)))
+                expected_waits.append(mock.call('fake location', timeout=None, **vars(fake_passed_args)))
         mock_api_process_transactions.assert_has_calls(expected_calls)
         mock_api_wait_for_job.assert_has_calls(expected_waits)
         mock_api_list_dataset_backends.assert_called_once_with(fake_dataset_id, **vars(fake_passed_args))
@@ -284,7 +284,7 @@ class Test(unittest.TestCase):
         fake_backend_ids = ['fake-backend-id-1', 'fake-backend-id-2', 'fake-backend-id-3']
         fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
         fake_args = FakeArgs(dataset_id=fake_dataset_id, backend_ids=fake_backend_ids, transaction=None,
-                             async_processing=False, all=False, min=None, max=None, all_backends=True, **vars(fake_passed_args))
+                             async_processing=False, all=False, min=None, max=None, all_backends=True, timeout=None, **vars(fake_passed_args))
 
         cli.process_transactions(fake_args)
 
@@ -293,10 +293,46 @@ class Test(unittest.TestCase):
         for idx, id in enumerate(listed_backends):
             for tx_idx in range(44, 48):
                 expected_calls.append(mock.call(fake_dataset_id, listed_backends[idx], transaction=tx_idx, **vars(fake_passed_args)))
-                expected_waits.append(mock.call('fake location', **vars(fake_passed_args)))
+                expected_waits.append(mock.call('fake location', timeout=None, **vars(fake_passed_args)))
         mock_api_process_transactions.assert_has_calls(expected_calls)
         mock_api_wait_for_job.assert_has_calls(expected_waits)
         mock_api_list_dataset_backends.assert_called_once_with(fake_dataset_id, **vars(fake_passed_args))
+
+    @mock.patch('conduce.api.wait_for_job')
+    @mock.patch('conduce.api.get_transactions', return_value={'count': 48})
+    @mock.patch('conduce.api.get_dataset_backend_metadata', return_value={'transactions': 43})
+    @mock.patch('conduce.api.process_transactions', return_value=MockResponse())
+    def test_process_transactions__one_transaction(
+        self,
+        mock_api_process_transactions,
+        mock_api_get_dataset_backend_metadata,
+            mock_api_get_transactions,
+            mock_api_wait_for_job,
+    ):
+        fake_dataset_id = 'fake-dataset-id'
+        fake_backend_ids = ['fake-backend-id-1', 'fake-backend-id-2', 'fake-backend-id-3']
+        fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
+        fake_args = FakeArgs(
+            all=False,
+            min=None,
+            max=None,
+            dataset_id=fake_dataset_id,
+            backend_ids=fake_backend_ids,
+            transaction='fake-tx-id',
+            async_processing=False,
+            all_backends=False,
+            timeout=10,
+            **vars(fake_passed_args))
+
+        cli.process_transactions(fake_args)
+
+        expected_calls = []
+        expected_waits = []
+        for idx, id in enumerate(fake_backend_ids):
+            expected_calls.append(mock.call(fake_dataset_id, fake_backend_ids[idx], transaction='fake-tx-id', **vars(fake_passed_args)))
+            expected_waits.append(mock.call('fake location', timeout=10, **vars(fake_passed_args)))
+        mock_api_process_transactions.assert_has_calls(expected_calls)
+        mock_api_wait_for_job.assert_has_calls(expected_waits)
 
     @mock.patch('conduce.api.wait_for_job')
     @mock.patch('conduce.api.get_transactions', return_value={'count': 48})
@@ -312,8 +348,17 @@ class Test(unittest.TestCase):
         fake_dataset_id = 'fake-dataset-id'
         fake_backend_ids = ['fake-backend-id-1', 'fake-backend-id-2', 'fake-backend-id-3']
         fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
-        fake_args = FakeArgs(all=False, min=None, max=None, dataset_id=fake_dataset_id, backend_ids=fake_backend_ids, transaction=None,
-                             async_processing=False, all_backends=False, **vars(fake_passed_args))
+        fake_args = FakeArgs(
+            all=False,
+            min=None,
+            max=None,
+            dataset_id=fake_dataset_id,
+            backend_ids=fake_backend_ids,
+            transaction=None,
+            async_processing=False,
+            all_backends=False,
+            timeout=10,
+            **vars(fake_passed_args))
 
         cli.process_transactions(fake_args)
 
@@ -322,7 +367,7 @@ class Test(unittest.TestCase):
         for idx, id in enumerate(fake_backend_ids):
             for tx_idx in range(44, 48):
                 expected_calls.append(mock.call(fake_dataset_id, fake_backend_ids[idx], transaction=tx_idx, **vars(fake_passed_args)))
-                expected_waits.append(mock.call('fake location', **vars(fake_passed_args)))
+                expected_waits.append(mock.call('fake location', timeout=10, **vars(fake_passed_args)))
         mock_api_process_transactions.assert_has_calls(expected_calls)
         mock_api_wait_for_job.assert_has_calls(expected_waits)
 
@@ -340,8 +385,17 @@ class Test(unittest.TestCase):
         fake_dataset_id = 'fake-dataset-id'
         fake_backend_id = 'fake-backend-id'
         fake_passed_args = FakeArgs(host='fake-host', user='fake-user')
-        fake_args = FakeArgs(dataset_id=fake_dataset_id, backend_ids=[fake_backend_id],
-                             transaction=None, all=False, min=None, max=None, async_processing=False, all_backends=False, **vars(fake_passed_args))
+        fake_args = FakeArgs(
+            dataset_id=fake_dataset_id,
+            backend_ids=[fake_backend_id],
+            transaction=None,
+            all=False,
+            min=None,
+            max=None,
+            async_processing=False,
+            all_backends=False,
+            timeout=None,
+            **vars(fake_passed_args))
 
         cli.process_transactions(fake_args)
 
@@ -349,7 +403,7 @@ class Test(unittest.TestCase):
         expected_waits = []
         for idx in range(44, 48):
             expected_calls.append(mock.call(fake_dataset_id, fake_backend_id, transaction=idx, **vars(fake_passed_args)))
-            expected_waits.append(mock.call('fake location', **vars(fake_passed_args)))
+            expected_waits.append(mock.call('fake location', timeout=None, **vars(fake_passed_args)))
         mock_api_process_transactions.assert_has_calls(expected_calls)
         mock_api_wait_for_job.assert_has_calls(expected_waits)
 
@@ -359,13 +413,20 @@ class Test(unittest.TestCase):
         fake_dataset_id = 'fake-dataset-id'
         fake_request_args = FakeArgs(host='fake-host', user='fake-user')
         fake_passed_args = FakeArgs(all=True, **vars(fake_request_args))
-        fake_args = FakeArgs(dataset_id=fake_dataset_id, backend_ids=[], async_processing=True, all_backends=True, **vars(fake_passed_args))
+        fake_args = FakeArgs(
+            dataset_id=fake_dataset_id,
+            backend_ids=[],
+            async_processing=True,
+            transaction=None,
+            all_backends=True,
+            timeout=None,
+            **vars(fake_passed_args))
 
         cli.process_transactions(fake_args)
 
         expected_calls = []
         for idx, id in enumerate(listed_backends):
-            expected_calls.append(mock.call(fake_dataset_id, listed_backends[idx], **vars(fake_passed_args)))
+            expected_calls.append(mock.call(fake_dataset_id, listed_backends[idx], transaction=None, **vars(fake_passed_args)))
         mock_api_process_transactions.assert_has_calls(expected_calls)
         mock_api_list_dataset_backends.assert_called_once_with(fake_dataset_id, **vars(fake_request_args))
 
@@ -376,13 +437,20 @@ class Test(unittest.TestCase):
         fake_backend_ids = ['fake-backend-id-1', 'fake-backend-id-2', 'fake-backend-id-3']
         fake_request_args = FakeArgs(host='fake-host', user='fake-user')
         fake_passed_args = FakeArgs(all=True, **vars(fake_request_args))
-        fake_args = FakeArgs(dataset_id=fake_dataset_id, backend_ids=fake_backend_ids, async_processing=True, all_backends=True, **vars(fake_passed_args))
+        fake_args = FakeArgs(
+            dataset_id=fake_dataset_id,
+            backend_ids=fake_backend_ids,
+            async_processing=True,
+            transaction=None,
+            all_backends=True,
+            timeout=None,
+            **vars(fake_passed_args))
 
         cli.process_transactions(fake_args)
 
         expected_calls = []
         for idx, id in enumerate(listed_backends):
-            expected_calls.append(mock.call(fake_dataset_id, listed_backends[idx], **vars(fake_passed_args)))
+            expected_calls.append(mock.call(fake_dataset_id, listed_backends[idx], transaction=None, **vars(fake_passed_args)))
         mock_api_process_transactions.assert_has_calls(expected_calls)
         mock_api_list_dataset_backends.assert_called_once_with(fake_dataset_id, **vars(fake_request_args))
 
@@ -391,13 +459,20 @@ class Test(unittest.TestCase):
         fake_dataset_id = 'fake-dataset-id'
         fake_backend_ids = ['fake-backend-id-1', 'fake-backend-id-2', 'fake-backend-id-3']
         fake_passed_args = FakeArgs(all=True, host='fake-host', user='fake-user')
-        fake_args = FakeArgs(dataset_id=fake_dataset_id, backend_ids=fake_backend_ids, async_processing=True, all_backends=False, **vars(fake_passed_args))
+        fake_args = FakeArgs(
+            dataset_id=fake_dataset_id,
+            backend_ids=fake_backend_ids,
+            async_processing=True,
+            transaction=None,
+            all_backends=False,
+            timeout=None,
+            **vars(fake_passed_args))
 
         cli.process_transactions(fake_args)
 
         expected_calls = []
         for idx, id in enumerate(fake_backend_ids):
-            expected_calls.append(mock.call(fake_dataset_id, fake_backend_ids[idx], **vars(fake_passed_args)))
+            expected_calls.append(mock.call(fake_dataset_id, fake_backend_ids[idx], transaction=None, **vars(fake_passed_args)))
         mock_api_process_transactions.assert_has_calls(expected_calls)
 
     @mock.patch('conduce.api.process_transactions', return_value=MockResponse())
@@ -405,11 +480,18 @@ class Test(unittest.TestCase):
         fake_dataset_id = 'fake-dataset-id'
         fake_backend_id = 'fake-backend-id'
         fake_passed_args = FakeArgs(all=False, host='fake-host', user='fake-user')
-        fake_args = FakeArgs(dataset_id=fake_dataset_id, backend_ids=[fake_backend_id], async_processing=True, all_backends=False, **vars(fake_passed_args))
+        fake_args = FakeArgs(
+            dataset_id=fake_dataset_id,
+            backend_ids=[fake_backend_id],
+            async_processing=True,
+            transaction=None,
+            all_backends=False,
+            timeout=None,
+            **vars(fake_passed_args))
 
         cli.process_transactions(fake_args)
 
-        mock_api_process_transactions.assert_called_once_with(fake_dataset_id, fake_backend_id, **vars(fake_passed_args))
+        mock_api_process_transactions.assert_called_once_with(fake_dataset_id, fake_backend_id, transaction=None, **vars(fake_passed_args))
 
     @mock.patch('conduce.util.csv_to_json', return_value='fake-csv-to-json')
     @mock.patch('conduce.util.parse_samples', return_value='fake-parsed-samples')
