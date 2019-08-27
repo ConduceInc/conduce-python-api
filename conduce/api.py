@@ -757,7 +757,7 @@ def post_transaction(dataset_id, entity_set, **kwargs):
         raise ValueError("Parameter entity_set is not an 'entities' dict.")
 
     if kwargs.get('debug'):
-        kwargs['debug'] = False
+        kwargs.pop('debug')
         kwargs['process'] = True
         print("Debug ingest")
         responses = []
@@ -768,15 +768,16 @@ def post_transaction(dataset_id, entity_set, **kwargs):
             print("{} / {} ingested".format(idx, len(entity_set['entities'])))
         return responses
 
+    process = bool(kwargs.pop('process', False))
     payload = {
         'data': entity_set,
         'op': kwargs.get('operation', 'INSERT'),
     }
     response = make_post_request(
-        payload, '/api/v2/data/{}/transactions?process={}'.format(dataset_id, bool(kwargs.get('process', False))), **kwargs)
+        payload, '/api/v2/data/{}/transactions?process={}'.format(dataset_id, process), **kwargs)
     response.raise_for_status()
 
-    if kwargs.get('process', False):
+    if process:
         if response.status_code == 202:
             if 'location' in response.headers:
                 job_id = response.headers['location']

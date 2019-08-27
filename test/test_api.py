@@ -678,8 +678,8 @@ class Test(unittest.TestCase):
     def test_post_transaction__process_true(self, mock_make_post_request):
         fake_id = 'fake_id'
         fake_entities = {'entities': 'fake entities'}
-        fake_kwargs = {'arg1': 'arg1', 'process': True}
-        self.assertIsInstance(api.post_transaction(fake_id, fake_entities, **fake_kwargs), ResultMock_201)
+        fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2'}
+        self.assertIsInstance(api.post_transaction(fake_id, fake_entities, process=True, **fake_kwargs), ResultMock_201)
 
         expected_payload = {
             'data': fake_entities,
@@ -711,14 +711,15 @@ class Test(unittest.TestCase):
         self.assertIsInstance(api.post_transaction(fake_id, fake_entity_set, **fake_kwargs), list)
 
         expected_uri = '/api/v2/data/fake_id/transactions?process=True'
-        for idx, call_args in enumerate(mock_make_post_request.call_args_list):
+        expected_kwargs = {'arg1': 'arg1'}
+        expected_calls = []
+        for fake_entity in fake_entities:
             expected_payload = {
-                'data': {'entities': [fake_entities[idx]]},
+                'data': {'entities': [fake_entity]},
                 'op': 'INSERT'
             }
-            fake_kwargs = {'arg1': 'arg1', 'debug': False, 'process': True}
-            self.assertEqual(call_args, mock.call(expected_payload, expected_uri, **fake_kwargs))
-            expected_uri = '/api/v2/data/fake_id/transactions?process=True'
+            expected_calls.append(mock.call(expected_payload, expected_uri, **expected_kwargs))
+        mock_make_post_request.assert_has_calls(expected_calls)
 
     @mock.patch('conduce.api.make_post_request', return_value=ResultMock())
     def test_create_resource_mime_type_json(self, mock_make_post_request):
