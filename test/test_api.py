@@ -355,7 +355,7 @@ class Test(unittest.TestCase):
         fake_dataset_id = 'fake-dataset-id'
         fake_backend_id = 'fake-backend-id'
         fake_kwargs = {'arg1': 'arg1', 'arg2': 'arg2', 'all': True, 'transaction': 'fake-transaction',
-                       'min': 'fake-min', 'max': 'fake-max', 'default': 'fake-default'}
+                       'min': 'fake-min', 'max': 'fake-max'}
 
         api.process_transactions(fake_dataset_id, fake_backend_id, **fake_kwargs)
 
@@ -365,7 +365,6 @@ class Test(unittest.TestCase):
             'tx': fake_kwargs.get('transaction'),
             'min': fake_kwargs.get('min'),
             'max': fake_kwargs.get('max'),
-            'default': fake_kwargs.get('default'),
         }
 
         mock_make_patch_request.assert_called_once_with({}, expected_fragment, parameters=expected_parameters, **fake_kwargs)
@@ -383,7 +382,6 @@ class Test(unittest.TestCase):
             'tx': fake_kwargs.get('transaction'),
             'min': fake_kwargs.get('min'),
             'max': fake_kwargs.get('max'),
-            'default': fake_kwargs.get('default'),
         }
 
         mock_make_patch_request.assert_called_once_with({}, expected_fragment, parameters=expected_parameters, **fake_kwargs)

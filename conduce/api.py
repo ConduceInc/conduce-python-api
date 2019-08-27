@@ -976,8 +976,6 @@ def process_transactions(dataset_id, backend_id, **kwargs):
             The oldest transaction in the sequence to be processed to the backend
         **max**
             The newest transaction in the sequence to be processed to the backend
-        **default**
-            Make this backend the default backend. Set to any value, all other parameters are ignored.
         See :py:func:`make_patch_request` for more kwargs.
 
     Returns
@@ -993,7 +991,6 @@ def process_transactions(dataset_id, backend_id, **kwargs):
         'tx': kwargs.get('transaction'),
         'min': kwargs.get('min'),
         'max': kwargs.get('max'),
-        'default': kwargs.get('default'),
     }
 
     # HACK: Remove when boolean parameters are supported
