@@ -245,7 +245,11 @@ def wait_for_job(job_id, **kwargs):
     """
     initial_status_countdown = 9
     server_error_count = 0
-    timeout = kwargs.get('timeout', 300) * 2
+
+    timeout = kwargs.get('timeout')
+    if timeout is None:
+        timeout = 300
+    timeout *= 2
 
     while timeout > 0:
         try:
