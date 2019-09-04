@@ -35,6 +35,30 @@ class Test(unittest.TestCase):
         unittest.TestCase.assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
     ###
 
+    def test_time_period_to_zoom_level(self):
+        self.assertEqual(util.time_period_to_zoom_level(0), 0)
+        self.assertEqual(util.time_period_to_zoom_level(365 / 100 * 24 * 3600 * 1000), 6)
+        self.assertEqual(util.time_period_to_zoom_level(365 / 4 * 24 * 3600 * 1000), 2)
+        self.assertEqual(util.time_period_to_zoom_level(365 / 2 * 24 * 3600 * 1000), 1)
+        self.assertEqual(util.time_period_to_zoom_level(365 * 24 * 3600 * 1000), 0)
+        self.assertEqual(util.time_period_to_zoom_level(24 * 3600 * 1000), 8)
+        self.assertEqual(util.time_period_to_zoom_level(2 * 365 * 24 * 3600 * 1000), -1)
+        self.assertEqual(util.time_period_to_zoom_level(16 * 365 * 24 * 3600 * 1000), -4)
+        self.assertEqual(util.time_period_to_zoom_level(20 * 365 * 24 * 3600 * 1000), -5)
+
+    def test_distance_to_zoom_level(self):
+        self.assertEqual(util.distance_to_zoom_level(0), 0)
+        self.assertEqual(util.distance_to_zoom_level(360), 0)
+        self.assertEqual(util.distance_to_zoom_level(360 * 2), -1)
+        self.assertEqual(util.distance_to_zoom_level(360 * 4), -2)
+        self.assertEqual(util.distance_to_zoom_level(360 * 16), -4)
+        self.assertEqual(util.distance_to_zoom_level(360 * 17), -5)
+        self.assertEqual(util.distance_to_zoom_level(360), 0)
+        self.assertEqual(util.distance_to_zoom_level(360 / 2), 1)
+        self.assertEqual(util.distance_to_zoom_level(360 / 4), 2)
+        self.assertEqual(util.distance_to_zoom_level(360 / 16), 4)
+        self.assertEqual(util.distance_to_zoom_level(360 / 17), 4)
+
     def test__convert_coordinates__length_not_two(self):
         fake_point = {
             "x": 1,
