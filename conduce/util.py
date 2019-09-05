@@ -14,6 +14,30 @@ import math
 import sys
 
 
+def time_period_to_zoom_level(time_period):
+    LOG_ONE_HALF = math.log(0.5)
+    TEMPORAL_ZOOM_LEVEL_0_LENGTH = 365.0 * 24 * 3600 * 1000
+
+    min_temporal_zoom_level = 0
+
+    if time_period != 0:
+        min_temporal_zoom_level = math.floor(math.log(time_period / TEMPORAL_ZOOM_LEVEL_0_LENGTH) / LOG_ONE_HALF)
+
+    return min_temporal_zoom_level
+
+
+def distance_to_zoom_level(distance):
+    LOG_ONE_HALF = math.log(0.5)
+    SPATIAL_ZOOM_LEVEL_0_LENGTH = 360.0
+
+    min_spatial_zoom_level = 0
+
+    if distance != 0:
+        min_spatial_zoom_level = math.floor(math.log(distance / SPATIAL_ZOOM_LEVEL_0_LENGTH) / LOG_ONE_HALF)
+
+    return min_spatial_zoom_level
+
+
 def walk_up_find(search_path, start_dir=os.getcwd()):
     cwd = start_dir
     while True:
