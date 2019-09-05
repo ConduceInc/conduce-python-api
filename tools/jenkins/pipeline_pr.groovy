@@ -33,9 +33,9 @@ def begin(build_info) {
     }
 
     stage("Cleanup"){
-      sh "sudo rm -rf venv"
-      sh "sudo rm -rf htmlcov"
-      sh "sudo rm -rf doc/build"
+      sh "rm -rf venv"
+      sh "rm -rf htmlcov"
+      sh "rm -rf doc/build"
     }
   }
 }

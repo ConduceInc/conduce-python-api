@@ -5,9 +5,9 @@ def prepare(build_info) {
     }
 
     sh "rm -rf venv"
-    sh "sudo rm -rf htmlcov"
-    sh "sudo rm -rf doc/build"
-    sh "virtualenv --python=/usr/bin/python3.4 venv"
+    sh "rm -rf htmlcov"
+    sh "rm -rf doc/build"
+    sh "python -m venv venv"
     sh ". venv/bin/activate && pip install -r requirements-dev.txt"
 
     milestone()
