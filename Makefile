@@ -59,22 +59,22 @@ devtest: clean-pyc devtest2 devtest3
 
 test: clean-pyc test2 test3
 
-devtest2:
+devtest2: deps-venv2
 	./venv2/bin/python -m unittest discover -v test/
 
-devtest3:
+devtest3: deps-venv3
 	./venv3/bin/python -m unittest discover -v test/
 
-test2:
+test2: deps-venv2
 	./venv2/bin/python -m unittest discover -v test/ -b
 
-test3:
+test3: deps-venv3
 	./venv3/bin/python -m unittest discover -v test/ -b
 
-docs: venv3 
+docs: deps-venv3
 	. ./venv3/bin/activate && make -C doc html
 
-coverage: venv3
+coverage: deps-venv3
 	./venv3/bin/coverage run --source conduce -m unittest discover -v test/ 
 	./venv3/bin/coverage report
 	./venv3/bin/coverage html
