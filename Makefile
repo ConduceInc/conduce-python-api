@@ -74,6 +74,11 @@ test3:
 docs: venv3 
 	. ./venv3/bin/activate && make -C doc html
 
+coverage: venv3
+	./venv3/bin/coverage run --source conduce -m unittest discover -v test/ 
+	./venv3/bin/coverage report
+	./venv3/bin/coverage html
+
 clean-pyc:
 	find . -name '*.pyc' | xargs rm -f
 	find . -name '*.pyo' | xargs rm -f
@@ -81,3 +86,5 @@ clean-pyc:
 clean: clean-pyc
 	rm -rf venv2
 	rm -rf venv3
+	rm -rf htmlcov
+	rm -rf doc/build
