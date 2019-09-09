@@ -775,8 +775,12 @@ class Test(unittest.TestCase):
 
         cli.add_capped_tile_store(fake_args)
 
-        mock_api_add_capped_tile_store.assert_called_once_with(fake_dataset_id, not fake_manual_processing,
-                                                               fake_min_spatial, fake_min_temporal, **vars(fake_passed_args))
+        mock_api_add_capped_tile_store.assert_called_once_with(
+            fake_dataset_id,
+            fake_min_spatial,
+            fake_min_temporal,
+            not fake_manual_processing,
+            **vars(fake_passed_args))
 
 
 if __name__ == '__main__':

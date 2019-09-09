@@ -492,7 +492,7 @@ def add_capped_tile_store(args):
     del vars(args)['min_temporal']
     auto_process = not args.manual_processing
     del vars(args)['manual_processing']
-    return api.add_capped_tile_store(dataset_id, auto_process, min_spatial, min_temporal, **vars(args))
+    return api.add_capped_tile_store(dataset_id, min_spatial, min_temporal, auto_process, **vars(args))
 
 
 def get_backend_status(args):
