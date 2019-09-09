@@ -16,18 +16,6 @@ spec:
         sleep 36000
 """
 
-// Determine which pipeline to run based on which branch is building
-if (env.BRANCH_NAME.contains("PR-")) {
-  version_suffix = "pr-${env.CHANGE_ID}"
-  suffix = "pr"
-} else if (env.BRANCH_NAME.contains('release')) {
-  version_suffix = "${build_info['version']}+rc-${env.BUILD_NUMBER}"
-  suffix = "to_test"
-} else if (env.BRANCH_NAME == 'master') {
-  version_suffix = "${build_info['version']}"
-  suffix = "master"
-}
-
 podTemplate(yaml: pod_template) {
   node(POD_LABEL) {
     try {
@@ -44,6 +32,18 @@ podTemplate(yaml: pod_template) {
           commit_id        : sh(script: "git rev-parse --short HEAD | tr -d '\n'", returnStdout: true),
           version          : sh(script: "cat setup.py | grep version | cut -d'\"' -f2", returnStdout: true)
           ]
+
+          // Determine which pipeline to run based on which branch is building
+          if (env.BRANCH_NAME.contains("PR-")) {
+            version_suffix = "pr-${env.CHANGE_ID}"
+            suffix = "pr"
+          } else if (env.BRANCH_NAME.contains('release')) {
+            version_suffix = "${build_info['version']}+rc-${env.BUILD_NUMBER}"
+            suffix = "to_test"
+          } else if (env.BRANCH_NAME == 'master') {
+            version_suffix = "${build_info['version']}"
+            suffix = "master"
+          }
 
           build_info['version_suffix'] = version_suffix
           echo "Version: ${build_info['version']}"
