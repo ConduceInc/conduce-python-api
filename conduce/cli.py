@@ -286,6 +286,8 @@ def create_dataset(args):
 
 def read_entity_set_from_samples_file(args):
     sample_list = None
+    if args.raw:
+        return json.load(open(args.raw))
     if args.csv:
         sample_list = util.parse_samples(util.csv_to_json(args.csv))
     if args.json:

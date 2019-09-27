@@ -9,6 +9,7 @@ try:
 except Exception:
     import builtins
 assert(hasattr(builtins, 'input'))
+assert(hasattr(builtins, 'open'))
 ###
 
 
@@ -493,13 +494,30 @@ class Test(unittest.TestCase):
 
         mock_api_process_transactions.assert_called_once_with(fake_dataset_id, fake_backend_id, transaction=None, **vars(fake_passed_args))
 
+    @mock.patch('json.load', return_value='fake-json')
+    @mock.patch.object(builtins, 'open', return_value="fake file stream")
+    @mock.patch('conduce.util.csv_to_json', return_value='fake-csv-to-json')
+    @mock.patch('conduce.util.parse_samples', return_value='fake-parsed-samples')
+    @mock.patch('conduce.util.json_to_samples', return_value='fake-samples')
+    @mock.patch('conduce.util.samples_to_entity_set', return_value='fake-entity-set')
+    def test_read_entity_set_from_samples_file__raw(self, mock_samples_to_entity_set,
+                                                    mock_json_to_samples, mock_parse_samples, mock_csv_to_json, mock_open, mock_json_load):
+        fake_args = FakeArgs(raw='fake-entity-set', csv=None, json=None)
+        self.assertEqual(cli.read_entity_set_from_samples_file(fake_args), 'fake-json')
+        mock_csv_to_json.assert_not_called()
+        mock_parse_samples.assert_not_called()
+        mock_json_to_samples.assert_not_called()
+        mock_samples_to_entity_set.assert_not_called()
+        mock_open.called_once_with('fake-entity-set')
+        mock_json_load.called_once_with('fake file stream')
+
     @mock.patch('conduce.util.csv_to_json', return_value='fake-csv-to-json')
     @mock.patch('conduce.util.parse_samples', return_value='fake-parsed-samples')
     @mock.patch('conduce.util.json_to_samples', return_value='fake-samples')
     @mock.patch('conduce.util.samples_to_entity_set', return_value='fake-entity-set')
     def test_read_entity_set_from_samples_file__json(self, mock_samples_to_entity_set,
                                                      mock_json_to_samples, mock_parse_samples, mock_csv_to_json):
-        fake_args = FakeArgs(json='fake-json', csv=None)
+        fake_args = FakeArgs(json='fake-json', csv=None, raw=None)
         self.assertEqual(cli.read_entity_set_from_samples_file(fake_args), 'fake-entity-set')
         mock_csv_to_json.assert_not_called()
         mock_parse_samples.assert_not_called()
@@ -512,7 +530,7 @@ class Test(unittest.TestCase):
     @mock.patch('conduce.util.samples_to_entity_set', return_value='fake-entity-set')
     def test_read_entity_set_from_samples_file__csv(self, mock_samples_to_entity_set,
                                                     mock_json_to_samples, mock_parse_samples, mock_csv_to_json):
-        fake_args = FakeArgs(csv='fake-csv', json=None)
+        fake_args = FakeArgs(csv='fake-csv', json=None, raw=None)
         self.assertEqual(cli.read_entity_set_from_samples_file(fake_args), 'fake-entity-set')
         mock_csv_to_json.assert_called_once_with('fake-csv')
         mock_parse_samples.assert_called_once_with('fake-csv-to-json')
