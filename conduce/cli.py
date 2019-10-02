@@ -523,8 +523,6 @@ def search_backend(args):
 
     metadata = api.get_dataset_backend_metadata(dataset_id, backend_id, **vars(args))
     backend_type = metadata.get('configuration', {}).get('backend_type', 'LegacyTileStore')
-    print(backend_type)
-    print(metadata)
 
     if backend_type == "ElasticsearchStore":
         full_query = {
@@ -533,7 +531,7 @@ def search_backend(args):
                 'query': query_string,
             }
         }
-        return api.make_post_request(full_query, uri, **vars(args))
+        return json.loads(api.make_post_request(full_query, uri, **vars(args)).content).get('elasticsearch_results', {}).get('result', {})
     else:
         return 'Backend type {} not supported'.format(backend_type)
 
