@@ -514,6 +514,30 @@ def get_backend_status(args):
                 backend_id, metadata.get('transactions', 'NaN'), max_transaction))
 
 
+def search_backend(args):
+    dataset_id = vars(args).pop('dataset_id')
+    backend_id = vars(args).pop('backend_id')
+    query = vars(args).pop('query')
+    query_string = json.dumps(json.load(open(query)))
+    uri = 'api/v2/data/{}/backends/{}/searches'.format(dataset_id, backend_id)
+
+    metadata = api.get_dataset_backend_metadata(dataset_id, backend_id, **vars(args))
+    backend_type = metadata.get('configuration', {}).get('backend_type', 'LegacyTileStore')
+    print(backend_type)
+    print(metadata)
+
+    if backend_type == "ElasticsearchStore":
+        full_query = {
+            'query_type': "ELASTICSEARCH",
+            'elasticsearch_query': {
+                'query': query_string,
+            }
+        }
+        return api.make_post_request(full_query, uri, **vars(args))
+    else:
+        return 'Backend type {} not supported'.format(backend_type)
+
+
 def ingest_data(args):
     if args.raw:
         del vars(args)['dataset_id']
@@ -1058,6 +1082,13 @@ def main():
         'backend-status', parents=[api_cmd_parser], help='Retrieve transaction processing progress for backends')
     parser_dataset_backend_status.add_argument('dataset_ids', nargs='*', help='Unique identifier of the dataset to configure')
     parser_dataset_backend_status.set_defaults(func=get_backend_status)
+
+    parser_dataset_search = parser_dataset_subparsers.add_parser(
+        'search', parents=[api_cmd_parser], help='Query a backend for data')
+    parser_dataset_search.add_argument('dataset_id', help='Unique identifier of the dataset to query')
+    parser_dataset_search.add_argument('backend_id', help='ID of backend to query')
+    parser_dataset_search.add_argument('query', help='The query to process')
+    parser_dataset_search.set_defaults(func=search_backend)
 
     parser_create_resource = subparsers.add_parser('create', parents=[api_cmd_parser], help='Create a new resource')
     parser_create_resource.add_argument('name', help='The name of the resource to create')
